@@ -1,0 +1,65 @@
+name: Tendbar
+options:
+  bundleIdPrefix: pl.dabusoft
+  deploymentTarget:
+    macOS: "14.0"
+  developmentLanguage: pl
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_IDENTITY: "-"
+    CODE_SIGN_STYLE: Manual
+    DEVELOPMENT_TEAM: ""
+    ENABLE_HARDENED_RUNTIME: NO
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+packages:
+  TendbarKit:
+    path: Packages/TendbarKit
+targets:
+  Tendbar:
+    type: application
+    platform: macOS
+    sources:
+      - Tendbar
+    info:
+      path: Tendbar/Info.plist
+      properties:
+        CFBundleDisplayName: Tendbar
+        CFBundleDevelopmentRegion: pl
+        LSUIElement: true
+        LSApplicationCategoryType: public.app-category.developer-tools
+        NSHumanReadableCopyright: "© 2026 Dabusoft. MIT License."
+    settings:
+      base:
+        PRODUCT_NAME: Tendbar
+        PRODUCT_BUNDLE_IDENTIFIER: pl.dabusoft.tendbar
+        SWIFT_EMIT_LOC_STRINGS: YES
+        LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    dependencies:
+      - package: TendbarKit
+      - target: TendbarHook
+        embed: true
+        codeSign: true
+        copy:
+          destination: executables
+  TendbarHook:
+    type: tool
+    platform: macOS
+    sources:
+      - TendbarHook
+    settings:
+      base:
+        PRODUCT_NAME: tendbar-hook
+        PRODUCT_BUNDLE_IDENTIFIER: pl.dabusoft.tendbar.hook
+        SKIP_INSTALL: YES
+    dependencies:
+      - package: TendbarKit
+schemes:
+  Tendbar:
+    build:
+      targets:
+        Tendbar: all
