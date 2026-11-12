@@ -25,7 +25,7 @@ struct MenuContent: View {
                         ForEach(model.events) { EventRow(event: $0) }
                     }
                 }
-                .frame(maxHeight: 360)
+                .frame(height: min(CGFloat(model.events.count) * 48, 360))
             }
             Divider()
             footer
