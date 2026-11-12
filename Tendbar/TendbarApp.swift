@@ -8,7 +8,11 @@ struct TendbarApp: App {
         MenuBarExtra {
             MenuContent(model: model)
         } label: {
-            Image(systemName: "bird")
+            if model.needsYouCount > 0 {
+                Text("\(Image(systemName: "bird.fill")) \(model.needsYouCount)")
+            } else {
+                Image(systemName: "bird")
+            }
         }
         .menuBarExtraStyle(.window)
     }

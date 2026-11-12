@@ -3,7 +3,7 @@ import SwiftUI
 import TendbarKit
 
 struct MenuContent: View {
-    let model: AppModel
+    @Bindable var model: AppModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -13,96 +13,190 @@ struct MenuContent: View {
                     .foregroundStyle(.red)
                     .font(.callout)
             }
+            ConnectionBanner(model: model)
             Divider()
-            if model.events.isEmpty {
-                Text("Brak zdarzeń. Dodaj hook Claude Code, żeby zobaczyć pierwsze.")
+            if model.sessions.isEmpty {
+                Text("Brak sesji. Uruchom Claude Code, a pojawią się tutaj.")
                     .foregroundStyle(.secondary)
                     .font(.callout)
                     .frame(maxWidth: .infinity, alignment: .leading)
             } else {
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 8) {
-                        ForEach(model.events) { EventRow(event: $0) }
+                    LazyVStack(alignment: .leading, spacing: 4) {
+                        ForEach(model.sessions) { session in
+                            SessionRow(session: session) { model.markSeen(session) }
+                        }
                     }
                 }
-                .frame(height: min(CGFloat(model.events.count) * 48, 360))
+                .frame(height: min(CGFloat(model.sessions.count) * 60, 420))
             }
             Divider()
             footer
         }
         .padding(16)
-        .frame(width: 380)
+        .frame(width: 400)
+        .onAppear { model.refreshConnection() }
     }
 
     private var header: some View {
-        HStack {
+        HStack(alignment: .firstTextBaseline) {
             Text("Tendbar").font(.headline)
             Spacer()
-            Text("Zdarzenia: \(model.events.count)")
-                .foregroundStyle(.secondary)
-                .font(.callout)
+            StateCount(state: .working, count: model.store.count(of: .working))
+            StateCount(state: .needsYou, count: model.store.count(of: .needsYou))
+            StateCount(state: .done, count: model.store.count(of: .done))
         }
     }
 
     private var footer: some View {
         HStack {
-            Button("Pokaż log") {
-                NSWorkspace.shared.activateFileViewerSelecting([TendbarPaths.eventLog])
-            }
-            if let path = model.hookExecutablePath {
-                Button("Kopiuj ścieżkę hooka") {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(path, forType: .string)
-                }
-            }
+            Button("Oznacz wszystkie jako przeczytane") { model.markAllSeen() }
+                .disabled(!model.sessions.contains { $0.unread })
             Spacer()
-            Button("Zakończ") { NSApplication.shared.terminate(nil) }
+            Menu {
+                Button("Usuń zakończone sesje") { model.removeEnded() }
+                Button("Pokaż log zdarzeń") {
+                    NSWorkspace.shared.activateFileViewerSelecting([TendbarPaths.eventLog])
+                }
+                Divider()
+                if model.connection == .connected || model.connection == .outdated {
+                    Button("Rozłącz z Claude Code") { model.disconnect() }
+                } else {
+                    Button("Połącz z Claude Code") { model.connect() }
+                }
+                Divider()
+                Button("Zakończ Tendbar") { NSApplication.shared.terminate(nil) }
+            } label: {
+                Image(systemName: "ellipsis.circle")
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
         }
     }
 }
 
-struct EventRow: View {
-    let event: ReceivedEvent
+struct ConnectionBanner: View {
+    let model: AppModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            HStack {
-                Text(title).fontWeight(.semibold)
-                Spacer()
-                Text(event.envelope.sentAt, style: .time)
-                    .foregroundStyle(.secondary)
-            }
-            Text(details)
-                .foregroundStyle(.secondary)
-                .lineLimit(2)
+        if let error = model.connectionError {
+            banner(Text("Nie udało się zmienić ustawień Claude Code: \(error)"), color: .red, button: false)
+        } else if model.connection == .disconnected {
+            banner(Text("Tendbar nie jest połączony z Claude Code."), color: .orange, button: true)
+        } else if model.connection == .outdated {
+            banner(Text("Hooki Tendbara są nieaktualne albo niepełne."), color: .orange, button: true)
+        } else if model.connection == nil {
+            banner(Text("Nie znaleziono pomocnika tendbar-hook w aplikacji."), color: .red, button: false)
         }
-        .font(.callout)
     }
 
-    private var title: String {
-        guard let payload = event.payload else { return String(localized: "Nieczytelne zdarzenie") }
-        return HookEventName.label(for: payload.event)
-    }
-
-    private var details: String {
-        let folder = event.payload?.cwd.map { URL(fileURLWithPath: $0).lastPathComponent } ?? "?"
-        let terminal = event.envelope.terminal.program ?? String(localized: "nieznany terminal")
-        let tty = event.envelope.terminal.tty ?? "—"
-        return "\(folder) · \(terminal) · \(tty)"
+    private func banner(_ text: Text, color: Color, button: Bool) -> some View {
+        HStack(alignment: .top) {
+            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(color)
+            text.font(.callout).fixedSize(horizontal: false, vertical: true)
+            Spacer()
+            if button {
+                Button("Połącz") { model.connect() }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+            }
+        }
     }
 }
 
-enum HookEventName {
-    static func label(for event: String) -> String {
-        switch event {
-        case "SessionStart": String(localized: "Start sesji")
-        case "UserPromptSubmit": String(localized: "Nowe polecenie")
-        case "Notification": String(localized: "Czeka na Ciebie")
-        case "PermissionRequest": String(localized: "Prosi o zgodę")
-        case "Stop": String(localized: "Gotowe")
-        case "StopFailure": String(localized: "Błąd")
-        case "SessionEnd": String(localized: "Koniec sesji")
-        default: event
+struct StateCount: View {
+    let state: SessionState
+    let count: Int
+
+    var body: some View {
+        if count > 0 {
+            HStack(spacing: 4) {
+                Circle().fill(state.color).frame(width: 7, height: 7)
+                Text("\(count)").monospacedDigit()
+            }
+            .font(.callout)
+            .foregroundStyle(.secondary)
+            .help(state.label)
+        }
+    }
+}
+
+struct SessionRow: View {
+    let session: Session
+    let onSelect: () -> Void
+
+    var body: some View {
+        Button(action: onSelect) {
+            HStack(alignment: .top, spacing: 10) {
+                Circle()
+                    .fill(session.state.color)
+                    .frame(width: 9, height: 9)
+                    .padding(.top, 5)
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(session.folderName).fontWeight(.semibold).lineLimit(1)
+                        Text(session.state.label).foregroundStyle(.secondary)
+                        Spacer()
+                        if session.unread {
+                            Circle().fill(.blue).frame(width: 7, height: 7)
+                        }
+                        Text(session.updatedAt, format: .relative(presentation: .numeric, unitsStyle: .abbreviated))
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                    }
+                    Text(detail)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .font(.callout)
+            .padding(.vertical, 6)
+            .padding(.horizontal, 6)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .background(session.unread ? Color.accentColor.opacity(0.08) : .clear, in: RoundedRectangle(cornerRadius: 6))
+    }
+
+    private var detail: String {
+        if let message = session.message { return message }
+        if let preview = session.preview, session.state == .done || session.state == .idle { return preview }
+        return session.state.hint
+    }
+}
+
+extension SessionState {
+    var label: String {
+        switch self {
+        case .idle: String(localized: "bezczynna")
+        case .working: String(localized: "pracuje")
+        case .needsYou: String(localized: "czeka na Ciebie")
+        case .done: String(localized: "gotowe")
+        case .failed: String(localized: "błąd")
+        case .ended: String(localized: "zakończona")
+        }
+    }
+
+    var hint: String {
+        switch self {
+        case .idle: String(localized: "Czeka na pierwsze polecenie.")
+        case .working: String(localized: "Claude pracuje…")
+        case .needsYou: String(localized: "Claude potrzebuje Twojej decyzji.")
+        case .done: String(localized: "Odpowiedź gotowa.")
+        case .failed: String(localized: "Tura zakończyła się błędem.")
+        case .ended: String(localized: "Sesja zamknięta.")
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .idle, .ended: .gray
+        case .working: .blue
+        case .needsYou: .orange
+        case .done: .green
+        case .failed: .red
         }
     }
 }

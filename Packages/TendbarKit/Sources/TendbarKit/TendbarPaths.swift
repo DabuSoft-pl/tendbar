@@ -16,6 +16,10 @@ public enum TendbarPaths {
         supportDirectory.appendingPathComponent("events.jsonl")
     }
 
+    public static var sessions: URL {
+        supportDirectory.appendingPathComponent("sessions.json")
+    }
+
     public static func socketPath(environment: [String: String]) -> String {
         environment[socketOverrideVariable] ?? socket.path
     }
