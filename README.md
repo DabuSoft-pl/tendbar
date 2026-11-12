@@ -4,7 +4,7 @@ A macOS menu bar app that keeps an eye on your Claude Code sessions: it tells yo
 for you, and takes you back to the right terminal tab. Everything stays on your Mac: no account, no network calls,
 no model calls.
 
-> Early development. Stage 1: the app receives raw hook events and lists them.
+> Early development: sessions, their state and the last reply already show; jumping to the terminal tab comes next.
 
 ## How it works
 
@@ -36,7 +36,9 @@ Then add the hook to `~/.claude/settings.json` (use "Kopiuj ścieżkę hooka" in
 }
 ```
 
-A later stage adds a "Connect" button that does this for you, with a backup of the file.
+Or just press "Połącz" in the app: it adds the hooks for you (also `PostToolUse`, so a session leaves "needs you"
+once you approve a tool), after a backup of `settings.json` (the last five are kept), and "Rozłącz z Claude Code"
+removes only Tendbar's hooks. The file is rewritten with sorted keys.
 
 ## Requirements
 
