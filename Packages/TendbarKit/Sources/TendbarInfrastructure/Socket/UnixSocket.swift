@@ -91,6 +91,10 @@ public final class UnixSocketServer: @unchecked Sendable {
             while true {
                 let client = accept(fd, nil, nil)
                 guard client >= 0 else { return }
+                guard Self.isSameUser(client) else {
+                    close(client)
+                    continue
+                }
                 SocketOptions.setBlocking(client, true)
                 SocketOptions.setTimeout(client, option: SO_RCVTIMEO, seconds: 2)
                 let data = Self.readAll(from: client)
@@ -133,6 +137,13 @@ public final class UnixSocketServer: @unchecked Sendable {
         }
         SocketOptions.setBlocking(fd, false)
         return fd
+    }
+
+    /// The folder is 0700 and the socket 0600; this also refuses a peer of another user (root included).
+    static func isSameUser(_ fd: Int32, expected: uid_t = getuid()) -> Bool {
+        var uid: uid_t = 0
+        var gid: gid_t = 0
+        return getpeereid(fd, &uid, &gid) == 0 && uid == expected
     }
 
     static func readAll(from fd: Int32) -> Data {

@@ -50,6 +50,16 @@ import TendbarDomain
         #expect((attributes[.posixPermissions] as? NSNumber)?.intValue == 0o600)
     }
 
+    @Test func acceptsOnlyPeersOfTheSameUser() {
+        var pair: [Int32] = [0, 0]
+        #expect(socketpair(AF_UNIX, SOCK_STREAM, 0, &pair) == 0)
+        defer { pair.forEach { close($0) } }
+
+        #expect(UnixSocketServer.isSameUser(pair[0]))
+        #expect(!UnixSocketServer.isSameUser(pair[0], expected: getuid() + 1))
+        #expect(!UnixSocketServer.isSameUser(-1))
+    }
+
     @Test func clientFailsWhenNobodyListens() {
         #expect(throws: SocketError.self) {
             try UnixSocketClient.send(Data("x".utf8), to: temporarySocketPath())

@@ -54,3 +54,52 @@ import TendbarDomain
         #expect(preview.hasSuffix("…"))
     }
 }
+
+@Suite struct TranscriptPathTests {
+    let home: URL
+
+    init() throws {
+        home = FileManager.default.temporaryDirectory.appendingPathComponent("tendbar-home-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: home.appendingPathComponent(".claude/projects/app"), withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: home.appendingPathComponent("Documents"), withIntermediateDirectories: true)
+    }
+
+    private func allowed(_ relative: String) -> Bool {
+        FileTranscriptReader.transcriptURL(home.appendingPathComponent(relative).path, home: home) != nil
+    }
+
+    @Test func acceptsTranscriptsOfEveryProfile() {
+        #expect(allowed(".claude/projects/app/s1.jsonl"))
+        #expect(allowed(".claude-work/projects/app/s1.jsonl"))
+    }
+
+    @Test func refusesEverythingElse() {
+        #expect(!allowed("Documents/notes.jsonl"))
+        #expect(!allowed(".claude/projects/app/s1.json"))
+        #expect(!allowed(".claude/settings.jsonl"))
+        #expect(!allowed(".claude/projects/../../Documents/x.jsonl"))
+        #expect(FileTranscriptReader.transcriptURL("relative/.claude/projects/a/s.jsonl", home: home) == nil)
+        #expect(FileTranscriptReader.transcriptURL("/etc/x.jsonl", home: home) == nil)
+    }
+
+    @Test func refusesASymlinkLeadingOutOfProjects() throws {
+        let target = home.appendingPathComponent("Documents/secret.jsonl")
+        try Data("{}".utf8).write(to: target)
+        let link = home.appendingPathComponent(".claude/projects/app/link.jsonl")
+        try FileManager.default.createSymbolicLink(at: link, withDestinationURL: target)
+
+        #expect(!allowed(".claude/projects/app/link.jsonl"))
+    }
+
+    @Test func readsAPreviewOnlyFromAnAllowedPath() async throws {
+        let line = #"{"type":"assistant","message":{"content":[{"type":"text","text":"Tests pass."}]}}"#
+        let inside = home.appendingPathComponent(".claude/projects/app/s1.jsonl")
+        let outside = home.appendingPathComponent("Documents/s1.jsonl")
+        try Data(line.utf8).write(to: inside)
+        try Data(line.utf8).write(to: outside)
+        let reader = FileTranscriptReader(home: home)
+
+        #expect(await reader.lastReplyPreview(at: inside.path) == "Tests pass.")
+        #expect(await reader.lastReplyPreview(at: outside.path) == nil)
+    }
+}
