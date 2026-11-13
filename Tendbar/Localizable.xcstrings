@@ -421,6 +421,16 @@
         }
       }
     },
+    "Earlier (%lld)": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wcześniejsze (%lld)"
+          }
+        }
+      }
+    },
     "Error": {
       "localizations": {
         "pl": {

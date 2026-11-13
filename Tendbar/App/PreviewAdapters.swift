@@ -63,6 +63,7 @@ private struct NoTranscripts: TranscriptReading {
 extension AppContainer {
     static func preview(sessions: [Session], accounts: [AccountUsage]) -> AppContainer {
         let silent = Silent()
+        UserDefaults.standard.removePersistentDomain(forName: "tendbar.preview")
         let defaults = UserDefaults(suiteName: "tendbar.preview") ?? .standard
         return AppContainer(
             preferences: Preferences(defaults: defaults),

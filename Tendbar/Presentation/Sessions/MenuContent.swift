@@ -9,6 +9,8 @@ struct MenuContent: View {
     private var actions: SessionsController { container.sessionActions }
     @Environment(\.openSettings) private var openSettings
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("panel.showsEarlier") private var showsEarlier = false
+    @State private var listHeight: CGFloat = 0
 
     var body: some View {
         sessionsPanel
@@ -42,14 +44,7 @@ struct MenuContent: View {
             if sessions.sessions.isEmpty {
                 EmptySessions(connection: container.claudeCode.connection)
             } else {
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 4) {
-                        ForEach(sessions.sessions) { session in
-                            SessionRow(session: session, showsDetail: container.preferences.panelPreviews) { actions.select(session) }
-                        }
-                    }
-                }
-                .frame(height: min(CGFloat(sessions.sessions.count) * (container.preferences.panelPreviews ? 60 : 36), 420))
+                sessionList
             }
             if !container.usage.isEmpty, container.preferences.usageStyle != .hidden {
                 Divider()
@@ -59,6 +54,49 @@ struct MenuContent: View {
             footer
         }
         .onAppear { container.claudeCodeActions.refreshConnection() }
+    }
+
+    /// Sessions that are busy, waiting or unread come first. Read and ended ones fold under "Earlier", and the list
+    /// scrolls past a fixed height, so the panel never grows past the screen.
+    private var sessionList: some View {
+        let current = sessions.sessions.filter(\.isCurrent)
+        let earlier = sessions.sessions.filter { !$0.isCurrent }
+        let expanded = showsEarlier || current.isEmpty
+        return ScrollView {
+            VStack(alignment: .leading, spacing: 4) {
+                ForEach(current) { row($0) }
+                if !earlier.isEmpty {
+                    if !current.isEmpty {
+                        Button {
+                            showsEarlier.toggle()
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "chevron.right")
+                                    .font(.caption2.weight(.semibold))
+                                    .rotationEffect(.degrees(expanded ? 90 : 0))
+                                Text("Earlier (\(earlier.count))")
+                                Spacer()
+                            }
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 6)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    if expanded {
+                        ForEach(earlier) { row($0) }
+                    }
+                }
+            }
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { listHeight = $0 }
+        }
+        .frame(height: min(max(listHeight, 36), 320))
+    }
+
+    private func row(_ session: Session) -> some View {
+        SessionRow(session: session, showsDetail: container.preferences.panelPreviews) { actions.select(session) }
     }
 
     private var header: some View {
@@ -257,5 +295,12 @@ struct EmptySessions: View {
         .font(.callout)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, 4)
+    }
+}
+
+private extension Session {
+    /// Busy, waiting for you, or with something you have not read yet.
+    var isCurrent: Bool {
+        state == .working || state == .needsYou || unread
     }
 }
