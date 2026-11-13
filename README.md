@@ -1,5 +1,7 @@
 # Tendbar
 
+[![Test](https://github.com/gruntz12/tendbar/actions/workflows/test.yml/badge.svg)](https://github.com/gruntz12/tendbar/actions/workflows/test.yml)
+
 A macOS menu bar app that keeps an eye on your Claude Code sessions. It tells you when a session is done, waiting for
 you or failed, takes you back to the right terminal tab, and shows how much of your usage limits each Claude account
 has used. Everything stays on your Mac: no account, no network calls, no model calls.

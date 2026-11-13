@@ -1,0 +1,28 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tests
+        run: make test
+      - name: Build the app
+        run: |
+          brew install xcodegen
+          xcodegen generate --quiet
+          xcodebuild -project Tendbar.xcodeproj -scheme Tendbar -configuration Debug -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO -quiet build
