@@ -51,12 +51,19 @@ final class AppModel {
         store.ordered
     }
 
-    var highestLimit: Double {
+    var currentAccount: AccountUsage? {
+        usage.accounts.values.max { $0.updatedAt < $1.updatedAt }
+    }
+
+    var accountsCurrentFirst: [AccountUsage] {
+        let current = currentAccount?.id
+        return usage.ordered.filter { $0.id == current } + usage.ordered.filter { $0.id != current }
+    }
+
+    var currentLimit: Double {
+        guard let account = currentAccount else { return 0 }
         let now = Date()
-        return usage.ordered
-            .flatMap { LimitWarnings.windows(of: $0).map(\.window) }
-            .map { $0.percentage(at: now) }
-            .max() ?? 0
+        return LimitWarnings.windows(of: account).map { $0.window.percentage(at: now) }.max() ?? 0
     }
 
     var needsYouCount: Int {

@@ -5,11 +5,11 @@ struct UsageSection: View {
     let model: AppModel
 
     var body: some View {
-        let accounts = model.usage.ordered
+        let accounts = model.accountsCurrentFirst
         if !accounts.isEmpty {
             VStack(alignment: .leading, spacing: 16) {
                 ForEach(accounts) { account in
-                    AccountLimits(name: model.accountName(account), account: account)
+                    AccountLimits(name: model.accountName(account), account: account, active: account.id == model.currentAccount?.id)
                         .contentShape(Rectangle())
                         .contextMenu {
                             Button("Zapomnij to konto") { model.forget(account) }
@@ -24,6 +24,7 @@ struct UsageSection: View {
 private struct AccountLimits: View {
     let name: String
     let account: AccountUsage
+    let active: Bool
 
     var body: some View {
         let now = Date()
@@ -38,6 +39,14 @@ private struct AccountLimits: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .firstTextBaseline) {
                 Text(name).fontWeight(.medium).lineLimit(1).truncationMode(.middle)
+                if active {
+                    Text("aktywne")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 1)
+                        .background(Color.primary.opacity(0.08), in: Capsule())
+                }
                 Spacer()
                 Text("odczyt \(account.updatedAt.formatted(.relative(presentation: .named)))")
                     .font(.caption)

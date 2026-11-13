@@ -8,7 +8,7 @@ struct TendbarApp: App {
         MenuBarExtra {
             MenuContent(model: model)
         } label: {
-            let limit = Int(model.highestLimit.rounded())
+            let limit = Int(model.currentLimit.rounded())
             if model.needsYouCount > 0 {
                 Text("\(Image(systemName: "bird.fill")) \(model.needsYouCount)")
             } else if limit >= 90 {

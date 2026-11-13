@@ -147,7 +147,7 @@ private struct NotchView: View {
     }
 
     private var highestLimit: Double {
-        model.highestLimit
+        model.currentLimit
     }
 
     var body: some View {
@@ -203,11 +203,15 @@ private struct NotchView: View {
                                 model.select(session)
                             }
                     }
-                    let accounts = model.usage.ordered
+                    let accounts = model.accountsCurrentFirst
                     if !accounts.isEmpty {
                         VStack(alignment: .leading, spacing: 4) {
                             ForEach(accounts) { account in
-                                NotchLimitRow(name: model.accountName(account), account: account)
+                                NotchLimitRow(
+                                    name: model.accountName(account),
+                                    account: account,
+                                    active: account.id == model.currentAccount?.id
+                                )
                             }
                         }
                         .padding(.top, active.isEmpty ? 0 : 6)
@@ -235,7 +239,7 @@ private struct NotchView: View {
         var parts: [String] = []
         if let lead { parts.append(lead.label) }
         if let badge { parts.append(String(localized: "\(badge.count) sesji: \(badge.state.label)")) }
-        if highestLimit > 0 { parts.append(String(localized: "najwyższy limit \(Int(highestLimit.rounded()))%")) }
+        if highestLimit > 0 { parts.append(String(localized: "limit aktywnego konta \(Int(highestLimit.rounded()))%")) }
         return parts.joined(separator: ", ")
     }
 }
@@ -289,17 +293,27 @@ func limitColor(_ percentage: Double) -> Color {
 private struct NotchLimitRow: View {
     let name: String
     let account: AccountUsage
+    let active: Bool
 
     var body: some View {
         let now = Date()
         HStack(spacing: 8) {
-            Text(name).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+            Circle()
+                .fill(active ? Color.white : Color.clear)
+                .strokeBorder(.white.opacity(0.4), lineWidth: active ? 0 : 1)
+                .frame(width: 6, height: 6)
+                .accessibilityLabel(active ? String(localized: "aktywne konto") : String(localized: "nieaktywne konto"))
+            Text(name)
+                .foregroundStyle(active ? .primary : .secondary)
+                .lineLimit(1)
+                .truncationMode(.middle)
             Spacer(minLength: 4)
             gauge(String(localized: "5h"), account.fiveHour, now: now)
             gauge(String(localized: "7d"), account.sevenDay, now: now)
         }
         .font(.system(size: 11))
         .foregroundStyle(.white)
+        .opacity(active ? 1 : 0.6)
         .padding(.horizontal, 8)
     }
 
