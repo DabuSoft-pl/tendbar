@@ -43,6 +43,17 @@ final class AppModel {
         checkLimits()
     }
 
+    #if DEBUG
+    init(preview store: SessionStore, usage: UsageStore) {
+        self.store = store
+        self.usage = usage
+        server = UnixSocketServer(path: "/dev/null")
+        installer = nil
+        connection = .connected
+        notificationStatus = .authorized
+    }
+    #endif
+
     func refreshNotch() {
         notch?.update()
     }

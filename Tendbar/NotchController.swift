@@ -115,11 +115,18 @@ final class NotchController {
     }
 }
 
-private struct NotchView: View {
+struct NotchView: View {
     let model: AppModel
     let notchWidth: CGFloat
     let notchHeight: CGFloat
-    @State private var expanded = false
+    @State private var expanded: Bool
+
+    init(model: AppModel, notchWidth: CGFloat, notchHeight: CGFloat, expanded: Bool = false) {
+        self.model = model
+        self.notchWidth = notchWidth
+        self.notchHeight = notchHeight
+        _expanded = State(initialValue: expanded)
+    }
 
     private let wing: CGFloat = 44
     private let expandedWidth: CGFloat = 380
