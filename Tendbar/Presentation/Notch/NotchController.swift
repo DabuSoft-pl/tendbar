@@ -197,7 +197,7 @@ struct NotchView: View {
                             .foregroundStyle(lead.color)
                             .modifier(Breathing(active: lead == .working))
                     } else {
-                        Image(systemName: "gauge.with.dots.needle.67percent").foregroundStyle(limitColor(highestLimit))
+                        Image(systemName: "bird").foregroundStyle(limitColor(highestLimit))
                     }
                 }
                 .frame(width: wing)
