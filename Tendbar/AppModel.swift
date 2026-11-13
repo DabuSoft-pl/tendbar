@@ -51,6 +51,14 @@ final class AppModel {
         store.ordered
     }
 
+    var highestLimit: Double {
+        let now = Date()
+        return usage.ordered
+            .flatMap { LimitWarnings.windows(of: $0).map(\.window) }
+            .map { $0.percentage(at: now) }
+            .max() ?? 0
+    }
+
     var needsYouCount: Int {
         store.needsYouCount
     }

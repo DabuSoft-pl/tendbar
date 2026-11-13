@@ -22,7 +22,8 @@ final class EdgeGlow {
             window.isReleasedWhenClosed = false
             window.level = .screenSaver
             window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]
-            window.contentView = NSHostingView(rootView: GlowView(color: color, calm: calm))
+            let radius: CGFloat = screen.safeAreaInsets.top > 0 ? 10 : 0
+            window.contentView = NSHostingView(rootView: GlowView(color: color, calm: calm, topRadius: radius))
             window.setFrame(screen.frame, display: false)
             window.orderFrontRegardless()
             windows.append(window)
@@ -43,14 +44,19 @@ final class EdgeGlow {
 private struct GlowView: View {
     let color: Color
     let calm: Bool
+    let topRadius: CGFloat
     @State private var opacity = 0.0
+
+    private var edge: UnevenRoundedRectangle {
+        UnevenRoundedRectangle(topLeadingRadius: topRadius, topTrailingRadius: topRadius)
+    }
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 12)
+            edge
                 .strokeBorder(color, lineWidth: 14)
                 .blur(radius: 18)
-            RoundedRectangle(cornerRadius: 12)
+            edge
                 .strokeBorder(color.opacity(0.85), lineWidth: 3)
                 .blur(radius: 1)
         }

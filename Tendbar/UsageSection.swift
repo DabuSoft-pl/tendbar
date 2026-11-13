@@ -7,66 +7,76 @@ struct UsageSection: View {
     var body: some View {
         let accounts = model.usage.ordered
         if !accounts.isEmpty {
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 16) {
                 ForEach(accounts) { account in
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack(alignment: .firstTextBaseline) {
-                            Text(model.accountName(account)).fontWeight(.medium).lineLimit(1)
-                            Spacer()
-                            Text(readingText(account))
-                                .foregroundStyle(.tertiary)
-                                .font(.caption)
+                    AccountLimits(name: model.accountName(account), account: account)
+                        .contentShape(Rectangle())
+                        .contextMenu {
+                            Button("Zapomnij to konto") { model.forget(account) }
                         }
-                        LimitRow(title: String(localized: "5 godz."), window: account.fiveHour)
-                        LimitRow(title: String(localized: "Tydzień"), window: account.sevenDay)
-                    }
-                    .contentShape(Rectangle())
-                    .contextMenu {
-                        Button("Zapomnij to konto") { model.forget(account) }
-                    }
                 }
             }
             .font(.callout)
         }
     }
-
-    private func readingText(_ account: AccountUsage) -> String {
-        String(localized: "odczyt \(account.updatedAt.formatted(.relative(presentation: .named)))")
-    }
 }
 
-private struct LimitRow: View {
-    let title: String
-    let window: LimitWindow?
+private struct AccountLimits: View {
+    let name: String
+    let account: AccountUsage
 
     var body: some View {
         let now = Date()
-        HStack(spacing: 8) {
-            Text(title)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .frame(width: 56, alignment: .leading)
-            if let window {
+        let windows: [(title: String, window: LimitWindow?)] = [
+            (String(localized: "5 godz."), account.fiveHour),
+            (String(localized: "tydzień"), account.sevenDay),
+        ]
+        let sorted = windows.sorted { ($0.window?.percentage(at: now) ?? -1) > ($1.window?.percentage(at: now) ?? -1) }
+        let lead = sorted[0]
+        let rest = sorted[1]
+
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(name).fontWeight(.medium).lineLimit(1).truncationMode(.middle)
+                Spacer()
+                Text("odczyt \(account.updatedAt.formatted(.relative(presentation: .named)))")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+            if let window = lead.window {
                 let percentage = window.percentage(at: now)
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text("\(Int(percentage.rounded()))%")
+                        .font(.system(size: 28, weight: .medium, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(percentage >= 70 ? limitColor(percentage) : .primary)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(lead.title).foregroundStyle(.secondary)
+                        Text(resetText(window, now: now)).font(.caption).foregroundStyle(.tertiary)
+                    }
+                }
                 ProgressView(value: percentage, total: 100)
                     .tint(limitColor(percentage))
-                Text("\(Int(percentage.rounded()))%")
-                    .monospacedDigit()
-                    .frame(width: 44, alignment: .trailing)
-                Text(resetText(window, now: now))
-                    .foregroundStyle(.secondary)
-                    .frame(width: 96, alignment: .trailing)
-                    .lineLimit(1)
+                    .accessibilityLabel(lead.title)
+                    .accessibilityValue("\(Int(percentage.rounded()))%")
             } else {
-                Text("brak danych")
-                    .foregroundStyle(.tertiary)
-                Spacer()
+                Text("brak danych").foregroundStyle(.tertiary)
+            }
+            if let window = rest.window {
+                let percentage = window.percentage(at: now)
+                HStack(spacing: 8) {
+                    Text(rest.title).foregroundStyle(.secondary)
+                    Spacer()
+                    Text("\(Int(percentage.rounded()))%").monospacedDigit()
+                    Text(resetText(window, now: now)).foregroundStyle(.tertiary)
+                }
+                .font(.caption)
             }
         }
     }
 
     private func resetText(_ window: LimitWindow, now: Date) -> String {
         if now >= window.resetsAt { return String(localized: "zresetowany") }
-        return window.resetsAt.formatted(.relative(presentation: .named))
+        return String(localized: "reset \(window.resetsAt.formatted(.relative(presentation: .named)))")
     }
 }

@@ -147,11 +147,7 @@ private struct NotchView: View {
     }
 
     private var highestLimit: Double {
-        let now = Date()
-        return model.usage.ordered
-            .flatMap { LimitWarnings.windows(of: $0).map(\.window) }
-            .map { $0.percentage(at: now) }
-            .max() ?? 0
+        model.highestLimit
     }
 
     var body: some View {
@@ -171,7 +167,9 @@ private struct NotchView: View {
             HStack(spacing: 0) {
                 Group {
                     if let lead {
-                        Image(systemName: "bird.fill").foregroundStyle(lead.color)
+                        Image(systemName: "bird.fill")
+                            .foregroundStyle(lead.color)
+                            .modifier(Breathing(active: lead == .working))
                     } else {
                         Image(systemName: "gauge.with.dots.needle.67percent").foregroundStyle(limitColor(highestLimit))
                     }
@@ -188,6 +186,13 @@ private struct NotchView: View {
                 .frame(width: wing)
             }
             .frame(height: notchHeight)
+
+            if !expanded, highestLimit > 0 {
+                LimitLine(percentage: highestLimit)
+                    .padding(.horizontal, radius)
+                    .padding(.top, 2)
+                    .padding(.bottom, 6)
+            }
 
             if expanded {
                 VStack(alignment: .leading, spacing: 4) {
@@ -222,6 +227,54 @@ private struct NotchView: View {
         .contentShape(UnevenRoundedRectangle(bottomLeadingRadius: radius, bottomTrailingRadius: radius))
         .onHover { expanded = $0 }
         .environment(\.colorScheme, .dark)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(accessibilityText(lead: lead))
+    }
+
+    private func accessibilityText(lead: SessionState?) -> String {
+        var parts: [String] = []
+        if let lead { parts.append(lead.label) }
+        if let badge { parts.append(String(localized: "\(badge.count) sesji: \(badge.state.label)")) }
+        if highestLimit > 0 { parts.append(String(localized: "najwyższy limit \(Int(highestLimit.rounded()))%")) }
+        return parts.joined(separator: ", ")
+    }
+}
+
+private struct LimitLine: View {
+    let percentage: Double
+
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack(alignment: .leading) {
+                Capsule().fill(.white.opacity(0.12))
+                Capsule()
+                    .fill(limitColor(percentage))
+                    .frame(width: proxy.size.width * min(percentage, 100) / 100)
+            }
+        }
+        .frame(height: 2)
+        .accessibilityHidden(true)
+    }
+}
+
+private struct Breathing: ViewModifier {
+    let active: Bool
+    @State private var dim = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(active && dim && !reduceMotion ? 0.45 : 1)
+            .onAppear { update() }
+            .onChange(of: active) { update() }
+    }
+
+    private func update() {
+        guard active, !reduceMotion else {
+            dim = false
+            return
+        }
+        withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) { dim = true }
     }
 }
 

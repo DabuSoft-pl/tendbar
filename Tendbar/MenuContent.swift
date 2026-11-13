@@ -242,5 +242,6 @@ struct StateMark: View {
         }
         .frame(width: 8, height: 8)
         .help(state.label)
+        .accessibilityLabel(unread && state == .done ? String(localized: "\(state.label), nieprzeczytane") : state.label)
     }
 }
