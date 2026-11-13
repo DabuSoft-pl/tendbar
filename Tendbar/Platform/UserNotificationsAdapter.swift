@@ -2,7 +2,7 @@ import Foundation
 import os
 import TendbarApplication
 import TendbarDomain
-import UserNotifications
+@preconcurrency import UserNotifications
 
 /// Notification Center behind the `AlertPresenting` and `NotificationPermissions` ports.
 @MainActor
