@@ -431,10 +431,14 @@ private struct StatusDot: View {
 /// the first section.
 private struct NoTopScrollEdge: ViewModifier {
     func body(content: Content) -> some View {
+        #if compiler(>=6.2)
         if #available(macOS 26, *) {
             content.scrollEdgeEffectHidden(true, for: .top)
         } else {
             content
         }
+        #else
+        content
+        #endif
     }
 }
