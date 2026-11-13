@@ -26,6 +26,32 @@ public enum ClaudeProfiles {
             && !name.hasSuffix("-")
     }
 
+    public static func slug(from input: String) -> String {
+        var text = input.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if let at = text.firstIndex(of: "@") {
+            let local = text[..<at]
+            let domain = text[text.index(after: at)...].split(separator: ".").first ?? ""
+            text = domain.isEmpty ? String(local) : "\(local)-\(domain)"
+        }
+        let folded = text.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "pl_PL"))
+            .replacingOccurrences(of: "ł", with: "l")
+        let allowed = Set("abcdefghijklmnopqrstuvwxyz0123456789")
+        var slug = ""
+        for character in folded {
+            if allowed.contains(character) {
+                slug.append(character)
+            } else if !slug.isEmpty, slug.last != "-" {
+                slug.append("-")
+            }
+        }
+        while slug.hasSuffix("-") { slug.removeLast() }
+        if slug.count > 32 {
+            slug = String(slug.prefix(32))
+            while slug.hasSuffix("-") { slug.removeLast() }
+        }
+        return slug
+    }
+
     public static func directory(named name: String, home: URL = home) -> URL {
         home.appendingPathComponent(".claude-\(name)", isDirectory: true)
     }

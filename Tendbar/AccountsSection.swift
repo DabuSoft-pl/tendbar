@@ -12,26 +12,34 @@ struct AccountsSection: View {
                 ProfileRow(model: model, profile: profile)
             }
             HStack {
-                TextField("nazwa, np. praca", text: $newName)
+                TextField("nazwa lub e-mail drugiego konta", text: $newName)
                     .textFieldStyle(.roundedBorder)
                     .onSubmit(add)
                 Button("Dodaj konto", action: add)
-                    .disabled(newName.isEmpty)
+                    .disabled(slug.isEmpty)
+            }
+            if !slug.isEmpty {
+                Text("Powstanie katalog ~/.claude-\(slug)")
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundStyle(.secondary)
             }
             if let error = model.profileError {
                 Text(error).foregroundStyle(.red).fixedSize(horizontal: false, vertical: true)
             }
-            Text("Nowe konto dostaje własny katalog ~/.claude-<nazwa> ze wspólnymi ustawieniami, CLAUDE.md, agentami, skillami i pluginami. Uruchom w nim Claude poleceniem z listy i zaloguj się na drugie konto przez /login.")
+            Text("Wpisana nazwa służy tylko do nazwania katalogu. Na konto logujesz się w Claude: uruchom polecenie z listy w terminalu i wpisz /login. Profil współdzieli z ~/.claude ustawienia, CLAUDE.md, agentów, skille i pluginy.")
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .font(.callout)
     }
 
+    private var slug: String {
+        ClaudeProfiles.slug(from: newName)
+    }
+
     private func add() {
-        let name = newName.trimmingCharacters(in: .whitespaces).lowercased()
-        guard !name.isEmpty else { return }
-        model.addProfile(named: name)
+        guard !slug.isEmpty else { return }
+        model.addProfile(named: slug)
         if model.profileError == nil { newName = "" }
     }
 }

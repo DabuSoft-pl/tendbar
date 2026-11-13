@@ -45,6 +45,25 @@ import Testing
         #expect(throws: ClaudeProfileError.invalidName) { try ClaudeProfiles.create(named: name, home: home) }
     }
 
+    @Test(arguments: [
+        ("jan@example.pl", "jan-example"),
+        ("Praca", "praca"),
+        ("  Konto prywatne ", "konto-prywatne"),
+        ("Żółć & łódź", "zolc-lodz"),
+        ("john.doe@gmail.com", "john-doe-gmail"),
+        ("--a--b--", "a-b"),
+        ("!!!", ""),
+    ])
+    func slugsAnyInput(input: String, expected: String) {
+        #expect(ClaudeProfiles.slug(from: input) == expected)
+    }
+
+    @Test func slugIsAlwaysAValidNameOrEmpty() {
+        let slug = ClaudeProfiles.slug(from: String(repeating: "ab-", count: 20))
+        #expect(slug.count <= 32)
+        #expect(ClaudeProfiles.isValidName(slug))
+    }
+
     @Test func launchCommandUsesTilde() {
         let profile = ClaudeProfiles.directory(named: "work", home: home)
 
