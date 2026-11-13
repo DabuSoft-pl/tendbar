@@ -27,7 +27,7 @@ extension HookEnvelope {
             kind: HookEvent.Kind(name: payload.event),
             cwd: payload.cwd,
             transcriptPath: payload.transcriptPath,
-            message: payload.message,
+            message: payload.message ?? payload.failureMessage,
             notificationType: payload.notificationType,
             terminal: terminal.context,
             sentAt: sentAt

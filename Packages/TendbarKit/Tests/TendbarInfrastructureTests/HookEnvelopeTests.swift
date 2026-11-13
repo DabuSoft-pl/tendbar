@@ -114,3 +114,22 @@ import TendbarDomain
         #expect(event.kind == .other("PreCompact"))
     }
 }
+
+@Suite struct StopFailureMessageTests {
+    @Test func describesTheErrorTypeAndDetails() throws {
+        let raw = #"{"session_id":"s1","hook_event_name":"StopFailure","error":"overloaded","error_details":"529 Overloaded","last_assistant_message":"API Error"}"#
+        let redacted = HookRedaction.redact(Data(raw.utf8), statusLine: false)
+        let envelope = HookEnvelope(sentAt: Date(), terminal: TerminalContext(), raw: redacted)
+
+        guard case let .hook(event) = try #require(envelope.message()) else { Issue.record("not a hook"); return }
+        #expect(event.kind == .stopFailure)
+        #expect(event.message == "Przeciążone API (529 Overloaded)")
+        #expect(!redacted.contains("last_assistant_message"))
+    }
+
+    @Test func fallsBackToAGenericLineForUnknownTypes() throws {
+        let payload = try JSONDecoder().decode(HookPayload.self, from: Data(#"{"session_id":"s1","hook_event_name":"StopFailure","error":"something_new"}"#.utf8))
+
+        #expect(payload.failureMessage == "Błąd API")
+    }
+}

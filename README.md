@@ -44,7 +44,7 @@ Everything lives in `~/Library/Application Support/Tendbar` (folder 0700, files 
 |---|---|
 | `sessions.json` | Session id, folder, terminal ids, state, the permission message and the first 200 characters of the last reply |
 | `usage.json` | Limit readings per account, keyed by config directory and e-mail address |
-| `events.jsonl` | Only when Settings → Ogólne → "Log zdarzeń" is on (off by default; turning it off deletes it). A debug log of hook events, rotated at 5 MB: session id, event, folder, transcript path, message, notification type, and limits when they change. A run of tool calls is logged once |
+| `events.jsonl` | Only when Settings → Ogólne → "Log zdarzeń" is on (off by default; turning it off deletes it). A debug log of hook events, rotated at 5 MB: session id, event, folder, transcript path, message, notification type, error type and details of a failed turn, and limits when they change. A run of tool calls is logged once |
 
 Prompts, tool inputs and outputs, file contents and Claude's replies are dropped by the helper before they reach the
 app. The last reply preview is read from the local transcript file.
