@@ -33,10 +33,13 @@ struct SettingsView: View {
     var body: some View {
         HStack(spacing: 0) {
             sidebar
-            Divider()
+            Divider().ignoresSafeArea()
             detail
+                .padding(.top, 12)
+                .ignoresSafeArea(edges: .top)
         }
         .frame(width: 700, height: 500)
+        .unifiedTitleBar()
         .onAppear(perform: refresh)
     }
 
@@ -50,7 +53,7 @@ struct SettingsView: View {
                 Text("Tendbar").font(.system(size: 15, weight: .semibold))
             }
             .padding(.horizontal, 6)
-            .padding(.top, 4)
+            .padding(.top, 8)
             .padding(.bottom, 16)
             ForEach(SettingsPage.allCases) { item in
                 Button { page = item } label: {
@@ -83,7 +86,7 @@ struct SettingsView: View {
         }
         .padding(12)
         .frame(width: 188)
-        .background(.regularMaterial)
+        .background(.regularMaterial, ignoresSafeAreaEdges: .all)
     }
 
     @ViewBuilder

@@ -2,10 +2,34 @@ import AppKit
 import SwiftUI
 
 extension View {
+    /// Lets the content run under a hidden title bar, as in System Settings: the sidebar reaches the top of the
+    /// window and the close button sits on it. Minimize and zoom do nothing in a fixed-size window, so they go.
+    func unifiedTitleBar() -> some View {
+        modifier(UnifiedTitleBar())
+    }
+
     /// Keeps the hosting window as tall as the content. A `MenuBarExtra` window grows with its content but never
     /// shrinks, so folding a section would leave the panel floating in an empty frame.
     func fitsWindow() -> some View {
         modifier(FitsWindow())
+    }
+}
+
+private struct UnifiedTitleBar: ViewModifier {
+    @State private var window: NSWindow?
+
+    func body(content: Content) -> some View {
+        content
+            .background(WindowReader(window: $window))
+            .onChange(of: window) {
+                guard let window else { return }
+                window.titleVisibility = .hidden
+                window.titlebarAppearsTransparent = true
+                window.titlebarSeparatorStyle = .none
+                window.styleMask.insert(.fullSizeContentView)
+                window.standardWindowButton(.miniaturizeButton)?.isHidden = true
+                window.standardWindowButton(.zoomButton)?.isHidden = true
+            }
     }
 }
 
@@ -35,7 +59,8 @@ private struct FitsWindow: ViewModifier {
     }
 }
 
-private struct WindowReader: NSViewRepresentable {
+/// Hands over the window a view sits in, once it is in one.
+struct WindowReader: NSViewRepresentable {
     @Binding var window: NSWindow?
 
     func makeNSView(context: Context) -> WindowView {
