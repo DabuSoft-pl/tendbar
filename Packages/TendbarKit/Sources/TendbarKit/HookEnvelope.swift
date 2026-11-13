@@ -86,3 +86,18 @@ public struct HookPayload: Codable, Sendable, Equatable {
         case notificationType = "notification_type"
     }
 }
+
+public enum HookRedaction {
+    public static let hookKeys: Set<String> = [
+        "session_id", "hook_event_name", "cwd", "transcript_path", "message", "notification_type", "source", "reason",
+    ]
+    public static let statusLineKeys: Set<String> = ["session_id", "rate_limits"]
+
+    public static func redact(_ input: Data, statusLine: Bool) -> String {
+        let keep = statusLine ? statusLineKeys : hookKeys
+        guard let object = try? JSONSerialization.jsonObject(with: input) as? [String: Any],
+              let data = try? JSONSerialization.data(withJSONObject: object.filter { keep.contains($0.key) }, options: [.sortedKeys])
+        else { return "{}" }
+        return String(decoding: data, as: UTF8.self)
+    }
+}

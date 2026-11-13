@@ -27,4 +27,13 @@ public enum TendbarPaths {
     public static func socketPath(environment: [String: String]) -> String {
         environment[socketOverrideVariable] ?? socket.path
     }
+
+    public static func writePrivately(_ data: Data, to url: URL) throws {
+        let manager = FileManager.default
+        let directory = url.deletingLastPathComponent()
+        try manager.createDirectory(at: directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        try? manager.setAttributes([.posixPermissions: 0o700], ofItemAtPath: directory.path)
+        try data.write(to: url, options: .atomic)
+        try manager.setAttributes([.posixPermissions: 0o600], ofItemAtPath: url.path)
+    }
 }

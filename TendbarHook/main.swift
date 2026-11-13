@@ -8,7 +8,7 @@ let input = FileHandle.standardInput.readDataToEndOfFile()
 let envelope = HookEnvelope(
     sentAt: Date(),
     terminal: .capture(environment: environment, tty: ProcessTTY.controllingTTY()),
-    raw: String(decoding: input, as: UTF8.self),
+    raw: HookRedaction.redact(input, statusLine: isStatusLine),
     channel: isStatusLine ? HookEnvelope.statusLineChannel : nil
 )
 

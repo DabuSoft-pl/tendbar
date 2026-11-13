@@ -147,7 +147,6 @@ public enum SessionPersistence {
     }
 
     public static func save(_ store: SessionStore, to url: URL = TendbarPaths.sessions) throws {
-        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try HookEnvelope.encoder.encode(store).write(to: url, options: .atomic)
+        try TendbarPaths.writePrivately(HookEnvelope.encoder.encode(store), to: url)
     }
 }

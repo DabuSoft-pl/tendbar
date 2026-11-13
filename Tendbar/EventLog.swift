@@ -12,7 +12,7 @@ enum EventLog {
             try? manager.moveItem(at: url, to: rotated)
         }
         if !manager.fileExists(atPath: url.path) {
-            try? manager.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try? manager.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
             manager.createFile(atPath: url.path, contents: nil, attributes: [.posixPermissions: 0o600])
         }
         guard let handle = try? FileHandle(forWritingTo: url) else { return }

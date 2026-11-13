@@ -240,8 +240,9 @@ final class AppModel {
     private func start() {
         do {
             try server.start { [weak self] data in
-                EventLog.append(data)
-                guard let envelope = try? HookEnvelope.decoder.decode(HookEnvelope.self, from: data) else { return }
+                guard var envelope = try? HookEnvelope.decoder.decode(HookEnvelope.self, from: data) else { return }
+                envelope.raw = HookRedaction.redact(Data(envelope.raw.utf8), statusLine: envelope.isStatusLine)
+                if let redacted = try? HookEnvelope.encoder.encode(envelope) { EventLog.append(redacted) }
                 if envelope.isStatusLine {
                     Task { @MainActor in self?.receiveStatusLine(envelope) }
                     return
