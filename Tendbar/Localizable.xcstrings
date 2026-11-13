@@ -11,6 +11,16 @@
         }
       }
     },
+    "%@ limit is available again": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limit %@ znów jest dostępny"
+          }
+        }
+      }
+    },
     "%@ limit: %lld%%": {
       "localizations": {
         "pl": {
@@ -41,12 +51,74 @@
         }
       }
     },
+    "%lld min": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld min"
+          }
+        }
+      }
+    },
     "%lld sessions: %@": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
             "value": "Sesje (%lld): %@"
+          }
+        }
+      }
+    },
+    "%lld turns": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld turn"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld turns"
+                }
+              }
+            }
+          }
+        },
+        "pl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld tura"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld tury"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld tur"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld tury"
+                }
+              }
+            }
           }
         }
       }
@@ -159,6 +231,16 @@
         }
       }
     },
+    "A reminder comes once per wait. A session that works with no sign of life for that long may hang on a command or a dropped connection": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przypomnienie przychodzi raz na każde czekanie. Sesja, która tak długo pracuje bez znaku życia, mogła utknąć na poleceniu albo zerwanym połączeniu"
+          }
+        }
+      }
+    },
     "A session finishes": {
       "localizations": {
         "pl": {
@@ -249,6 +331,26 @@
         }
       }
     },
+    "Allow": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zezwól"
+          }
+        }
+      }
+    },
+    "Allow %@?": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zezwolić na %@?"
+          }
+        }
+      }
+    },
     "Allow Tendbar in System Settings → General → Login Items": {
       "localizations": {
         "pl": {
@@ -265,6 +367,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zezwól Tendbarowi na sterowanie aplikacją %@: Ustawienia systemowe → Prywatność i ochrona → Automatyzacja."
+          }
+        }
+      }
+    },
+    "Allow and Deny on permission notifications": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zezwól i Odmów w powiadomieniach o zgodę"
           }
         }
       }
@@ -295,6 +407,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Limity konta przychodzą z sesji Claude Code zalogowanych na tym koncie"
+          }
+        }
+      }
+    },
+    "Answer from the notification": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odpowiedź z powiadomienia"
           }
         }
       }
@@ -339,6 +461,16 @@
         }
       }
     },
+    "Bird calls": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ptasie głosy"
+          }
+        }
+      }
+    },
     "Cancel": {
       "localizations": {
         "pl": {
@@ -355,6 +487,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Profile Claude Code"
+          }
+        }
+      }
+    },
+    "Claude is working with no sign of life. Check its terminal": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude pracuje bez znaku życia. Zajrzyj do terminala"
           }
         }
       }
@@ -529,6 +671,16 @@
         }
       }
     },
+    "Deny": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odmów"
+          }
+        }
+      }
+    },
     "Diagnostics for a bug report": {
       "localizations": {
         "pl": {
@@ -605,6 +757,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wszystko zostaje na tym Macu. Tendbar nie wysyła nic do sieci"
+          }
+        }
+      }
+    },
+    "Flag a quiet session after": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oznacz cichą sesję po"
+          }
+        }
+      }
+    },
+    "Follow up": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przypomnienia"
           }
         }
       }
@@ -799,12 +971,42 @@
         }
       }
     },
+    "Longest turn: %@ in %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Najdłuższa tura: %@ w %@"
+          }
+        }
+      }
+    },
+    "Longest wait for you: %@ in %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Najdłuższe czekanie na Ciebie: %@ w %@"
+          }
+        }
+      }
+    },
     "Mark all as read": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
             "value": "Oznacz jako przeczytane"
+          }
+        }
+      }
+    },
+    "May be stuck": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mogła utknąć"
           }
         }
       }
@@ -875,6 +1077,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Obok ptaka"
+          }
+        }
+      }
+    },
+    "No activity for %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brak aktywności od %@"
+          }
+        }
+      }
+    },
+    "No activity for %@, it may be stuck": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brak aktywności od %@, mogła utknąć"
           }
         }
       }
@@ -965,6 +1187,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Powiadamiaj, gdy"
+          }
+        }
+      }
+    },
+    "Off": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wyłączone"
           }
         }
       }
@@ -1075,6 +1307,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Limit zapytań"
+          }
+        }
+      }
+    },
+    "Remind about a wait after": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przypomnij o czekaniu po"
           }
         }
       }
@@ -1219,6 +1461,16 @@
         }
       }
     },
+    "Sound style": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rodzaj dźwięku"
+          }
+        }
+      }
+    },
     "Start Claude Code in a terminal and it shows up here": {
       "localizations": {
         "pl": {
@@ -1249,6 +1501,26 @@
         }
       }
     },
+    "Still waiting for you": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nadal czeka na Ciebie"
+          }
+        }
+      }
+    },
+    "Still waiting for you · %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nadal czeka na Ciebie · %@"
+          }
+        }
+      }
+    },
     "System": {
       "localizations": {
         "pl": {
@@ -1265,6 +1537,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ustawienia systemowe"
+          }
+        }
+      }
+    },
+    "System sound": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dźwięk systemowy"
           }
         }
       }
@@ -1329,6 +1611,16 @@
         }
       }
     },
+    "That limit is available again": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ten limit znów jest dostępny"
+          }
+        }
+      }
+    },
     "The edge glows orange when a session waits, green when it finishes, red after an error and at 90% of a limit. Right-click a session in the panel to mute its folder": {
       "localizations": {
         "pl": {
@@ -1345,6 +1637,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nowy język pojawi się po ponownym uruchomieniu"
+          }
+        }
+      }
+    },
+    "The notification shows the whole command or file. The terminal prompt keeps working, and whichever you answer first decides. Your deny rules still apply": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Powiadomienie pokazuje całe polecenie albo plik. Pytanie w terminalu dalej działa i decyduje ta odpowiedź, której udzielisz pierwszą. Twoje reguły odmowy nadal obowiązują"
           }
         }
       }
@@ -1395,6 +1697,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Terminal tej sesji nie jest uruchomiony."
+          }
+        }
+      }
+    },
+    "Today": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dziś"
+          }
+        }
+      }
+    },
+    "Today's turns and waits": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dzisiejsze tury i czekanie"
           }
         }
       }
@@ -1619,12 +1941,12 @@
         }
       }
     },
-    "resets in %@": {
+    "resets in %@, at %@": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "reset za %@"
+            "value": "reset za %@, o %@"
           }
         }
       }
@@ -1649,6 +1971,16 @@
         }
       }
     },
+    "waited for you %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "czekał na Ciebie %@"
+          }
+        }
+      }
+    },
     "waiting for you": {
       "localizations": {
         "pl": {
@@ -1665,6 +1997,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "tygodniowy"
+          }
+        }
+      }
+    },
+    "worked %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "praca %@"
           }
         }
       }

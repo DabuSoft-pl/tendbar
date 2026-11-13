@@ -157,4 +157,27 @@ import TendbarDomain
         #expect(HookInstaller.command(for: "/Users/me/My Apps/Tendbar.app/x") == "'/Users/me/My Apps/Tendbar.app/x'")
         #expect(HookInstaller.command(for: "/a'b") == #"'/a'\''b'"#)
     }
+
+    @Test func permissionHooksWaitLongerThanTheOthers() throws {
+        let installer = HookInstaller(settingsURL: settings, hookPath: hookPath)
+        try installer.connect(now: now)
+
+        let timeouts = HookInstaller.ourTimeouts(in: try read())
+
+        #expect(timeouts["PermissionRequest"] == [HookInstaller.permissionTimeoutSeconds])
+        #expect(timeouts["Stop"] == [HookInstaller.timeoutSeconds])
+        #expect(HookInstaller.permissionWaitSeconds < Double(HookInstaller.permissionTimeoutSeconds))
+    }
+
+    @Test func anOldTimeoutCountsAsOutdated() throws {
+        let installer = HookInstaller(settingsURL: settings, hookPath: hookPath)
+        try installer.connect(now: now)
+        var object = try read()
+        var hooks = object["hooks"] as! [String: Any]
+        hooks["PermissionRequest"] = [["hooks": [["type": "command", "command": "'\(hookPath)'", "timeout": 3]]]]
+        object["hooks"] = hooks
+        try JSONSerialization.data(withJSONObject: object).write(to: settings)
+
+        #expect(try installer.status() == .outdated)
+    }
 }

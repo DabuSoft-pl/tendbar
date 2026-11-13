@@ -29,6 +29,7 @@ extension HookEnvelope {
             transcriptPath: payload.transcriptPath,
             message: payload.message ?? payload.failureMessage,
             notificationType: payload.notificationType,
+            agentID: payload.agentID,
             terminal: terminal.context,
             sentAt: sentAt
         ))

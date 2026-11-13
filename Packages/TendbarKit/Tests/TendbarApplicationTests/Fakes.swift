@@ -31,6 +31,15 @@ final class InMemoryUsage: UsageRepository, UsageOutput {
 }
 
 @MainActor
+final class InMemoryActivity: ActivityRepository, ActivityOutput {
+    var stats = ActivityStats()
+    private(set) var shown: [ActivityStats] = []
+    func load() -> ActivityStats { stats }
+    func save(_ stats: ActivityStats) { self.stats = stats }
+    func show(_ activity: ActivityStats) { shown.append(activity) }
+}
+
+@MainActor
 final class InMemoryFiredWarnings: FiredWarningRepository {
     var keys: Set<String> = []
     func load() -> Set<String> { keys }
@@ -48,11 +57,20 @@ final class InMemoryProfiles: ProfileRepository {
 final class RecordingAlerts: AlertPresenting {
     private(set) var presented: [(AlertKind, Session)] = []
     private(set) var limits: [LimitWarning] = []
+    private(set) var resets: [LimitReset] = []
     private(set) var dismissed: [String] = []
+    private(set) var permissions: [PermissionAsk] = []
 
-    func present(_ kind: AlertKind, for session: Session, sound: Bool) { presented.append((kind, session)) }
-    func presentLimit(_ warning: LimitWarning, account: AccountUsage, sound: Bool) { limits.append(warning) }
+    func present(_ kind: AlertKind, for session: Session, sound: AlertSound) { presented.append((kind, session)) }
+    func presentLimit(_ warning: LimitWarning, account: AccountUsage, sound: AlertSound) { limits.append(warning) }
+    func presentLimitReset(_ reset: LimitReset, account: AccountUsage, sound: AlertSound) { resets.append(reset) }
+    func presentPermission(_ ask: PermissionAsk, for session: Session, sound: AlertSound) { permissions.append(ask) }
     func dismiss(sessionID: String) { dismissed.append(sessionID) }
+}
+
+final class RecordingReply: PermissionReply, @unchecked Sendable {
+    private(set) var answers: [PermissionDecision?] = []
+    func send(_ decision: PermissionDecision?) { answers.append(decision) }
 }
 
 @MainActor

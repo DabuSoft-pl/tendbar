@@ -52,6 +52,8 @@ extension AlertKind {
         case .needsYou: String(localized: "Waiting for you")
         case .done: String(localized: "Done")
         case .failed: String(localized: "Error")
+        case .reminder: String(localized: "Still waiting for you")
+        case .quiet: String(localized: "May be stuck")
         }
     }
 }
@@ -66,7 +68,13 @@ extension Session {
     }
 
     /// The line under the folder name: the kind, and for a finished turn how long it took.
-    func alertSubtitle(for kind: AlertKind) -> String {
+    func alertSubtitle(for kind: AlertKind, now: Date = Date()) -> String {
+        if kind == .reminder, let since = waitingSince {
+            return String(localized: "Still waiting for you · \(Elapsed.text(now.timeIntervalSince(since)))")
+        }
+        if kind == .quiet {
+            return String(localized: "No activity for \(Elapsed.text(now.timeIntervalSince(updatedAt)))")
+        }
         guard kind == .done, let start = turnStartedAt, updatedAt.timeIntervalSince(start) >= 60 else { return kind.title }
         return String(localized: "Done after \(Elapsed.text(updatedAt.timeIntervalSince(start)))")
     }
@@ -74,9 +82,15 @@ extension Session {
     /// The banner text for an alert about this session.
     func alertBody(for kind: AlertKind) -> String {
         switch kind {
-        case .needsYou, .failed: message ?? state.hint
+        case .needsYou, .failed, .reminder: message ?? state.hint
         case .done: preview ?? ""
+        case .quiet: String(localized: "Claude is working with no sign of life. Check its terminal")
         }
+    }
+
+    /// The line a quiet working session shows in the panel instead of its reply.
+    func quietText(now: Date = Date()) -> String {
+        String(localized: "No activity for \(Elapsed.text(now.timeIntervalSince(updatedAt))), it may be stuck")
     }
 }
 
@@ -110,6 +124,14 @@ enum Elapsed {
 
     static func until(_ date: Date, now: Date = Date()) -> String {
         text(date.timeIntervalSince(now))
+    }
+
+    /// A clock time to plan around: "16:40" today, "Mon 09:00" on another day.
+    static func clock(_ date: Date, now: Date = Date(), calendar: Calendar = .current) -> String {
+        if calendar.isDate(date, inSameDayAs: now) {
+            return date.formatted(date: .omitted, time: .shortened)
+        }
+        return date.formatted(.dateTime.weekday(.abbreviated).hour().minute())
     }
 }
 

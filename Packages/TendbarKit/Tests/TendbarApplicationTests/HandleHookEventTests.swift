@@ -9,16 +9,20 @@ import TendbarDomain
     let alerts = RecordingAlerts()
     let flasher = RecordingFlasher()
     let settings = StubSettings()
+    let activity = InMemoryActivity()
     let now = Date(timeIntervalSince1970: 1_800_000_000)
 
-    private func useCase(preview: String? = nil) -> HandleHookEvent {
+    private func useCase(preview: String? = nil, desk: PermissionDesk? = nil) -> HandleHookEvent {
         HandleHookEvent(
             repository: sessions,
             output: sessions,
             alerts: alerts,
             flasher: flasher,
             settings: settings,
-            transcripts: StubTranscripts(preview: preview)
+            transcripts: StubTranscripts(preview: preview),
+            activity: activity,
+            activityOutput: activity,
+            desk: desk
         )
     }
 
@@ -69,6 +73,16 @@ import TendbarDomain
         #expect(sessions.store.sessions["s1"]?.unread == true)
     }
 
+    @Test func aFinishedTurnIsCountedForToday() async {
+        let handle = useCase()
+
+        await handle.execute(event(.userPromptSubmit))
+        await handle.execute(event(.stop, at: 120))
+
+        #expect(activity.stats.day(of: now, calendar: .current).turns == 1)
+        #expect(activity.shown.count == 1)
+    }
+
     @Test func nothingAtAllWhenTheKindIsSwitchedOff() async {
         settings.alertSettings.notifyNeedsYou = false
 
@@ -96,5 +110,66 @@ import TendbarDomain
         await handle.execute(event(.postToolUse, at: 1))
 
         #expect(alerts.dismissed == ["s1"])
+    }
+
+    @Test func aPermissionPromptGoesToTheBannerOnlyWhenTurnedOn() async {
+        let desk = PermissionDesk(alerts: alerts)
+        let handle = useCase(desk: desk)
+        let reply = RecordingReply()
+        let ask = PermissionAsk(id: "a1", sessionID: "s1", tool: "Bash", detail: "rm -rf build")
+
+        await handle.execute(event(.permissionRequest), permission: (ask, reply))
+
+        #expect(reply.answers == [nil])
+        #expect(alerts.presented.map(\.0) == [.needsYou])
+        #expect(alerts.permissions.isEmpty)
+    }
+
+    @Test func theBannerAnswersTheHookOnce() async {
+        settings.alertSettings.answersPermissions = true
+        let desk = PermissionDesk(alerts: alerts)
+        let handle = useCase(desk: desk)
+        let reply = RecordingReply()
+        let ask = PermissionAsk(id: "a1", sessionID: "s1", tool: "Bash", detail: "rm -rf build")
+
+        await handle.execute(event(.permissionRequest), permission: (ask, reply))
+
+        #expect(reply.answers.isEmpty)
+        #expect(alerts.permissions == [ask])
+        #expect(!desk.answer(askID: "old", sessionID: "s1", decision: .allow))
+        #expect(desk.answer(askID: "a1", sessionID: "s1", decision: .deny))
+        #expect(!desk.answer(askID: "a1", sessionID: "s1", decision: .allow))
+        #expect(reply.answers == [.deny])
+    }
+
+    @Test func answeringInTheTerminalReleasesTheHook() async {
+        settings.alertSettings.answersPermissions = true
+        let desk = PermissionDesk(alerts: alerts)
+        let handle = useCase(desk: desk)
+        let reply = RecordingReply()
+
+        await handle.execute(event(.permissionRequest), permission: (PermissionAsk(id: "a1", sessionID: "s1", tool: "Bash"), reply))
+        await handle.execute(event(.notification, at: 6, message: "Claude needs your permission to use Bash"))
+        #expect(reply.answers.isEmpty)
+        await handle.execute(event(.postToolUse, at: 9))
+
+        #expect(reply.answers == [nil])
+        #expect(!desk.isWaiting(sessionID: "s1"))
+    }
+
+    @Test func aSubagentsToolUseDoesNotEndTheMainThreadsWait() async {
+        settings.alertSettings.answersPermissions = true
+        let desk = PermissionDesk(alerts: alerts)
+        let handle = useCase(desk: desk)
+        let reply = RecordingReply()
+
+        await handle.execute(event(.permissionRequest), permission: (PermissionAsk(id: "a1", sessionID: "s1", tool: "Bash"), reply))
+        var fromSubagent = event(.postToolUse, at: 2)
+        fromSubagent.agentID = "agent-7"
+        await handle.execute(fromSubagent)
+
+        #expect(sessions.load().sessions["s1"]?.state == .needsYou)
+        #expect(desk.isWaiting(sessionID: "s1"))
+        #expect(reply.answers.isEmpty)
     }
 }

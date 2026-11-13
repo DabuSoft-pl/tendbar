@@ -53,3 +53,29 @@ public final class JSONUsageRepository: UsageRepository {
         try? TendbarPaths.writePrivately(data, to: url)
     }
 }
+
+/// Keeps the day by day activity in memory and writes it through to `activity.json`.
+@MainActor
+public final class JSONActivityRepository: ActivityRepository {
+    private let url: URL
+    private var cached: ActivityStats?
+
+    public init(url: URL = TendbarPaths.activity) {
+        self.url = url
+    }
+
+    public func load() -> ActivityStats {
+        if let cached { return cached }
+        let stats = (try? Data(contentsOf: url))
+            .flatMap { try? HookEnvelope.decoder.decode(ActivityRecord.self, from: $0) }?
+            .stats ?? ActivityStats()
+        cached = stats
+        return stats
+    }
+
+    public func save(_ stats: ActivityStats) {
+        cached = stats
+        guard let data = try? HookEnvelope.encoder.encode(ActivityRecord(stats)) else { return }
+        try? TendbarPaths.writePrivately(data, to: url)
+    }
+}

@@ -48,4 +48,36 @@ import TendbarDomain
 
         #expect(JSONUsageRepository(url: url).load() == store)
     }
+
+    @Test func waitingAndQuietStateSurviveARestart() {
+        let url = directory.appendingPathComponent("sessions.json")
+        var store = SessionStore()
+        store.apply(HookEvent(sessionID: "s1", kind: .userPromptSubmit, cwd: "/Users/me/app", sentAt: now))
+        store.apply(HookEvent(sessionID: "s1", kind: .permissionRequest, cwd: "/Users/me/app", message: "Allow Bash?", sentAt: now.addingTimeInterval(60)))
+        store.markReminded("s1")
+
+        JSONSessionRepository(url: url).save(store)
+
+        let session = JSONSessionRepository(url: url).load().sessions["s1"]
+        #expect(session?.waitingSince == now.addingTimeInterval(60))
+        #expect(session?.remindedWait == true)
+        #expect(JSONSessionRepository(url: url).load() == store)
+    }
+
+    @Test func activitySurvivesARestart() {
+        let url = directory.appendingPathComponent("activity.json")
+        var day = DayActivity()
+        day.turns = 3
+        day.workSeconds = 600
+        day.waits = 2
+        day.waitSeconds = 240
+        day.longestWait = 200
+        day.longestWaitFolder = "app"
+        let stats = ActivityStats(days: ["2027-01-15": day])
+
+        JSONActivityRepository(url: url).save(stats)
+
+        #expect(JSONActivityRepository(url: url).load() == stats)
+        #expect(JSONActivityRepository(url: url.appendingPathExtension("missing")).load() == ActivityStats())
+    }
 }

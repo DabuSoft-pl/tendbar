@@ -18,6 +18,10 @@ public struct HookInstaller: Sendable {
         "PostToolUse", "Stop", "StopFailure", "SessionEnd",
     ]
     public static let timeoutSeconds = 3
+    /// A PermissionRequest hook may wait for Allow or Deny on a banner. The terminal prompt works meanwhile.
+    public static let permissionTimeoutSeconds = 600
+    /// How long the hook waits for that answer, a little under its timeout so it always exits on its own.
+    public static let permissionWaitSeconds = 590.0
     public static let backupLimit = 5
 
     public let settingsURL: URL
@@ -44,7 +48,9 @@ public struct HookInstaller: Sendable {
         let wrapped = statusLine.map(Self.isOurs(command:)) == true
         if commands.isEmpty && !wrapped { return .disconnected }
         let expected = Self.command(for: hookPath)
-        let complete = Self.events.allSatisfy { commands[$0] == [expected] } && commands.count == Self.events.count
+        let timeouts = Self.ourTimeouts(in: settings)
+        let complete = Self.events.allSatisfy { commands[$0] == [expected] && timeouts[$0] == [Self.timeout(for: $0)] }
+            && commands.count == Self.events.count
         let statusLineCurrent = statusLine?.hasPrefix(expected + " " + Self.statusLineFlag) == true
         return complete && statusLineCurrent ? .connected : .outdated
     }
@@ -132,6 +138,25 @@ public struct HookInstaller: Sendable {
         (entry["command"] as? String)?.contains(marker) == true
     }
 
+    static func timeout(for event: String) -> Int {
+        event == "PermissionRequest" ? permissionTimeoutSeconds : timeoutSeconds
+    }
+
+    static func ourTimeouts(in settings: [String: Any]) -> [String: [Int]] {
+        guard let hooks = settings["hooks"] as? [String: Any] else { return [:] }
+        var result: [String: [Int]] = [:]
+        for (event, value) in hooks {
+            guard let groups = value as? [[String: Any]] else { continue }
+            let timeouts = groups
+                .compactMap { $0["hooks"] as? [[String: Any]] }
+                .joined()
+                .filter(isOurs)
+                .map { ($0["timeout"] as? NSNumber)?.intValue ?? -1 }
+            if !timeouts.isEmpty { result[event] = timeouts }
+        }
+        return result
+    }
+
     static func ourCommands(in settings: [String: Any]) -> [String: [String]] {
         guard let hooks = settings["hooks"] as? [String: Any] else { return [:] }
         var result: [String: [String]] = [:]
@@ -181,7 +206,7 @@ public struct HookInstaller: Sendable {
             case let existing as [[String: Any]]: groups = existing
             default: throw HookInstallerError.unexpectedHooksFormat(event)
             }
-            let entry: [String: Any] = ["type": "command", "command": command, "timeout": timeoutSeconds]
+            let entry: [String: Any] = ["type": "command", "command": command, "timeout": timeout(for: event)]
             groups.append(["hooks": [entry]])
             hooks[event] = groups
         }

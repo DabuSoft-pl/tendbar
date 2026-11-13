@@ -44,10 +44,31 @@ public final class CheckLimitWarnings {
         let settings = settings.alertSettings
         guard settings.notifyLimits else { return }
         for (account, warning) in warnings {
-            alerts.presentLimit(warning, account: account, sound: settings.sound)
+            alerts.presentLimit(warning, account: account, sound: settings.alertSound)
         }
         if settings.flash, warnings.contains(where: { $0.1.threshold >= 90 }) {
             flasher.flash(.attention)
+        }
+    }
+
+    /// Announces windows that warned before and have reset since. Runs on a timer, since a reset brings no reading.
+    public func checkResets() {
+        let now = clock.now()
+        var keys = fired.load()
+        var resets: [(AccountUsage, LimitReset)] = []
+        for account in usage.load().ordered {
+            for reset in LimitWarnings.resets(for: account, now: now, fired: keys) {
+                resets.append((account, reset))
+                keys.insert(LimitWarnings.resetKey(accountID: reset.accountID, window: reset.window, resetsAt: reset.resetsAt))
+            }
+        }
+        guard !resets.isEmpty else { return }
+        fired.save(Set(keys.sorted().suffix(Self.rememberedLimit)))
+
+        let settings = settings.alertSettings
+        guard settings.notifyLimits, settings.notifyLimitResets else { return }
+        for (account, reset) in resets {
+            alerts.presentLimitReset(reset, account: account, sound: settings.alertSound)
         }
     }
 }

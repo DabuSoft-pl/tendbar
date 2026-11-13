@@ -76,12 +76,16 @@ public struct HookEnvelope: Codable, Sendable, Equatable {
     public var terminal: TerminalRecord
     public var raw: String
     public var channel: String?
+    /// PermissionRequest only: what the prompt asks, for a banner with Allow and Deny. The hook then waits for an
+    /// answer on the same connection. Never written to the event log.
+    public var permission: PermissionRecord?
 
-    public init(sentAt: Date, terminal: TerminalContext, raw: String, channel: String? = nil) {
+    public init(sentAt: Date, terminal: TerminalContext, raw: String, channel: String? = nil, permission: PermissionRecord? = nil) {
         self.sentAt = sentAt
         self.terminal = TerminalRecord(terminal)
         self.raw = raw
         self.channel = channel
+        self.permission = permission
     }
 
     public var isStatusLine: Bool {
@@ -113,6 +117,7 @@ public struct HookPayload: Codable, Sendable, Equatable {
     public var transcriptPath: String?
     public var message: String?
     public var notificationType: String?
+    public var agentID: String?
     /// `StopFailure` only: the error type (`rate_limit`, `overloaded`, ...) and optional details.
     public var error: String?
     public var errorDetails: String?
@@ -124,6 +129,7 @@ public struct HookPayload: Codable, Sendable, Equatable {
         case transcriptPath = "transcript_path"
         case message
         case notificationType = "notification_type"
+        case agentID = "agent_id"
         case error
         case errorDetails = "error_details"
     }
@@ -153,7 +159,7 @@ public struct HookPayload: Codable, Sendable, Equatable {
 public enum HookRedaction {
     public static let hookKeys: Set<String> = [
         "session_id", "hook_event_name", "cwd", "transcript_path", "message", "notification_type", "source", "reason",
-        "error", "error_details",
+        "error", "error_details", "agent_id",
     ]
     public static let statusLineKeys: Set<String> = ["session_id", "rate_limits"]
 
@@ -163,5 +169,60 @@ public enum HookRedaction {
               let data = try? JSONSerialization.data(withJSONObject: object.filter { keep.contains($0.key) }, options: [.sortedKeys])
         else { return "{}" }
         return String(decoding: data, as: UTF8.self)
+    }
+}
+
+/// What a permission prompt asks, taken from the hook input before redaction: the tool and the one field that says
+/// what it would do (a command, a file path, a URL), capped in length.
+public struct PermissionRecord: Codable, Sendable, Equatable {
+    public static let detailLimit = 2_000
+    static let detailKeys = ["command", "file_path", "notebook_path", "url", "path", "pattern", "query", "prompt"]
+
+    public var id: String
+    public var tool: String
+    public var detail: String?
+
+    public init(id: String = UUID().uuidString, tool: String, detail: String?) {
+        self.id = id
+        self.tool = tool
+        self.detail = detail
+    }
+
+    /// Nil for anything but a PermissionRequest.
+    public init?(hookInput: Data, id: String = UUID().uuidString) {
+        guard let object = try? JSONSerialization.jsonObject(with: hookInput) as? [String: Any],
+              object["hook_event_name"] as? String == "PermissionRequest",
+              let tool = object["tool_name"] as? String
+        else { return nil }
+        let input = object["tool_input"] as? [String: Any] ?? [:]
+        let detail = Self.detailKeys.lazy.compactMap { input[$0] as? String }.first
+        self.init(id: id, tool: tool, detail: detail.map { String($0.prefix(Self.detailLimit)) })
+    }
+
+    public func ask(sessionID: String) -> PermissionAsk {
+        PermissionAsk(id: id, sessionID: sessionID, tool: tool, detail: detail)
+    }
+}
+
+/// The app's answer to a waiting hook, and the JSON the hook prints for Claude Code.
+public enum PermissionAnswer {
+    public static func encode(_ decision: PermissionDecision?) -> Data {
+        guard let decision else { return Data() }
+        return Data(#"{"decision":"\#(decision.rawValue)"}"#.utf8)
+    }
+
+    public static func decode(_ data: Data) -> PermissionDecision? {
+        guard let object = try? JSONSerialization.jsonObject(with: data) as? [String: String] else { return nil }
+        return object["decision"].flatMap(PermissionDecision.init(rawValue:))
+    }
+
+    /// The hook output that allows or denies the prompt.
+    public static func hookOutput(_ decision: PermissionDecision) -> Data {
+        var verdict: [String: Any] = ["behavior": decision.rawValue]
+        if decision == .deny { verdict["message"] = "Denied from a Tendbar notification." }
+        let output: [String: Any] = [
+            "hookSpecificOutput": ["hookEventName": "PermissionRequest", "decision": verdict],
+        ]
+        return (try? JSONSerialization.data(withJSONObject: output, options: [.sortedKeys])) ?? Data()
     }
 }

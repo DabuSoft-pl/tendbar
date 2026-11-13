@@ -2,6 +2,10 @@ public enum AlertKind: String, Sendable, CaseIterable {
     case needsYou
     case done
     case failed
+    /// A wait that went unanswered for a while.
+    case reminder
+    /// A working session with no events for a while.
+    case quiet
 }
 
 public enum AlertPolicy {

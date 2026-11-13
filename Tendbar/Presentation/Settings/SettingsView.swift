@@ -199,9 +199,37 @@ private struct NotificationSettings: View {
                 Toggle("A session finishes", isOn: $preferences.notifyDone)
                 Toggle("A turn fails", isOn: $preferences.notifyFailed)
                 Toggle("An account passes 80% and 90% of a limit", isOn: $preferences.notifyLimits)
+                Toggle("That limit is available again", isOn: $preferences.notifyLimitResets)
+                    .disabled(!preferences.notifyLimits)
+            }
+            Section {
+                Toggle("Allow and Deny on permission notifications", isOn: $preferences.permissionActions)
+                    .disabled(!preferences.notifyNeedsYou)
+            } header: {
+                Text("Answer from the notification")
+            } footer: {
+                Text("The notification shows the whole command or file. The terminal prompt keeps working, and whichever you answer first decides. Your deny rules still apply")
+            }
+            Section {
+                Picker("Remind about a wait after", selection: $preferences.remindAfterMinutes) {
+                    minutes([2, 5, 10, 15])
+                }
+                .disabled(!preferences.notifyNeedsYou)
+                Picker("Flag a quiet session after", selection: $preferences.quietAfterMinutes) {
+                    minutes([10, 15, 30])
+                }
+            } header: {
+                Text("Follow up")
+            } footer: {
+                Text("A reminder comes once per wait. A session that works with no sign of life for that long may hang on a command or a dropped connection")
             }
             Section {
                 Toggle("Sound", isOn: $preferences.playSound)
+                Picker("Sound style", selection: $preferences.soundStyle) {
+                    Text("Bird calls").tag(SoundStyle.bird)
+                    Text("System sound").tag(SoundStyle.system)
+                }
+                .disabled(!preferences.playSound)
                 Toggle("Start of the reply in “Done” notifications", isOn: $preferences.showReplyPreview)
                     .disabled(!preferences.notifyDone)
                 Toggle("Glowing screen edge", isOn: $preferences.edgeGlow)
@@ -277,6 +305,14 @@ private struct NotificationSettings: View {
         model.notificationPermission == .authorized
     }
 
+    @ViewBuilder
+    private func minutes(_ choices: [Int]) -> some View {
+        Text("Off").tag(0)
+        ForEach(choices, id: \.self) { minutes in
+            Text("\(minutes) min").tag(minutes)
+        }
+    }
+
 }
 
 private struct AppearanceSettings: View {
@@ -318,6 +354,7 @@ private struct AppearanceSettings: View {
             }
             Section("Panel") {
                 Toggle("Start of the reply under each session", isOn: $preferences.panelPreviews)
+                Toggle("Today's turns and waits", isOn: $preferences.panelToday)
                 Picker("Usage limits", selection: $preferences.usageStyle) {
                     Text("Full").tag(UsageStyle.full)
                     Text("One line per account").tag(UsageStyle.compact)

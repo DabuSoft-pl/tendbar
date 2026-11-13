@@ -82,6 +82,9 @@ struct MenuContent: View {
             } else {
                 sessionList
             }
+            if container.preferences.panelToday, case let today = container.activity.today(), !today.isEmpty {
+                TodayLine(day: today)
+            }
             if !container.usage.isEmpty, container.preferences.usageStyle != .hidden {
                 Divider()
                 UsageSection(model: container.usage, actions: container.usageActions, compact: container.preferences.usageStyle == .compact)
@@ -268,7 +271,13 @@ struct SessionRow: View {
                                 .monospacedDigit()
                         }
                     }
-                    if showsDetail, session.state != .working {
+                    if session.state == .working, session.flaggedQuiet {
+                        TimelineView(.periodic(from: .now, by: 30)) { context in
+                            Text(session.quietText(now: context.date))
+                                .foregroundStyle(Palette.amber)
+                                .lineLimit(1)
+                        }
+                    } else if showsDetail, session.state != .working {
                         Text(detail)
                             .foregroundStyle(.secondary)
                             .lineLimit(2)

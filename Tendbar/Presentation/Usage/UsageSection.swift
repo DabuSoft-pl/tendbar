@@ -119,7 +119,7 @@ private struct WindowLimit: View {
 
     private func resetText(_ window: LimitWindow) -> String {
         if now >= window.resetsAt { return String(localized: "reset") }
-        return String(localized: "resets in \(Elapsed.until(window.resetsAt, now: now))")
+        return String(localized: "resets in \(Elapsed.until(window.resetsAt, now: now)), at \(Elapsed.clock(window.resetsAt, now: now))")
     }
 }
 

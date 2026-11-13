@@ -32,13 +32,20 @@ permission prompt. Tendbar watches them for you. Everything stays on your Mac: n
   when it waits for you, vermilion after an error, sage green until you read a finished reply.
 - **Back to the right terminal.** Click a session, or pick it with the arrow keys and press Return, to jump to its
   tab or pane (see [Terminals](#terminals)).
-- **Notifications that matter.** A banner when a session needs you, finishes or fails, each one switchable. Optionally
-  the screen edge glows in the state's color. Right-click a session to mute its folder.
+- **Notifications that matter.** A banner when a session needs you, finishes or fails, each one switchable, with
+  Tendbar's own short bird calls (or the system sound). Optionally the screen edge glows in the state's color.
+  Right-click a session to mute its folder.
+- **Follow-ups.** One reminder when a session has waited for you longer than you set (5 minutes by default), and a
+  warning when a working session goes quiet for 15 minutes, since it may hang on a command or a dropped connection.
+- **Answer from the notification.** Opt in, and a permission banner shows the whole command or file with Allow and
+  Deny. The terminal prompt keeps working, whichever you answer first decides, and your deny rules still apply.
 - **A pill by the notch.** The lead state, a count and two thin lines for the five-hour and weekly limits. Hover it
   for the sessions and every account's limits. On Macs without a notch it sits in the middle of the menu bar.
 - **Usage limits per account.** Five-hour and weekly usage with a warning at 80% and 90%, for every account you use,
   including separate `CLAUDE_CONFIG_DIR` profiles. A tick on each bar marks the even pace, and when you run ahead of
-  it Tendbar tells you when the limit would run out.
+  it Tendbar tells you when the limit would run out. Resets show as a clock time, and a limit that warned you
+  announces when it is available again.
+- **Your day in one line.** The panel counts today's turns, Claude's working time and how long it waited for you.
 - **Shown your way.** Settings → Appearance picks what sits next to the bird in the menu bar, when the pill shows up,
   and how dense the panel is: with or without reply previews, full or one-line limits.
 - **English and Polish.** Follows the macOS language, or pick one in Settings → General.
@@ -87,7 +94,9 @@ Builds are signed ad hoc, so they run on the Mac that built them.
 - **Nothing leaves your Mac.** Tendbar makes no network calls, has no analytics and never calls Anthropic.
 - **No secrets.** It never reads tokens or the Keychain and never switches or rotates accounts.
 - **Only what it needs.** The hook helper drops prompts, tool inputs and outputs, file contents and Claude's replies
-  before anything reaches the app. The reply preview is read from the local transcript file.
+  before anything reaches the app. The reply preview is read from the local transcript file. The one exception is a
+  permission prompt: its tool and command, file path or URL (up to 2,000 characters) reach the app for the Allow and
+  Deny banner, stay in memory only and never go to a file or the event log.
 - **Not on shared screens.** The pill and the glow stay out of screen sharing and recordings (Settings → General).
 - **Your settings, your call.** `~/.claude/settings.json` changes only when you press Connect or Disconnect, never at
   launch. Each change is backed up first (the last five are kept), and Disconnect removes only Tendbar's entries.
@@ -98,6 +107,7 @@ Everything Tendbar keeps lives in `~/Library/Application Support/Tendbar` (folde
 |---|---|
 | `sessions.json` | Session id, folder, terminal ids, state, the permission message and the first 200 characters of the last reply |
 | `usage.json` | Limit readings per account, keyed by config directory and e-mail address |
+| `activity.json` | Per day for the last month: the number of turns and waits, their total time, and the longest wait and turn with their folder name |
 | `events.jsonl` | Only when Settings → General → Event log is on (off by default; turning it off deletes it). Hook events for troubleshooting: session id, event, folder, transcript path, message, notification type, the error of a failed turn, and limits when they change. Rotated at 5 MB |
 
 ## How it works
@@ -107,6 +117,12 @@ inside the app bundle. It keeps only the fields Tendbar uses, adds the terminal 
 app, iTerm/Terminal session ids, WezTerm, kitty and tmux pane ids and sockets, the TTY, `CLAUDE_CONFIG_DIR`), sends
 the event over a Unix socket (`~/Library/Application Support/Tendbar/tendbar.sock`, mode 0600) and exits at once. It
 prints nothing and always exits 0, so Claude Code is never slowed down or blocked, even when Tendbar is not running.
+
+A permission prompt is the one place the helper waits. It asks the app whether to wait for Allow or Deny from a
+banner: with the setting off the app answers at once and the helper exits; with it on, the helper waits (up to 590
+seconds, under a 600 second hook timeout) while Claude Code shows its usual prompt. Answering in the terminal goes
+ahead as normal, and the helper is released with no output as soon as the session moves on. Only Allow or Deny on
+the banner makes it print Claude Code's `PermissionRequest` decision.
 
 Limits come from the `rate_limits` Claude Code passes to status lines (five-hour and weekly windows on Pro and Max
 plans, after the first reply of a session). Connecting wraps your `statusLine`: `tendbar-hook --statusline` sends the
@@ -127,7 +143,8 @@ make screenshots  # render the README images from sample data
 
 The code follows Clean Architecture: a domain package, use cases and adapters, described in [`CLAUDE.md`](CLAUDE.md).
 UI strings are English, with the Polish translation in `Tendbar/Localizable.xcstrings`. The app icon is drawn by
-`tools/make-icon.swift`.
+`tools/make-icon.swift` and the bird calls are synthesized by `tools/make-sounds.swift`, so the app ships no recorded
+or licensed audio.
 
 ## Contributing
 

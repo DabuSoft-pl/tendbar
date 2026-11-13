@@ -27,6 +27,12 @@ final class Preferences: AlertSettingsProviding {
         static let hideFromCapture = "view.hideFromCapture"
         static let muted = "notify.muted"
         static let theme = "view.theme"
+        static let soundStyle = "notify.sound.style"
+        static let remindAfter = "notify.remindAfter"
+        static let quietAfter = "notify.quietAfter"
+        static let limitResets = "notify.limits.resets"
+        static let today = "view.panel.today"
+        static let permissionActions = "notify.permissionActions"
     }
 
     @ObservationIgnored private let defaults: UserDefaults
@@ -37,6 +43,15 @@ final class Preferences: AlertSettingsProviding {
     var notifyDone: Bool { didSet { defaults.set(notifyDone, forKey: Key.done) } }
     var notifyFailed: Bool { didSet { defaults.set(notifyFailed, forKey: Key.failed) } }
     var playSound: Bool { didSet { defaults.set(playSound, forKey: Key.sound) } }
+    var soundStyle: SoundStyle { didSet { defaults.set(soundStyle.rawValue, forKey: Key.soundStyle) } }
+    /// Minutes a session may wait for you before a reminder; 0 turns reminders off.
+    var remindAfterMinutes: Int { didSet { defaults.set(remindAfterMinutes, forKey: Key.remindAfter) } }
+    /// Minutes without hook events before a working session counts as stuck; 0 turns it off.
+    var quietAfterMinutes: Int { didSet { defaults.set(quietAfterMinutes, forKey: Key.quietAfter) } }
+    var notifyLimitResets: Bool { didSet { defaults.set(notifyLimitResets, forKey: Key.limitResets) } }
+    var panelToday: Bool { didSet { defaults.set(panelToday, forKey: Key.today) } }
+    /// Allow and Deny on permission banners. Off by default: it answers a prompt without looking at the terminal.
+    var permissionActions: Bool { didSet { defaults.set(permissionActions, forKey: Key.permissionActions) } }
     var edgeGlow: Bool { didSet { defaults.set(edgeGlow, forKey: Key.glow) } }
     var glowOnDone: Bool { didSet { defaults.set(glowOnDone, forKey: Key.glowDone) } }
     var showReplyPreview: Bool { didSet { defaults.set(showReplyPreview, forKey: Key.replyPreview) } }
@@ -79,11 +94,18 @@ final class Preferences: AlertSettingsProviding {
         defaults.register(defaults: [
             Key.needsYou: true, Key.done: true, Key.failed: true, Key.sound: true, Key.glow: true, Key.glowDone: true, Key.notch: true, Key.limits: true,
             Key.pillLines: true, Key.panelPreviews: true, Key.hideFromCapture: true,
+            Key.remindAfter: 5, Key.quietAfter: 15, Key.limitResets: true, Key.today: true,
         ])
         notifyNeedsYou = defaults.bool(forKey: Key.needsYou)
         notifyDone = defaults.bool(forKey: Key.done)
         notifyFailed = defaults.bool(forKey: Key.failed)
         playSound = defaults.bool(forKey: Key.sound)
+        soundStyle = defaults.string(forKey: Key.soundStyle).flatMap(SoundStyle.init) ?? .bird
+        remindAfterMinutes = defaults.integer(forKey: Key.remindAfter)
+        quietAfterMinutes = defaults.integer(forKey: Key.quietAfter)
+        notifyLimitResets = defaults.bool(forKey: Key.limitResets)
+        panelToday = defaults.bool(forKey: Key.today)
+        permissionActions = defaults.bool(forKey: Key.permissionActions)
         edgeGlow = defaults.bool(forKey: Key.glow)
         glowOnDone = defaults.bool(forKey: Key.glowDone)
         notifyLimits = defaults.bool(forKey: Key.limits)
@@ -119,12 +141,23 @@ final class Preferences: AlertSettingsProviding {
         settings.notifyFailed = notifyFailed
         settings.notifyLimits = notifyLimits
         settings.sound = playSound
+        settings.birdSounds = soundStyle == .bird
+        settings.remindAfter = remindAfterMinutes > 0 ? TimeInterval(remindAfterMinutes * 60) : nil
+        settings.quietAfter = quietAfterMinutes > 0 ? TimeInterval(quietAfterMinutes * 60) : nil
+        settings.notifyLimitResets = notifyLimitResets
+        settings.answersPermissions = permissionActions
         settings.flash = edgeGlow
         settings.flashOnDone = glowOnDone
         settings.showsReplyPreview = showReplyPreview
         settings.mutedFolders = Set(mutedFolders)
         return settings
     }
+}
+
+/// Which sound a banner plays when sounds are on.
+enum SoundStyle: String, CaseIterable, Identifiable {
+    case bird, system
+    var id: Self { self }
 }
 
 /// What the menu bar item shows next to the bird.

@@ -59,3 +59,30 @@ import Testing
         #expect(LimitWarnings.pending(for: reset, now: now, fired: []).isEmpty)
     }
 }
+
+@Suite struct LimitResetTests {
+    let now = Date(timeIntervalSince1970: 1_800_000_000)
+
+    private func account(resetsAt: Date) -> AccountUsage {
+        AccountUsage(id: "a", fiveHour: LimitWindow(usedPercentage: 85, resetsAt: resetsAt), updatedAt: now.addingTimeInterval(-3600))
+    }
+
+    @Test func aWarnedWindowAnnouncesItsReset() {
+        let resetsAt = now.addingTimeInterval(-60)
+        let fired: Set<String> = [LimitWarnings.key(accountID: "a", window: LimitWarnings.fiveHour, resetsAt: resetsAt, threshold: 80)]
+
+        let resets = LimitWarnings.resets(for: account(resetsAt: resetsAt), now: now, fired: fired)
+
+        #expect(resets == [LimitReset(accountID: "a", window: LimitWarnings.fiveHour, resetsAt: resetsAt)])
+    }
+
+    @Test func onlyOnceAndOnlyAfterAWarning() {
+        let resetsAt = now.addingTimeInterval(-60)
+        let warned = LimitWarnings.key(accountID: "a", window: LimitWarnings.fiveHour, resetsAt: resetsAt, threshold: 80)
+        let announced = LimitWarnings.resetKey(accountID: "a", window: LimitWarnings.fiveHour, resetsAt: resetsAt)
+
+        #expect(LimitWarnings.resets(for: account(resetsAt: resetsAt), now: now, fired: []).isEmpty)
+        #expect(LimitWarnings.resets(for: account(resetsAt: resetsAt), now: now, fired: [warned, announced]).isEmpty)
+        #expect(LimitWarnings.resets(for: account(resetsAt: now.addingTimeInterval(60)), now: now, fired: [warned]).isEmpty)
+    }
+}

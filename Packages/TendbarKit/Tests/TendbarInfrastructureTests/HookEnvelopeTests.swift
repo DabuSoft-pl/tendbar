@@ -132,4 +132,36 @@ import TendbarDomain
 
         #expect(payload.failureMessage == "API error")
     }
+
+    @Test func aPermissionPromptKeepsItsToolAndCommand() throws {
+        let input = Data(#"{"hook_event_name":"PermissionRequest","session_id":"s1","tool_name":"Bash","tool_input":{"command":"rm -rf build","description":"Clean"}}"#.utf8)
+
+        let record = try #require(PermissionRecord(hookInput: input, id: "a1"))
+
+        #expect(record == PermissionRecord(id: "a1", tool: "Bash", detail: "rm -rf build"))
+        #expect(PermissionRecord(hookInput: Data(#"{"hook_event_name":"Stop","session_id":"s1"}"#.utf8)) == nil)
+    }
+
+    @Test func aFileEditShowsItsPathAndLongCommandsAreCapped() throws {
+        let edit = Data(#"{"hook_event_name":"PermissionRequest","tool_name":"Edit","tool_input":{"file_path":"/Users/me/app/a.swift","old_string":"x"}}"#.utf8)
+        let long = try JSONSerialization.data(withJSONObject: [
+            "hook_event_name": "PermissionRequest", "tool_name": "Bash",
+            "tool_input": ["command": String(repeating: "a", count: 5_000)],
+        ])
+
+        #expect(PermissionRecord(hookInput: edit)?.detail == "/Users/me/app/a.swift")
+        #expect(PermissionRecord(hookInput: long)?.detail?.count == PermissionRecord.detailLimit)
+    }
+
+    @Test func answersBecomeHookOutput() throws {
+        #expect(PermissionAnswer.decode(PermissionAnswer.encode(.allow)) == .allow)
+        #expect(PermissionAnswer.decode(PermissionAnswer.encode(nil)) == nil)
+
+        let output = try JSONSerialization.jsonObject(with: PermissionAnswer.hookOutput(.deny)) as? [String: Any]
+        let specific = output?["hookSpecificOutput"] as? [String: Any]
+        let decision = specific?["decision"] as? [String: Any]
+        #expect(specific?["hookEventName"] as? String == "PermissionRequest")
+        #expect(decision?["behavior"] as? String == "deny")
+        #expect(decision?["message"] != nil)
+    }
 }

@@ -39,6 +39,8 @@ public struct HookEvent: Sendable, Equatable {
     public var transcriptPath: String?
     public var message: String?
     public var notificationType: String?
+    /// Set when a subagent, not the main thread, caused the event.
+    public var agentID: String?
     public var terminal: TerminalContext
     public var sentAt: Date
 
@@ -49,6 +51,7 @@ public struct HookEvent: Sendable, Equatable {
         transcriptPath: String? = nil,
         message: String? = nil,
         notificationType: String? = nil,
+        agentID: String? = nil,
         terminal: TerminalContext = TerminalContext(),
         sentAt: Date
     ) {
@@ -58,6 +61,7 @@ public struct HookEvent: Sendable, Equatable {
         self.transcriptPath = transcriptPath
         self.message = message
         self.notificationType = notificationType
+        self.agentID = agentID
         self.terminal = terminal
         self.sentAt = sentAt
     }

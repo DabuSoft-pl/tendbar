@@ -73,4 +73,28 @@ import TendbarDomain
             try UnixSocketClient.send(Data("x".utf8), to: path)
         }
     }
+
+    @Test func aRequestWaitsForTheReply() throws {
+        let path = temporarySocketPath()
+        let server = UnixSocketServer(path: path)
+        try server.start(replying: { data, reply in
+            DispatchQueue.global().asyncAfter(deadline: .now() + 0.2) {
+                reply.send(Data("re: ".utf8) + data)
+            }
+        })
+        defer { server.stop() }
+
+        let answer = try UnixSocketClient.request(Data("ask".utf8), to: path, wait: 5)
+
+        #expect(String(decoding: answer, as: UTF8.self) == "re: ask")
+    }
+
+    @Test func aDroppedReplyEndsTheWaitEmpty() throws {
+        let path = temporarySocketPath()
+        let server = UnixSocketServer(path: path)
+        try server.start(replying: { _, reply in reply.send(nil) })
+        defer { server.stop() }
+
+        #expect(try UnixSocketClient.request(Data("ask".utf8), to: path, wait: 5).isEmpty)
+    }
 }

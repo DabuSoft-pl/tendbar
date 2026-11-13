@@ -16,11 +16,13 @@ Domain  <-  Application  <-  Infrastructure
 
 - `TendbarDomain` — entities and business rules, no I/O and no imports of ours: `Session`, `SessionStore` (how hook
   events move a session between states), `HookEvent`, `UsageStore`/`AccountUsage`/`UsageReading`, `AlertPolicy`,
-  `LimitWarnings`, `ProfileName`.
+  `LimitWarnings`, `ProfileName`, `Attention` (reminders, quiet sessions), `ActivityStats` (turns and waits per day),
+  `PermissionAsk`.
 - `TendbarApplication` — use cases, one class each (`HandleHookEvent`, `OpenSession`, `RecordUsageReading`,
-  `CheckLimitWarnings`, `AddProfile`, …) and the ports they need: repositories, `AlertPresenting`, `ScreenFlashing`,
-  `TerminalNavigating`, `HookConnecting`, `AlertSettingsProviding`, `Clock`, and the output ports `SessionsOutput` and
-  `UsageOutput`. Use cases never import AppKit, SwiftUI or UserNotifications.
+  `CheckLimitWarnings`, `CheckAttention`, `AddProfile`, …, plus `PermissionDesk` holding prompts that wait for a
+  banner answer) and the ports they need: repositories, `AlertPresenting`, `ScreenFlashing`,
+  `TerminalNavigating`, `HookConnecting`, `AlertSettingsProviding`, `Clock`, and the output ports `SessionsOutput`,
+  `UsageOutput` and `ActivityOutput`; `PermissionReply` is the way back to a waiting hook. Use cases never import AppKit, SwiftUI or UserNotifications.
 - `TendbarInfrastructure` — adapters that touch files, sockets and processes: the hook wire format (`HookEnvelope`,
   `HookRedaction`, `InboundMessage` maps it to domain values), `HookEventListener`, JSON repositories with storage
   records (`Records.swift` keeps `sessions.json`/`usage.json` stable), `HookInstaller`, `ClaudeProfiles`,
@@ -34,6 +36,11 @@ Domain  <-  Application  <-  Infrastructure
   a controller (user intent → use case) and the views. Views import Domain and Application, never Infrastructure.
 - `TendbarHook` — `tendbar-hook`, embedded in `Tendbar.app/Contents/MacOS`, uses only Domain and Infrastructure. It
   must never print (SessionStart and UserPromptSubmit stdout becomes Claude's context), never block and never fail.
+  The one exception is PermissionRequest: it sends a `PermissionRecord` and waits on the same connection
+  (`UnixSocketClient.request`) for the app's answer, printing the hook decision only for Allow or Deny from a banner.
+  Every held prompt must get an answer or be released (nil) once the session leaves "waiting for you".
+- `tools/make-icon.swift` and `tools/make-sounds.swift` draw the icon and synthesize the bird calls in
+  `Tendbar/Sounds`; rerun them after changing either, never add recorded or licensed assets.
 - `project.yml` — XcodeGen spec; `Tendbar.xcodeproj` and `Tendbar/Info.plist` are generated, not committed.
 
 Flow of one event: `tendbar-hook` → socket → `HookEventListener` → `InboundMessage.hook(HookEvent)` →

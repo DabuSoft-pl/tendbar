@@ -39,12 +39,14 @@ private final class MemoryProfiles: ProfileRepository {
 @MainActor
 private final class Silent: AlertPresenting, NotificationPermissions, ScreenFlashing, TerminalNavigating,
     AccountEmailResolving, HookConnecting, ProfileDirectories, LoginItemControlling {
-    func present(_ kind: AlertKind, for session: Session, sound: Bool) {}
-    func presentLimit(_ warning: LimitWarning, account: AccountUsage, sound: Bool) {}
+    func present(_ kind: AlertKind, for session: Session, sound: AlertSound) {}
+    func presentLimit(_ warning: LimitWarning, account: AccountUsage, sound: AlertSound) {}
+    func presentLimitReset(_ reset: LimitReset, account: AccountUsage, sound: AlertSound) {}
+    func presentPermission(_ ask: PermissionAsk, for session: Session, sound: AlertSound) {}
     func dismiss(sessionID: String) {}
     func permission() async -> NotificationPermission { .authorized }
     func requestPermission() async -> (NotificationPermission, error: String?) { (.authorized, nil) }
-    func sendTest(sound: Bool) async throws {}
+    func sendTest(sound: AlertSound) async throws {}
     func flash(_ tone: FlashTone) {}
     func jump(to session: Session) -> JumpOutcome { .jumped }
     func email(configDirectory: String?) -> String? { configDirectory == nil ? "damian@example.com" : "work@example.com" }
@@ -54,6 +56,13 @@ private final class Silent: AlertPresenting, NotificationPermissions, ScreenFlas
     func create(named name: String) throws -> String { "/Users/me/.claude-\(name)" }
     var state: LoginItemState { .enabled }
     func setEnabled(_ enabled: Bool) throws {}
+}
+
+@MainActor
+private final class MemoryActivity: ActivityRepository {
+    var stats = ActivityStats()
+    func load() -> ActivityStats { stats }
+    func save(_ stats: ActivityStats) { self.stats = stats }
 }
 
 private struct NoTranscripts: TranscriptReading {
@@ -70,6 +79,7 @@ extension AppContainer {
             adapters: Adapters(
                 sessions: MemorySessions(SessionStore(sessions: sessions)),
                 usage: MemoryUsage(UsageStore(accounts: accounts)),
+                activity: MemoryActivity(),
                 firedWarnings: MemoryFired(),
                 profiles: MemoryProfiles(),
                 alerts: silent,

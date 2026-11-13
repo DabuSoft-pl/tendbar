@@ -20,6 +20,10 @@ public enum TendbarPaths {
         supportDirectory.appendingPathComponent("sessions.json")
     }
 
+    public static var activity: URL {
+        supportDirectory.appendingPathComponent("activity.json")
+    }
+
     public static var usage: URL {
         supportDirectory.appendingPathComponent("usage.json")
     }

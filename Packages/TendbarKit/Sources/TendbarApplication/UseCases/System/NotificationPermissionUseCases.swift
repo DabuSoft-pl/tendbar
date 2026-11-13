@@ -43,7 +43,7 @@ public final class SendTestNotification {
             (permission, error) = await permissions.requestPermission()
         }
         do {
-            try await permissions.sendTest(sound: settings.alertSettings.sound)
+            try await permissions.sendTest(sound: settings.alertSettings.alertSound)
             return (permission, error)
         } catch {
             return (permission, error.localizedDescription)

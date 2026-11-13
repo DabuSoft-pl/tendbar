@@ -13,8 +13,23 @@ let envelope = HookEnvelope(
     channel: isStatusLine ? HookEnvelope.statusLineChannel : nil
 )
 
+let socketPath = TendbarPaths.socketPath(environment: environment)
+
+// A permission prompt waits for Tendbar's answer from a banner. Without one the hook prints nothing and the
+// terminal prompt decides, as it does meanwhile anyway.
+if !isStatusLine, let permission = PermissionRecord(hookInput: input) {
+    var asking = envelope
+    asking.permission = permission
+    if let data = try? HookEnvelope.encoder.encode(asking),
+       let answer = try? UnixSocketClient.request(data, to: socketPath, wait: HookInstaller.permissionWaitSeconds),
+       let decision = PermissionAnswer.decode(answer) {
+        FileHandle.standardOutput.write(PermissionAnswer.hookOutput(decision))
+    }
+    exit(0)
+}
+
 if let data = try? HookEnvelope.encoder.encode(envelope) {
-    try? UnixSocketClient.send(data, to: TendbarPaths.socketPath(environment: environment))
+    try? UnixSocketClient.send(data, to: socketPath)
 }
 
 guard isStatusLine,

@@ -12,6 +12,7 @@ final class AppContainer {
     struct Adapters {
         var sessions: SessionRepository
         var usage: UsageRepository
+        var activity: ActivityRepository
         var firedWarnings: FiredWarningRepository
         var profiles: ProfileRepository
         var alerts: AlertPresenting
@@ -29,6 +30,7 @@ final class AppContainer {
     let preferences: Preferences
     let sessions = SessionsViewModel()
     let usage = UsageViewModel()
+    let activity = ActivityViewModel()
     let claudeCode = ClaudeCodeViewModel()
     let system: SystemViewModel
     let sessionActions: SessionsController
@@ -40,6 +42,10 @@ final class AppContainer {
     private let startUsage: StartUsage
     private let handleHookEvent: HandleHookEvent
     private let recordUsage: RecordUsageReading
+    private let checkAttention: CheckAttention
+    private let checkWarnings: CheckLimitWarnings
+    let permissionDesk: PermissionDesk
+    private var timer: Timer?
     private var listener: HookEventListener?
     private var notch: NotchController?
 
@@ -47,13 +53,18 @@ final class AppContainer {
         self.preferences = preferences
         system = SystemViewModel(eventLog: eventLog, dataFolder: dataFolder)
 
-        let checkWarnings = CheckLimitWarnings(
+        checkWarnings = CheckLimitWarnings(
             usage: a.usage, fired: a.firedWarnings, alerts: a.alerts, flasher: a.flasher, settings: preferences, clock: a.clock
         )
+        permissionDesk = PermissionDesk(alerts: a.alerts)
         startSessions = StartSessions(repository: a.sessions, output: sessions, clock: a.clock)
         startUsage = StartUsage(repository: a.usage, output: usage, checkWarnings: checkWarnings)
         handleHookEvent = HandleHookEvent(
-            repository: a.sessions, output: sessions, alerts: a.alerts, flasher: a.flasher, settings: preferences, transcripts: a.transcripts
+            repository: a.sessions, output: sessions, alerts: a.alerts, flasher: a.flasher, settings: preferences, transcripts: a.transcripts,
+            activity: a.activity, activityOutput: activity, desk: permissionDesk
+        )
+        checkAttention = CheckAttention(
+            repository: a.sessions, output: sessions, alerts: a.alerts, flasher: a.flasher, settings: preferences, clock: a.clock
         )
         recordUsage = RecordUsageReading(repository: a.usage, output: usage, emails: a.emails, checkWarnings: checkWarnings)
 
@@ -84,7 +95,23 @@ final class AppContainer {
 
         startSessions.execute()
         startUsage.execute()
+        activity.show(a.activity.load())
         claudeCodeActions.refreshConnection()
+    }
+
+    /// Reminders, quiet sessions and limit resets have no event of their own, so a timer looks for them.
+    private func startTimer() {
+        let timer = Timer(timeInterval: 30, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.checkAttention.execute()
+                self?.checkWarnings.checkResets()
+            }
+        }
+        timer.tolerance = 5
+        RunLoop.main.add(timer, forMode: .common)
+        self.timer = timer
+        checkAttention.execute()
+        checkWarnings.checkResets()
     }
 
     /// The real app: JSON files, the hook socket, Notification Center, AppleScript and the notch.
@@ -97,6 +124,7 @@ final class AppContainer {
             adapters: Adapters(
                 sessions: JSONSessionRepository(),
                 usage: JSONUsageRepository(),
+                activity: JSONActivityRepository(),
                 firedWarnings: UserDefaultsFiredWarningRepository(),
                 profiles: UserDefaultsProfileRepository(),
                 alerts: notifications,
@@ -114,9 +142,13 @@ final class AppContainer {
             dataFolder: TendbarPaths.supportDirectory
         )
         notifications.onOpen = { [weak container] id in container?.sessionActions.open(sessionID: id) }
+        notifications.onAnswer = { [weak container] askID, sessionID, decision in
+            container?.permissionDesk.answer(askID: askID, sessionID: sessionID, decision: decision)
+        }
         container.listen(on: TendbarPaths.socketPath(environment: ProcessInfo.processInfo.environment))
         container.systemActions.requestNotifications()
         container.showNotch()
+        container.startTimer()
         DispatchQueue.main.async { preferences.theme.apply() }
         return container
     }
@@ -125,17 +157,23 @@ final class AppContainer {
         let filter = EventLogFilter { UserDefaults.standard.bool(forKey: EventLog.enabledKey) }
         let listener = HookEventListener(socketPath: socketPath, logFilter: filter)
         do {
-            try listener.start { [weak self] message in self?.receive(message) }
+            try listener.start { [weak self] message, permission in
+                guard let self else {
+                    permission?.reply.send(nil)
+                    return
+                }
+                receive(message, permission: permission)
+            }
             self.listener = listener
         } catch {
             sessions.listenerError = String(describing: error)
         }
     }
 
-    private func receive(_ message: InboundMessage) {
+    private func receive(_ message: InboundMessage, permission: (ask: PermissionAsk, reply: PermissionReply)?) {
         switch message {
         case let .hook(event):
-            Task { await handleHookEvent.execute(event) }
+            Task { await handleHookEvent.execute(event, permission: permission) }
         case let .usage(reading):
             recordUsage.execute(reading)
         }

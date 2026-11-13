@@ -63,6 +63,16 @@ public struct Session: Sendable, Identifiable, Equatable {
     public var updatedAt: Date
     /// When the current or last turn began, so a working session can say how long it has been at it.
     public var turnStartedAt: Date?
+    /// When the session began waiting for you, while it does.
+    public var waitingSince: Date?
+    /// How long the current or last turn spent waiting for you, so its working time can leave the waits out.
+    public var turnWaited: TimeInterval
+    /// A reminder about the current wait went out already.
+    public var remindedWait: Bool
+    /// The user was told this working session has gone quiet; cleared by the next event.
+    public var flaggedQuiet: Bool
+    /// The subagent whose permission prompt the session waits on; nil for the main thread.
+    public var waitingAgent: String?
     public var unread: Bool
     public var message: String?
     public var preview: String?
@@ -76,6 +86,11 @@ public struct Session: Sendable, Identifiable, Equatable {
         startedAt: Date,
         updatedAt: Date,
         turnStartedAt: Date? = nil,
+        waitingSince: Date? = nil,
+        turnWaited: TimeInterval = 0,
+        remindedWait: Bool = false,
+        flaggedQuiet: Bool = false,
+        waitingAgent: String? = nil,
         unread: Bool = false,
         message: String? = nil,
         preview: String? = nil
@@ -88,6 +103,11 @@ public struct Session: Sendable, Identifiable, Equatable {
         self.startedAt = startedAt
         self.updatedAt = updatedAt
         self.turnStartedAt = turnStartedAt
+        self.waitingSince = waitingSince
+        self.turnWaited = turnWaited
+        self.remindedWait = remindedWait
+        self.flaggedQuiet = flaggedQuiet
+        self.waitingAgent = waitingAgent
         self.unread = unread
         self.message = message
         self.preview = preview

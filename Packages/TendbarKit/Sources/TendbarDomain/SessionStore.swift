@@ -40,6 +40,8 @@ public struct SessionStore: Sendable, Equatable {
         session.transcriptPath = event.transcriptPath ?? session.transcriptPath
         session.terminal = event.terminal
         session.updatedAt = max(session.updatedAt, event.sentAt)
+        session.flaggedQuiet = false
+        let wasWaiting = session.state == .needsYou
 
         switch event.kind {
         case .sessionStart:
@@ -47,16 +49,18 @@ public struct SessionStore: Sendable, Equatable {
         case .userPromptSubmit:
             session.state = .working
             session.turnStartedAt = event.sentAt
+            session.turnWaited = 0
             session.unread = false
             session.message = nil
         case .postToolUse:
-            if session.state == .needsYou {
+            if session.state == .needsYou, event.agentID == session.waitingAgent {
                 session.state = .working
                 session.unread = false
                 session.message = nil
             }
         case .permissionRequest:
             session.state = .needsYou
+            session.waitingAgent = event.agentID
             session.unread = true
         case .notification:
             guard event.asksForAttention else { break }
@@ -78,8 +82,26 @@ public struct SessionStore: Sendable, Equatable {
             break
         }
 
+        if session.state == .needsYou, !wasWaiting {
+            session.waitingSince = event.sentAt
+            session.waitingAgent = event.agentID
+            session.remindedWait = false
+        } else if session.state != .needsYou, wasWaiting {
+            if let since = session.waitingSince { session.turnWaited += max(event.sentAt.timeIntervalSince(since), 0) }
+            session.waitingSince = nil
+            session.waitingAgent = nil
+        }
+
         sessions[session.id] = session
         return session
+    }
+
+    public mutating func markReminded(_ id: String) {
+        sessions[id]?.remindedWait = true
+    }
+
+    public mutating func markQuiet(_ id: String) {
+        sessions[id]?.flaggedQuiet = true
     }
 
     public mutating func setPreview(_ preview: String, for id: String) {

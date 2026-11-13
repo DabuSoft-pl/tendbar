@@ -46,19 +46,42 @@ enum SocketOptions {
 
 public enum UnixSocketClient {
     public static func send(_ data: Data, to path: String, timeout: Double = 1) throws {
+        let fd = try connected(to: path, timeout: timeout)
+        defer { close(fd) }
+        try write(data, to: fd)
+    }
+
+    /// Sends a message, then waits up to `wait` seconds for the reply the server writes before it closes.
+    public static func request(_ data: Data, to path: String, timeout: Double = 1, wait: Double) throws -> Data {
+        let fd = try connected(to: path, timeout: timeout)
+        defer { close(fd) }
+        try write(data, to: fd)
+        shutdown(fd, SHUT_WR)
+        SocketOptions.setTimeout(fd, option: SO_RCVTIMEO, seconds: wait)
+        return UnixSocketServer.readAll(from: fd)
+    }
+
+    private static func connected(to path: String, timeout: Double) throws -> Int32 {
         var address = try SocketAddress.make(path: path)
         let fd = socket(AF_UNIX, SOCK_STREAM, 0)
         guard fd >= 0 else { throw SocketError.system("socket", errno) }
-        defer { close(fd) }
         SocketOptions.disableSigpipe(fd)
         SocketOptions.setTimeout(fd, option: SO_SNDTIMEO, seconds: timeout)
         let connected = SocketAddress.withSockaddr(&address) { connect(fd, $0, $1) }
-        guard connected == 0 else { throw SocketError.system("connect", errno) }
+        guard connected == 0 else {
+            let code = errno
+            close(fd)
+            throw SocketError.system("connect", code)
+        }
+        return fd
+    }
+
+    private static func write(_ data: Data, to fd: Int32) throws {
         try data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) in
             guard let base = buffer.baseAddress else { return }
             var offset = 0
             while offset < buffer.count {
-                let written = write(fd, base + offset, buffer.count - offset)
+                let written = Darwin.write(fd, base + offset, buffer.count - offset)
                 if written < 0 {
                     if errno == EINTR { continue }
                     throw SocketError.system("write", errno)
@@ -85,6 +108,14 @@ public final class UnixSocketServer: @unchecked Sendable {
     }
 
     public func start(onMessage: @escaping @Sendable (Data) -> Void) throws {
+        try start { data, reply in
+            reply.send(nil)
+            onMessage(data)
+        }
+    }
+
+    /// Each message comes with the connection to answer on. It closes once answered, or when the reply is dropped.
+    public func start(replying onMessage: @escaping @Sendable (Data, SocketReply) -> Void) throws {
         let fd = try Self.openListener(at: path)
         let source = DispatchSource.makeReadSource(fileDescriptor: fd, queue: queue)
         source.setEventHandler {
@@ -96,10 +127,11 @@ public final class UnixSocketServer: @unchecked Sendable {
                     continue
                 }
                 SocketOptions.setBlocking(client, true)
+                SocketOptions.disableSigpipe(client)
                 SocketOptions.setTimeout(client, option: SO_RCVTIMEO, seconds: 2)
                 let data = Self.readAll(from: client)
-                close(client)
-                if !data.isEmpty { onMessage(data) }
+                let reply = SocketReply(fd: client)
+                if data.isEmpty { reply.send(nil) } else { onMessage(data, reply) }
             }
         }
         source.setCancelHandler { [path] in
@@ -160,5 +192,40 @@ public final class UnixSocketServer: @unchecked Sendable {
             }
         }
         return data
+    }
+}
+
+/// One client connection kept open for an answer. Sending, or dropping the last reference, closes it.
+public final class SocketReply: @unchecked Sendable {
+    private let lock = NSLock()
+    private var fd: Int32?
+
+    init(fd: Int32) {
+        self.fd = fd
+    }
+
+    deinit {
+        if let fd { close(fd) }
+    }
+
+    public func send(_ data: Data?) {
+        lock.lock()
+        defer { lock.unlock() }
+        guard let fd else { return }
+        self.fd = nil
+        if let data, !data.isEmpty {
+            SocketOptions.setTimeout(fd, option: SO_SNDTIMEO, seconds: 1)
+            data.withUnsafeBytes { buffer in
+                guard let base = buffer.baseAddress else { return }
+                var offset = 0
+                while offset < buffer.count {
+                    let written = Darwin.write(fd, base + offset, buffer.count - offset)
+                    if written < 0, errno == EINTR { continue }
+                    guard written > 0 else { break }
+                    offset += written
+                }
+            }
+        }
+        close(fd)
     }
 }
