@@ -16,13 +16,11 @@ public struct LimitWindow: Codable, Sendable, Equatable {
 
 public struct AccountUsage: Codable, Sendable, Equatable, Identifiable {
     public var id: String
+    public var configDirectory: String?
+    public var email: String?
     public var fiveHour: LimitWindow?
     public var sevenDay: LimitWindow?
     public var updatedAt: Date
-
-    public var configDirectory: String? {
-        id.isEmpty ? nil : id
-    }
 }
 
 public struct UsageStore: Codable, Sendable, Equatable {
@@ -31,7 +29,10 @@ public struct UsageStore: Codable, Sendable, Equatable {
     public init() {}
 
     public var ordered: [AccountUsage] {
-        accounts.values.sorted { $0.id < $1.id }
+        accounts.values.sorted { ($0.email ?? $0.id).lowercased() == ($1.email ?? $1.id).lowercased()
+            ? $0.id < $1.id
+            : ($0.email ?? $0.id).lowercased() < ($1.email ?? $1.id).lowercased()
+        }
     }
 
     public static func accountKey(configDirectory: String?) -> String {
@@ -41,20 +42,33 @@ public struct UsageStore: Codable, Sendable, Equatable {
         return standardized == defaultDirectory ? "" : standardized
     }
 
+    public static func key(configDirectory: String?, email: String?) -> String {
+        let directory = accountKey(configDirectory: configDirectory)
+        guard let email, !email.isEmpty else { return directory }
+        return directory + "|" + email.lowercased()
+    }
+
     @discardableResult
-    public mutating func apply(_ envelope: HookEnvelope) -> Bool {
+    public mutating func apply(_ envelope: HookEnvelope, email: String? = nil) -> Bool {
         guard envelope.isStatusLine,
               let input = try? JSONDecoder().decode(StatusLineInput.self, from: Data(envelope.raw.utf8)),
               let limits = input.rateLimits
         else { return false }
-        let key = Self.accountKey(configDirectory: envelope.terminal.configDirectory)
+        let directory = Self.accountKey(configDirectory: envelope.terminal.configDirectory)
+        let key = Self.key(configDirectory: envelope.terminal.configDirectory, email: email)
         accounts[key] = AccountUsage(
             id: key,
+            configDirectory: directory.isEmpty ? nil : directory,
+            email: email,
             fiveHour: limits.fiveHour?.window,
             sevenDay: limits.sevenDay?.window,
             updatedAt: envelope.sentAt
         )
         return true
+    }
+
+    public mutating func remove(_ id: String) {
+        accounts[id] = nil
     }
 }
 
@@ -106,13 +120,37 @@ public enum UsagePersistence {
 }
 
 public enum ClaudeAccount {
-    public static func email(configDirectory: String?) -> String? {
-        let url = configDirectory.map { URL(fileURLWithPath: $0).appendingPathComponent(".claude.json") }
+    public static func configFile(configDirectory: String?) -> URL {
+        configDirectory.map { URL(fileURLWithPath: $0).appendingPathComponent(".claude.json") }
             ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".claude.json")
+    }
+
+    public static func email(configDirectory: String?) -> String? {
+        email(in: configFile(configDirectory: configDirectory))
+    }
+
+    public static func email(in url: URL) -> String? {
         guard let data = try? Data(contentsOf: url),
               let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let account = object["oauthAccount"] as? [String: Any]
         else { return nil }
         return account["emailAddress"] as? String
+    }
+}
+
+
+public final class AccountEmailCache {
+    private var entries: [String: (modified: Date, email: String?)] = [:]
+
+    public init() {}
+
+    public func email(configDirectory: String?) -> String? {
+        let url = ClaudeAccount.configFile(configDirectory: configDirectory)
+        let modified = (try? FileManager.default.attributesOfItem(atPath: url.path))?[.modificationDate] as? Date
+        guard let modified else { return nil }
+        if let entry = entries[url.path], entry.modified == modified { return entry.email }
+        let email = ClaudeAccount.email(in: url)
+        entries[url.path] = (modified, email)
+        return email
     }
 }

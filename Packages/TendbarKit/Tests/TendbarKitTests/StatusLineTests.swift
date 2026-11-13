@@ -110,6 +110,37 @@ import Testing
         #expect(store.ordered.map(\.id) == ["", "/Users/me/.claude-work"])
     }
 
+    @Test func keepsAccountsSwitchedInTheSameDirectoryApart() throws {
+        var store = UsageStore()
+        let first = #"{"rate_limits":{"five_hour":{"used_percentage":80,"resets_at":1800003600}}}"#
+        let second = #"{"rate_limits":{"five_hour":{"used_percentage":5,"resets_at":1800003600}}}"#
+
+        store.apply(envelope(first), email: "Work@Example.com")
+        store.apply(envelope(second), email: "me@example.com")
+
+        #expect(store.ordered.map(\.email) == ["me@example.com", "Work@Example.com"])
+        #expect(store.accounts["|work@example.com"]?.fiveHour?.usedPercentage == 80)
+        #expect(store.accounts["|me@example.com"]?.fiveHour?.usedPercentage == 5)
+
+        store.remove("|me@example.com")
+        #expect(store.accounts.count == 1)
+    }
+
+    @Test func readsTheLoggedInEmailAndCachesIt() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("tendbar-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let file = directory.appendingPathComponent(".claude.json")
+        try Data(#"{"oauthAccount":{"emailAddress":"a@example.com","accountUuid":"x"},"projects":{}}"#.utf8).write(to: file)
+        let cache = AccountEmailCache()
+
+        #expect(cache.email(configDirectory: directory.path) == "a@example.com")
+
+        try Data(#"{"oauthAccount":{"emailAddress":"b@example.com"}}"#.utf8).write(to: file)
+        try FileManager.default.setAttributes([.modificationDate: Date().addingTimeInterval(10)], ofItemAtPath: file.path)
+        #expect(cache.email(configDirectory: directory.path) == "b@example.com")
+        #expect(cache.email(configDirectory: directory.appendingPathComponent("missing").path) == nil)
+    }
+
     @Test func treatsTheDefaultDirectoryAsTheDefaultAccount() {
         let home = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".claude").path
         #expect(UsageStore.accountKey(configDirectory: home) == "")

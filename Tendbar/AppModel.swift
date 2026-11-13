@@ -9,7 +9,7 @@ import UserNotifications
 final class AppModel {
     private(set) var store: SessionStore
     private(set) var usage = UsagePersistence.load()
-    @ObservationIgnored private var accountNames: [String: String] = [:]
+    @ObservationIgnored private let emailCache = AccountEmailCache()
     private(set) var connection: HookInstaller.Status?
     private(set) var connectionError: String?
     private(set) var startError: String?
@@ -181,17 +181,20 @@ final class AppModel {
     }
 
     private func receiveStatusLine(_ envelope: HookEnvelope) {
-        guard usage.apply(envelope) else { return }
+        let email = emailCache.email(configDirectory: envelope.terminal.configDirectory)
+        guard usage.apply(envelope, email: email) else { return }
         try? UsagePersistence.save(usage)
     }
 
     func accountName(_ account: AccountUsage) -> String {
-        if let cached = accountNames[account.id] { return cached }
-        let name = ClaudeAccount.email(configDirectory: account.configDirectory)
+        account.email
             ?? account.configDirectory.map { URL(fileURLWithPath: $0).lastPathComponent }
             ?? String(localized: "Konto domyślne")
-        accountNames[account.id] = name
-        return name
+    }
+
+    func forget(_ account: AccountUsage) {
+        usage.remove(account.id)
+        try? UsagePersistence.save(usage)
     }
 
     private func receive(_ payload: HookPayload, envelope: HookEnvelope) {

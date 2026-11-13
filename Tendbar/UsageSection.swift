@@ -20,6 +20,10 @@ struct UsageSection: View {
                         LimitRow(title: "5 godz.", window: account.fiveHour)
                         LimitRow(title: "Tydzień", window: account.sevenDay)
                     }
+                    .contentShape(Rectangle())
+                    .contextMenu {
+                        Button("Zapomnij to konto") { model.forget(account) }
+                    }
                 }
             }
             .font(.callout)
