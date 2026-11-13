@@ -157,7 +157,7 @@ struct NotchView: View {
 
     private var lead: SessionState? {
         let states = Set(active.map(\.state))
-        for state in [SessionState.needsYou, .failed, .working, .done] where states.contains(state) { return state }
+        for state in [SessionState.needsYou, .working, .failed, .done] where states.contains(state) { return state }
         return nil
     }
 

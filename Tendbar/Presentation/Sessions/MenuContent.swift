@@ -78,8 +78,12 @@ struct MenuContent: View {
             Spacer()
             Button {
                 dismiss()
-                NSApp.activate()
+                NSApp.activate(ignoringOtherApps: true)
                 openSettings()
+                DispatchQueue.main.async {
+                    NSApp.windows.first { $0.identifier?.rawValue.contains("Settings") == true }?
+                        .makeKeyAndOrderFront(nil)
+                }
             } label: {
                 Image(systemName: "gearshape")
             }

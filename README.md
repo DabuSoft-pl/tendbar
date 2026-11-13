@@ -18,7 +18,7 @@ has used. Everything stays on your Mac: no account, no network calls, no model c
 - **Usage limits.** Five-hour and weekly usage per account, with a warning at 80% and 90% of each window.
 - **Several accounts.** Readings are filed under the account signed in at the time, so switching accounts in any
   way starts a new entry and the previous account keeps its last reading until its window resets. Separate
-  `CLAUDE_CONFIG_DIR` profiles can be added in Settings → Konta.
+  `CLAUDE_CONFIG_DIR` profiles can be added in Settings → Claude Code.
 
 Tendbar never switches or rotates accounts, never reads tokens or the Keychain and never calls Anthropic.
 
@@ -55,7 +55,7 @@ app. The last reply preview is read from the local transcript file.
 make install   # Release build into /Applications/Tendbar.app
 ```
 
-Open Settings (the gear in the panel, or ⌘,) → Ogólne → Claude Code and press "Połącz". It adds Tendbar's hooks to
+Open Settings (the gear in the panel, or ⌘,) → Claude Code and press "Połącz". It adds Tendbar's hooks to
 `~/.claude/settings.json` and wraps the status line, after a backup of the file (the last five are kept). "Rozłącz"
 removes only Tendbar's entries. Settings change only when you press one of these buttons, never at launch. The file
 is rewritten with sorted keys.

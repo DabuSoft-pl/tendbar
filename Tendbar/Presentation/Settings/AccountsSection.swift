@@ -9,16 +9,19 @@ struct AccountsSection: View {
     @State private var newName = ""
 
     var body: some View {
-        Form {
+        Group {
             Section {
+                if model.profiles.isEmpty {
+                    Text("Brak profili. Domyślny profil ~/.claude pojawi się po pierwszej sesji")
+                        .foregroundStyle(.secondary)
+                }
                 ForEach(model.profiles) { profile in
                     ProfileRow(profile: profile, actions: actions)
                 }
             } header: {
                 Text("Profile Claude Code")
             } footer: {
-                Text("Limity konta przychodzą z każdej sesji Claude Code na tym koncie. Po przelogowaniu w tym samym profilu kolejne odczyty trafiają do nowego konta, a poprzednie zostaje z ostatnim stanem")
-                    .foregroundStyle(.secondary)
+                Text("Limity konta przychodzą z sesji Claude Code zalogowanych na tym koncie")
             }
             Section {
                 HStack {
@@ -34,12 +37,10 @@ struct AccountsSection: View {
                 Text("Nowy profil")
             } footer: {
                 Text(slug.isEmpty
-                    ? String(localized: "Profil to osobny katalog Claude Code. Logujesz się w nim poleceniem /login. Ustawienia, CLAUDE.md, agenci, skille i pluginy są wspólne z ~/.claude.")
+                    ? String(localized: "Profil to osobny katalog Claude Code, w którym logujesz się przez /login")
                     : String(localized: "Powstanie katalog ~/.claude-\(slug)"))
-                    .foregroundStyle(.secondary)
             }
         }
-        .formStyle(.grouped)
     }
 
     private var slug: String {
@@ -73,7 +74,10 @@ private struct ProfileRow: View {
             Spacer()
             switch profile.connection {
             case .connected:
-                Text("połączone").foregroundStyle(.secondary)
+                Image(systemName: "checkmark")
+                    .foregroundStyle(.secondary)
+                    .help("Połączone")
+                    .accessibilityLabel("Połączone")
             case .outdated, .disconnected:
                 Button("Połącz") { actions.connect(profile) }
             case nil:

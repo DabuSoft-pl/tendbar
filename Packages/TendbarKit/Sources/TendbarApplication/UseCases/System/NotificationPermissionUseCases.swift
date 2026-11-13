@@ -38,7 +38,10 @@ public final class SendTestNotification {
     }
 
     public func execute() async -> (NotificationPermission, error: String?) {
-        let (permission, error) = await permissions.requestPermission()
+        var (permission, error) = (await permissions.permission(), String?.none)
+        if permission != .authorized {
+            (permission, error) = await permissions.requestPermission()
+        }
         do {
             try await permissions.sendTest(sound: settings.alertSettings.sound)
             return (permission, error)

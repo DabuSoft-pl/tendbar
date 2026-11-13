@@ -42,7 +42,9 @@ final class UserNotificationsAdapter: NSObject, UNUserNotificationCenterDelegate
         content.title = "Tendbar"
         content.body = String(localized: "Powiadomienia działają.")
         if sound { content.sound = .default }
-        try await center.add(UNNotificationRequest(identifier: "test", content: content, trigger: nil))
+        let previous = await center.deliveredNotifications().map(\.request.identifier).filter { $0.hasPrefix("test-") }
+        center.removeDeliveredNotifications(withIdentifiers: previous)
+        try await center.add(UNNotificationRequest(identifier: "test-\(UUID().uuidString)", content: content, trigger: nil))
     }
 
     func present(_ kind: AlertKind, for session: Session, sound: Bool) {
