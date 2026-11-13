@@ -56,8 +56,73 @@ final class AppModel {
 
     func refresh() {
         refreshConnection()
+        refreshProfiles()
         launchAtLogin = LaunchAtLogin.status
         Task { notificationStatus = await notifier.authorizationStatus() }
+    }
+
+    struct Profile: Identifiable {
+        let directory: String?
+        let email: String?
+        let connection: HookInstaller.Status?
+
+        var id: String { directory ?? "" }
+        var launchCommand: String {
+            directory.map { ClaudeProfiles.launchCommand(for: URL(fileURLWithPath: $0)) } ?? "claude"
+        }
+    }
+
+    private(set) var profiles: [Profile] = []
+    private(set) var profileError: String?
+    private static let profilesKey = "profiles"
+
+    private var extraProfileDirectories: [String] {
+        get { UserDefaults.standard.stringArray(forKey: Self.profilesKey) ?? [] }
+        set { UserDefaults.standard.set(newValue, forKey: Self.profilesKey) }
+    }
+
+    func refreshProfiles() {
+        let directories: [String?] = [nil] + extraProfileDirectories.map(Optional.some)
+        profiles = directories.map { directory in
+            Profile(
+                directory: directory,
+                email: ClaudeAccount.email(configDirectory: directory),
+                connection: Self.hookExecutablePath.flatMap {
+                    try? HookInstaller(settingsURL: HookInstaller.settingsURL(configDirectory: directory), hookPath: $0).status()
+                }
+            )
+        }
+    }
+
+    func addProfile(named name: String) {
+        do {
+            let directory = try ClaudeProfiles.create(named: name).path
+            if !extraProfileDirectories.contains(directory) { extraProfileDirectories.append(directory) }
+            profileError = nil
+        } catch ClaudeProfileError.invalidName {
+            profileError = String(localized: "Nazwa może mieć 1–32 znaki: małe litery, cyfry i myślniki.")
+        } catch {
+            profileError = error.localizedDescription
+        }
+        refreshProfiles()
+    }
+
+    func removeProfile(_ profile: Profile) {
+        guard let directory = profile.directory else { return }
+        extraProfileDirectories.removeAll { $0 == directory }
+        refreshProfiles()
+    }
+
+    func connect(_ profile: Profile) {
+        guard let path = Self.hookExecutablePath else { return }
+        do {
+            try HookInstaller(settingsURL: HookInstaller.settingsURL(configDirectory: profile.directory), hookPath: path).connect()
+            profileError = nil
+        } catch {
+            profileError = String(describing: error)
+        }
+        refreshConnection()
+        refreshProfiles()
     }
 
     func refreshConnection() {

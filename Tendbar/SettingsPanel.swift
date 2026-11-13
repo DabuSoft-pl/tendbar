@@ -8,6 +8,7 @@ struct SettingsPanel: View {
 
     var body: some View {
         @Bindable var preferences = model.preferences
+        ScrollView {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Button(action: onClose) {
@@ -60,6 +61,10 @@ struct SettingsPanel: View {
                 }
             }
 
+            section("Konta Claude") {
+                AccountsSection(model: model)
+            }
+
             section("Wygląd") {
                 Toggle(NotchController.hasNotch ? "Stan sesji w notchu" : "Stan sesji na środku paska menu", isOn: $preferences.notchView)
                     .onChange(of: preferences.notchView) { model.refreshNotch() }
@@ -96,6 +101,9 @@ struct SettingsPanel: View {
                     .controlSize(.small)
             }
         }
+        .padding(.trailing, 8)
+        }
+        .frame(height: 600)
         .toggleStyle(.switch)
         .controlSize(.small)
         .onAppear { model.refresh() }
