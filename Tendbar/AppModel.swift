@@ -13,6 +13,7 @@ final class AppModel {
     private(set) var startError: String?
     private(set) var notificationStatus: UNAuthorizationStatus = .notDetermined
     private(set) var notificationError: String?
+    private(set) var jumpMessage: String?
     private(set) var launchAtLogin: SMAppService.Status = LaunchAtLogin.status
     private(set) var launchAtLoginError: String?
     let preferences = Preferences()
@@ -117,9 +118,29 @@ final class AppModel {
         persist()
     }
 
+    func select(_ session: Session) {
+        markSeen(session)
+        switch TerminalJumper.jump(to: session.terminal) {
+        case .jumped, .activated:
+            jumpMessage = nil
+        case .notRunning:
+            jumpMessage = String(localized: "Terminal tej sesji nie jest uruchomiony.")
+        case .unavailable:
+            jumpMessage = String(localized: "Nie umiem jeszcze przełączyć na ten terminal.")
+        case let .notAuthorized(app):
+            jumpMessage = String(localized: "Zezwól Tendbarowi na sterowanie aplikacją \(app): Ustawienia systemowe → Prywatność i ochrona → Automatyzacja.")
+        case let .failed(message):
+            jumpMessage = String(localized: "Nie udało się przełączyć na sesję: \(message)")
+        }
+    }
+
+    func dismissJumpMessage() {
+        jumpMessage = nil
+    }
+
     private func open(sessionID: String) {
         guard let session = store.sessions[sessionID] else { return }
-        markSeen(session)
+        select(session)
     }
 
     private func change(_ action: (HookInstaller) throws -> URL?) {

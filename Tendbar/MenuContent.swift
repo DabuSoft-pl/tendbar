@@ -27,6 +27,19 @@ struct MenuContent: View {
                     .font(.callout)
             }
             ConnectionBanner(model: model)
+            if let message = model.jumpMessage {
+                HStack(alignment: .top) {
+                    Image(systemName: "info.circle.fill").foregroundStyle(.orange)
+                    Text(message).font(.callout).fixedSize(horizontal: false, vertical: true)
+                    Spacer()
+                    Button {
+                        model.dismissJumpMessage()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                    .buttonStyle(.borderless)
+                }
+            }
             Divider()
             if model.sessions.isEmpty {
                 Text("Brak sesji. Uruchom Claude Code, a pojawią się tutaj.")
@@ -37,7 +50,7 @@ struct MenuContent: View {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 4) {
                         ForEach(model.sessions) { session in
-                            SessionRow(session: session) { model.markSeen(session) }
+                            SessionRow(session: session) { model.select(session) }
                         }
                     }
                 }

@@ -32,6 +32,7 @@ targets:
         CFBundleDevelopmentRegion: pl
         LSUIElement: true
         LSApplicationCategoryType: public.app-category.developer-tools
+        NSAppleEventsUsageDescription: Tendbar przełącza na kartę terminala, w której działa wybrana sesja Claude Code.
         NSHumanReadableCopyright: "© 2026 Dabusoft. MIT License."
     settings:
       base:
