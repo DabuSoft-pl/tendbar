@@ -21,6 +21,7 @@ final class AppModel {
     @ObservationIgnored private let installer: HookInstaller?
     @ObservationIgnored private let notifier = Notifier()
     @ObservationIgnored private let glow = EdgeGlow()
+    @ObservationIgnored private var notch: NotchController?
 
     static var hookExecutablePath: String? {
         Bundle.main.url(forAuxiliaryExecutable: "tendbar-hook")?.path
@@ -36,6 +37,11 @@ final class AppModel {
         start()
         refreshConnection()
         requestNotifications()
+        notch = NotchController(model: self)
+    }
+
+    func refreshNotch() {
+        notch?.update()
     }
 
     var sessions: [Session] {

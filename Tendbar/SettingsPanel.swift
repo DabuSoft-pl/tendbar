@@ -60,6 +60,17 @@ struct SettingsPanel: View {
                 }
             }
 
+            section("Wygląd") {
+                Toggle("Stan sesji w notchu", isOn: $preferences.notchView)
+                    .disabled(!NotchController.isAvailable)
+                    .onChange(of: preferences.notchView) { model.refreshNotch() }
+                if !NotchController.isAvailable {
+                    Text("Ten Mac nie ma ekranu z notchem.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
             section("Ogólne") {
                 Toggle("Uruchamiaj przy logowaniu", isOn: Binding(
                     get: { model.launchAtLogin == .enabled || model.launchAtLogin == .requiresApproval },

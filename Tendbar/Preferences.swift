@@ -12,6 +12,7 @@ final class Preferences {
         static let failed = "notify.failed"
         static let sound = "notify.sound"
         static let glow = "notify.glow"
+        static let notch = "view.notch"
     }
 
     @ObservationIgnored private let defaults: UserDefaults
@@ -21,11 +22,15 @@ final class Preferences {
     var notifyFailed: Bool { didSet { defaults.set(notifyFailed, forKey: Key.failed) } }
     var playSound: Bool { didSet { defaults.set(playSound, forKey: Key.sound) } }
     var edgeGlow: Bool { didSet { defaults.set(edgeGlow, forKey: Key.glow) } }
+    var notchView: Bool { didSet { defaults.set(notchView, forKey: Key.notch) } }
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        defaults.register(defaults: [Key.needsYou: true, Key.done: true, Key.failed: true, Key.sound: true, Key.glow: true])
+        defaults.register(defaults: [
+            Key.needsYou: true, Key.done: true, Key.failed: true, Key.sound: true, Key.glow: true, Key.notch: true,
+        ])
         edgeGlow = defaults.bool(forKey: Key.glow)
+        notchView = defaults.bool(forKey: Key.notch)
         notifyNeedsYou = defaults.bool(forKey: Key.needsYou)
         notifyDone = defaults.bool(forKey: Key.done)
         notifyFailed = defaults.bool(forKey: Key.failed)
