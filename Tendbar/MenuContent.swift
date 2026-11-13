@@ -3,9 +3,22 @@ import SwiftUI
 import TendbarKit
 
 struct MenuContent: View {
-    @Bindable var model: AppModel
+    let model: AppModel
+    @State private var showingSettings = false
 
     var body: some View {
+        Group {
+            if showingSettings {
+                SettingsPanel(model: model) { showingSettings = false }
+            } else {
+                sessionsPanel
+            }
+        }
+        .padding(16)
+        .frame(width: 400)
+    }
+
+    private var sessionsPanel: some View {
         VStack(alignment: .leading, spacing: 12) {
             header
             if let error = model.startError {
@@ -33,8 +46,6 @@ struct MenuContent: View {
             Divider()
             footer
         }
-        .padding(16)
-        .frame(width: 400)
         .onAppear { model.refreshConnection() }
     }
 
@@ -53,16 +64,17 @@ struct MenuContent: View {
             Button("Oznacz wszystkie jako przeczytane") { model.markAllSeen() }
                 .disabled(!model.sessions.contains { $0.unread })
             Spacer()
+            Button {
+                showingSettings = true
+            } label: {
+                Image(systemName: "gearshape")
+            }
+            .buttonStyle(.borderless)
+            .help("Ustawienia")
             Menu {
                 Button("Usuń zakończone sesje") { model.removeEnded() }
                 Button("Pokaż log zdarzeń") {
                     NSWorkspace.shared.activateFileViewerSelecting([TendbarPaths.eventLog])
-                }
-                Divider()
-                if model.connection == .connected || model.connection == .outdated {
-                    Button("Rozłącz z Claude Code") { model.disconnect() }
-                } else {
-                    Button("Połącz z Claude Code") { model.connect() }
                 }
                 Divider()
                 Button("Zakończ Tendbar") { NSApplication.shared.terminate(nil) }
