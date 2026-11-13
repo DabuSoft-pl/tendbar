@@ -4,16 +4,40 @@ Tendbar — open-source (MIT) macOS menu bar app that watches Claude Code sessio
 concurrency), SwiftUI `MenuBarExtra`, macOS 14+. UI is Polish (String Catalog, source language `pl`), ready for more
 languages; code, commits and docs are English. Claude Code only: no Codex, Cursor or others.
 
-## Layout
+## Architecture (Clean Architecture)
 
-- `Packages/TendbarKit` — logic shared by the app and the helper, tested with Swift Testing (`swift test`): hook
-  envelope and payload, Unix socket client/server, controlling TTY lookup, paths.
-- `TendbarHook` — `tendbar-hook`, embedded in `Tendbar.app/Contents/MacOS`. Reads the hook JSON from stdin, adds the
-  terminal context, sends it to the app and exits 0. It must never print (SessionStart and UserPromptSubmit stdout
-  becomes Claude's context), never block and never fail the hook.
-- `Tendbar` — the app: `AppModel` (receives events), `EventLog` (`events.jsonl` in Application Support),
-  `MenuContent` (UI).
+Dependencies point inwards only; the package's targets make the compiler enforce it.
+
+```
+Domain  <-  Application  <-  Infrastructure
+   ^             ^                 ^
+   +-------------+---- App: Presentation, Platform, composition root (App/AppContainer)
+```
+
+- `TendbarDomain` — entities and business rules, no I/O and no imports of ours: `Session`, `SessionStore` (how hook
+  events move a session between states), `HookEvent`, `UsageStore`/`AccountUsage`/`UsageReading`, `AlertPolicy`,
+  `LimitWarnings`, `ProfileName`.
+- `TendbarApplication` — use cases, one class each (`HandleHookEvent`, `OpenSession`, `RecordUsageReading`,
+  `CheckLimitWarnings`, `AddProfile`, …) and the ports they need: repositories, `AlertPresenting`, `ScreenFlashing`,
+  `TerminalNavigating`, `HookConnecting`, `AlertSettingsProviding`, `Clock`, and the output ports `SessionsOutput` and
+  `UsageOutput`. Use cases never import AppKit, SwiftUI or UserNotifications.
+- `TendbarInfrastructure` — adapters that touch files, sockets and processes: the hook wire format (`HookEnvelope`,
+  `HookRedaction`, `InboundMessage` maps it to domain values), `HookEventListener`, JSON repositories with storage
+  records (`Records.swift` keeps `sessions.json`/`usage.json` stable), `HookInstaller`, `ClaudeProfiles`,
+  `TranscriptReader`, `TerminalJump`, `ProcessTTY`.
+- `Tendbar/App` — `TendbarApp` and `AppContainer`, the only code that knows every layer; `PreviewAdapters.swift`
+  builds the same container on in-memory adapters for SwiftUI previews.
+- `Tendbar/Platform` — adapters that need macOS UI frameworks: `UserNotificationsAdapter`, `EdgeGlow`,
+  `AppleScriptTerminalNavigator`, `LaunchAtLoginService`, `Preferences` (UserDefaults, also `AlertSettingsProviding`).
+- `Tendbar/Presentation` — per feature a view model (observable state; implements the output port where there is one),
+  a controller (user intent → use case) and the views. Views import Domain and Application, never Infrastructure.
+- `TendbarHook` — `tendbar-hook`, embedded in `Tendbar.app/Contents/MacOS`, uses only Domain and Infrastructure. It
+  must never print (SessionStart and UserPromptSubmit stdout becomes Claude's context), never block and never fail.
 - `project.yml` — XcodeGen spec; `Tendbar.xcodeproj` and `Tendbar/Info.plist` are generated, not committed.
+
+Flow of one event: `tendbar-hook` → socket → `HookEventListener` → `InboundMessage.hook(HookEvent)` →
+`HandleHookEvent` → `SessionRepository` + `SessionsOutput` (`SessionsViewModel`) + `AlertPresenting`/`ScreenFlashing`.
+Tests: `TendbarDomainTests` (rules), `TendbarApplicationTests` (use cases on fakes), `TendbarInfrastructureTests`.
 
 ## Rules
 
@@ -28,7 +52,7 @@ languages; code, commits and docs are English. Claude Code only: no Codex, Curso
 ## Commands
 
 ```bash
-make test       # TendbarKit tests
+make test       # Domain, Application and Infrastructure tests
 make build      # xcodegen + xcodebuild (Debug, ad-hoc signed) into build/
 make run        # build and open the app
 make install    # Release build into /Applications (then "Połącz" in the app)

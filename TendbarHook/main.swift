@@ -1,5 +1,6 @@
 import Foundation
-import TendbarKit
+import TendbarDomain
+import TendbarInfrastructure
 
 let environment = ProcessInfo.processInfo.environment
 let arguments = CommandLine.arguments

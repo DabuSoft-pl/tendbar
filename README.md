@@ -65,12 +65,13 @@ Settings → Ogólne → "Uruchamiaj przy logowaniu" keeps Tendbar running after
 ## Develop
 
 ```bash
-make test       # TendbarKit unit tests
+make test       # Domain, Application and Infrastructure tests
 make run        # generate the Xcode project (XcodeGen), build and open the app
 make install    # Release build into /Applications
 ```
 
-The app icon is drawn by `tools/make-icon.swift`.
+The code follows Clean Architecture (domain, use cases, adapters); `CLAUDE.md` describes the layers. The app
+icon is drawn by `tools/make-icon.swift`.
 
 ## Requirements
 

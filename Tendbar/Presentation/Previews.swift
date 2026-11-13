@@ -1,0 +1,108 @@
+#if DEBUG
+import SwiftUI
+import TendbarDomain
+
+@MainActor
+enum PreviewData {
+    static func container(sessions: [Session] = PreviewData.sessions, accounts: [AccountUsage] = PreviewData.accounts) -> AppContainer {
+        AppContainer.preview(sessions: sessions, accounts: accounts)
+    }
+
+    static var sessions: [Session] {
+        [
+            session("a1", folder: "dabusoft_api", state: .needsYou, minutesAgo: 1, unread: true,
+                    message: "Claude needs your permission to use Bash"),
+            session("b2", folder: "tendbar", state: .working, minutesAgo: 2),
+            session("c3", folder: "dabusoft_front", state: .done, minutesAgo: 6, unread: true,
+                    preview: "Gotowe: formularz logowania korzysta teraz z nowego endpointu, testy przechodzą."),
+            session("d4", folder: "homelab-ansible", state: .failed, minutesAgo: 14, unread: true,
+                    message: "API Error: 529 Overloaded"),
+            session("e5", folder: "vault", state: .done, minutesAgo: 48,
+                    preview: "Dopisałem notatkę o migracji do Symfony i zaktualizowałem indeks ADR."),
+        ]
+    }
+
+    static var accounts: [AccountUsage] {
+        [
+            account("|damian@example.com", email: "damian@example.com", five: 92, week: 63, minutesAgo: 1),
+            account("|druga@example.com", email: "druga@example.com", five: 41, week: 87, minutesAgo: 180),
+        ]
+    }
+
+    static func session(
+        _ id: String, folder: String, state: SessionState, minutesAgo: Double,
+        unread: Bool = false, message: String? = nil, preview: String? = nil
+    ) -> Session {
+        Session(
+            id: id,
+            cwd: "/Users/me/Projekty/\(folder)",
+            terminal: TerminalContext(program: "iTerm.app"),
+            state: state,
+            startedAt: date(minutesAgo + 30),
+            updatedAt: date(minutesAgo),
+            unread: unread,
+            message: message,
+            preview: preview
+        )
+    }
+
+    static func account(_ id: String, email: String, five: Double, week: Double, minutesAgo: Double) -> AccountUsage {
+        AccountUsage(
+            id: id,
+            email: email,
+            fiveHour: LimitWindow(usedPercentage: five, resetsAt: date(-130)),
+            sevenDay: LimitWindow(usedPercentage: week, resetsAt: date(-3 * 24 * 60)),
+            updatedAt: date(minutesAgo)
+        )
+    }
+
+    private static func date(_ minutesAgo: Double) -> Date {
+        Date().addingTimeInterval(-minutesAgo * 60)
+    }
+}
+
+private struct NotchPreview: View {
+    let container: AppContainer
+    var expanded = false
+
+    var body: some View {
+        NotchView(
+            sessions: container.sessions,
+            usage: container.usage,
+            onSelect: { container.sessionActions.select($0) },
+            notchWidth: 180,
+            notchHeight: 32,
+            expanded: expanded
+        )
+        .frame(width: 420, height: expanded ? 420 : 60)
+        .background(.gray.opacity(0.3))
+    }
+}
+
+#Preview("Panel") {
+    MenuContent(container: PreviewData.container())
+}
+
+#Preview("Panel, pusto") {
+    MenuContent(container: PreviewData.container(sessions: [], accounts: []))
+}
+
+#Preview("Notch") {
+    NotchPreview(container: PreviewData.container())
+}
+
+#Preview("Notch, pracuje") {
+    NotchPreview(container: PreviewData.container(
+        sessions: [PreviewData.session("b2", folder: "tendbar", state: .working, minutesAgo: 1)],
+        accounts: [PreviewData.account("|damian@example.com", email: "damian@example.com", five: 33, week: 63, minutesAgo: 1)]
+    ))
+}
+
+#Preview("Notch, rozwinięty") {
+    NotchPreview(container: PreviewData.container(), expanded: true)
+}
+
+#Preview("Ustawienia") {
+    SettingsView(container: PreviewData.container())
+}
+#endif
