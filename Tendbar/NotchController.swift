@@ -163,7 +163,7 @@ private struct NotchView: View {
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .animation(.spring(duration: 0.3, bounce: 0.15), value: expanded)
+        .animation(.easeOut(duration: 0.25), value: expanded)
         .animation(.easeInOut(duration: 0.25), value: lead)
     }
 
@@ -191,7 +191,7 @@ private struct NotchView: View {
             .frame(height: notchHeight)
 
             if expanded {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 4) {
                     ForEach(active.prefix(6)) { session in
                         NotchRow(session: session)
                             .onTapGesture {
@@ -270,17 +270,14 @@ private struct NotchRow: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Circle().fill(session.state.color).frame(width: 8, height: 8)
-            Text(session.folderName).fontWeight(.semibold).lineLimit(1)
+            StateMark(state: session.state, unread: session.unread)
+            Text(session.folderName).fontWeight(.medium).lineLimit(1)
             Text(session.state.label).foregroundStyle(.secondary).lineLimit(1)
             Spacer()
-            if session.unread {
-                Circle().fill(.blue).frame(width: 6, height: 6)
-            }
         }
         .font(.system(size: 12))
         .foregroundStyle(.white)
-        .padding(.vertical, 6)
+        .padding(.vertical, 8)
         .padding(.horizontal, 8)
         .contentShape(Rectangle())
         .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))

@@ -57,7 +57,7 @@ private struct ProfileRow: View {
         VStack(alignment: .leading, spacing: 3) {
             HStack(alignment: .firstTextBaseline) {
                 Text(profile.email ?? String(localized: "niezalogowane"))
-                    .fontWeight(.semibold)
+                    .fontWeight(.medium)
                     .foregroundStyle(profile.email == nil ? .secondary : .primary)
                     .lineLimit(1)
                 Spacer()

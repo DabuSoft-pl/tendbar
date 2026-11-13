@@ -27,13 +27,9 @@ struct MenuContent: View {
                     .font(.callout)
             }
             ConnectionBanner(model: model)
-            if !model.usage.accounts.isEmpty {
-                Divider()
-                UsageSection(model: model)
-            }
             if let message = model.jumpMessage {
                 HStack(alignment: .top) {
-                    Image(systemName: "info.circle.fill").foregroundStyle(.orange)
+                    Image(systemName: "info.circle").foregroundStyle(.secondary)
                     Text(message).font(.callout).fixedSize(horizontal: false, vertical: true)
                     Spacer()
                     Button {
@@ -60,6 +56,10 @@ struct MenuContent: View {
                 }
                 .frame(height: min(CGFloat(model.sessions.count) * 60, 420))
             }
+            if !model.usage.accounts.isEmpty {
+                Divider()
+                UsageSection(model: model)
+            }
             Divider()
             footer
         }
@@ -78,7 +78,7 @@ struct MenuContent: View {
 
     private var footer: some View {
         HStack {
-            Button("Oznacz wszystkie jako przeczytane") { model.markAllSeen() }
+            Button("Oznacz jako przeczytane") { model.markAllSeen() }
                 .disabled(!model.sessions.contains { $0.unread })
             Spacer()
             Button {
@@ -112,17 +112,17 @@ struct ConnectionBanner: View {
         if let error = model.connectionError {
             banner(Text("Nie udało się zmienić ustawień Claude Code: \(error)"), color: .red, button: false)
         } else if model.connection == .disconnected {
-            banner(Text("Tendbar nie jest połączony z Claude Code."), color: .orange, button: true)
+            banner(Text("Tendbar nie jest połączony z Claude Code"), color: .secondary, button: true)
         } else if model.connection == .outdated {
-            banner(Text("Hooki Tendbara są nieaktualne albo niepełne."), color: .orange, button: true)
+            banner(Text("Hooki Tendbara są nieaktualne albo niepełne"), color: .secondary, button: true)
         } else if model.connection == nil {
-            banner(Text("Nie znaleziono pomocnika tendbar-hook w aplikacji."), color: .red, button: false)
+            banner(Text("Nie znaleziono pomocnika tendbar-hook w aplikacji"), color: .red, button: false)
         }
     }
 
     private func banner(_ text: Text, color: Color, button: Bool) -> some View {
         HStack(alignment: .top) {
-            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(color)
+            Image(systemName: "exclamationmark.triangle").foregroundStyle(color)
             text.font(.callout).fixedSize(horizontal: false, vertical: true)
             Spacer()
             if button {
@@ -141,7 +141,7 @@ struct StateCount: View {
     var body: some View {
         if count > 0 {
             HStack(spacing: 4) {
-                Circle().fill(state.color).frame(width: 7, height: 7)
+                StateMark(state: state, unread: true)
                 Text("\(count)").monospacedDigit()
             }
             .font(.callout)
@@ -157,19 +157,14 @@ struct SessionRow: View {
 
     var body: some View {
         Button(action: onSelect) {
-            HStack(alignment: .top, spacing: 10) {
-                Circle()
-                    .fill(session.state.color)
-                    .frame(width: 9, height: 9)
-                    .padding(.top, 5)
+            HStack(alignment: .top, spacing: 8) {
+                StateMark(state: session.state, unread: session.unread)
+                    .padding(.top, 4)
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(alignment: .firstTextBaseline) {
-                        Text(session.folderName).fontWeight(.semibold).lineLimit(1)
+                        Text(session.folderName).fontWeight(.medium).lineLimit(1)
                         Text(session.state.label).foregroundStyle(.secondary)
                         Spacer()
-                        if session.unread {
-                            Circle().fill(.blue).frame(width: 7, height: 7)
-                        }
                         Text(age)
                             .foregroundStyle(.secondary)
                             .monospacedDigit()
@@ -181,12 +176,10 @@ struct SessionRow: View {
                 }
             }
             .font(.callout)
-            .padding(.vertical, 6)
-            .padding(.horizontal, 6)
+            .padding(8)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .background(session.unread ? Color.accentColor.opacity(0.08) : .clear, in: RoundedRectangle(cornerRadius: 6))
     }
 
     private var age: String {
@@ -215,22 +208,44 @@ extension SessionState {
 
     var hint: String {
         switch self {
-        case .idle: String(localized: "Czeka na pierwsze polecenie.")
+        case .idle: String(localized: "Czeka na pierwsze polecenie")
         case .working: String(localized: "Claude pracuje…")
-        case .needsYou: String(localized: "Claude potrzebuje Twojej decyzji.")
-        case .done: String(localized: "Odpowiedź gotowa.")
-        case .failed: String(localized: "Tura zakończyła się błędem.")
-        case .ended: String(localized: "Sesja zamknięta.")
+        case .needsYou: String(localized: "Claude potrzebuje Twojej decyzji")
+        case .done: String(localized: "Odpowiedź gotowa")
+        case .failed: String(localized: "Tura zakończyła się błędem")
+        case .ended: String(localized: "Sesja zamknięta")
         }
     }
 
     var color: Color {
         switch self {
         case .idle, .ended: .gray
-        case .working: .blue
+        case .working: .secondary
         case .needsYou: .orange
         case .done: .green
         case .failed: .red
         }
+    }
+}
+
+struct StateMark: View {
+    let state: SessionState
+    let unread: Bool
+
+    var body: some View {
+        Group {
+            switch state {
+            case .working:
+                Circle().strokeBorder(.secondary, lineWidth: 1.5)
+            case .idle, .ended:
+                Circle().fill(.tertiary)
+            case .done where !unread:
+                Circle().fill(.tertiary)
+            default:
+                Circle().fill(state.color)
+            }
+        }
+        .frame(width: 8, height: 8)
+        .help(state.label)
     }
 }

@@ -294,7 +294,7 @@ final class AppModel {
         for (account, warning) in warnings {
             let reset = warning.resetsAt.formatted(.relative(presentation: .named))
             notifier.postLimit(
-                title: String(localized: "Limit \(Self.windowName(warning.window)): \(Int(warning.percentage.rounded())) %"),
+                title: String(localized: "Limit \(Self.windowName(warning.window)): \(Int(warning.percentage.rounded()))%"),
                 body: String(localized: "\(accountName(account)), reset \(reset)"),
                 identifier: LimitWarnings.key(accountID: warning.accountID, window: warning.window, resetsAt: warning.resetsAt, threshold: warning.threshold),
                 sound: preferences.playSound

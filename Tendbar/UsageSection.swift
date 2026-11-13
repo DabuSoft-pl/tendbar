@@ -11,7 +11,7 @@ struct UsageSection: View {
                 ForEach(accounts) { account in
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(alignment: .firstTextBaseline) {
-                            Text(model.accountName(account)).fontWeight(.semibold).lineLimit(1)
+                            Text(model.accountName(account)).fontWeight(.medium).lineLimit(1)
                             Spacer()
                             Text(readingText(account))
                                 .foregroundStyle(.tertiary)
@@ -56,7 +56,7 @@ private struct LimitRow: View {
                 let percentage = window.percentage(at: now)
                 ProgressView(value: percentage, total: 100)
                     .tint(limitColor(percentage))
-                Text("\(Int(percentage.rounded())) %")
+                Text("\(Int(percentage.rounded()))%")
                     .monospacedDigit()
                     .frame(width: 44, alignment: .trailing)
                 Text(resetText(window, now: now))

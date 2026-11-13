@@ -9,7 +9,7 @@ struct SettingsPanel: View {
     var body: some View {
         @Bindable var preferences = model.preferences
         ScrollView {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Button(action: onClose) {
                     Label("Wróć", systemImage: "chevron.left")
