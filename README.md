@@ -11,7 +11,7 @@ has used. Everything stays on your Mac: no account, no network calls, no model c
   until you have read a finished reply. Clicking a session switches to its tab in iTerm2 or Terminal, its pane in
   WezTerm, kitty (with `allow_remote_control` and `listen_on` set) or tmux, and its folder's window in VS Code and its
   forks (Cursor and others). For other terminals (Ghostty, Warp) Tendbar brings the app forward.
-- **Notifications.** A banner when a session needs you, finishes or fails, each switchable. Optionally the screen
+- **Notifications.** A banner when a session needs you, finishes or fails, each switchable. A "done" banner shows only the folder unless you turn on the start of the reply. Optionally the screen
   edge glows when a session waits or fails. Clicking a banner opens the session.
 - **Notch pill.** A small pill next to the notch (or at the middle of the menu bar) shows the lead state and a count,
   with a thin line for the highest usage limit. Hover it to see the sessions and every account's limits.

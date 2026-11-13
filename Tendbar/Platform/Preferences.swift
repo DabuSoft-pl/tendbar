@@ -17,6 +17,7 @@ final class Preferences: AlertSettingsProviding {
         static let notch = "view.notch"
         static let limits = "notify.limits"
         static let logEvents = "log.events"
+        static let replyPreview = "notify.done.preview"
     }
 
     @ObservationIgnored private let defaults: UserDefaults
@@ -29,6 +30,7 @@ final class Preferences: AlertSettingsProviding {
     var playSound: Bool { didSet { defaults.set(playSound, forKey: Key.sound) } }
     var edgeGlow: Bool { didSet { defaults.set(edgeGlow, forKey: Key.glow) } }
     var glowOnDone: Bool { didSet { defaults.set(glowOnDone, forKey: Key.glowDone) } }
+    var showReplyPreview: Bool { didSet { defaults.set(showReplyPreview, forKey: Key.replyPreview) } }
     var notifyLimits: Bool { didSet { defaults.set(notifyLimits, forKey: Key.limits) } }
     var logEvents: Bool {
         didSet {
@@ -57,6 +59,7 @@ final class Preferences: AlertSettingsProviding {
         notifyLimits = defaults.bool(forKey: Key.limits)
         notchView = defaults.bool(forKey: Key.notch)
         logEvents = defaults.bool(forKey: Key.logEvents)
+        showReplyPreview = defaults.bool(forKey: Key.replyPreview)
     }
 
     var alertSettings: AlertSettings {
@@ -68,6 +71,7 @@ final class Preferences: AlertSettingsProviding {
         settings.sound = playSound
         settings.flash = edgeGlow
         settings.flashOnDone = glowOnDone
+        settings.showsReplyPreview = showReplyPreview
         return settings
     }
 }

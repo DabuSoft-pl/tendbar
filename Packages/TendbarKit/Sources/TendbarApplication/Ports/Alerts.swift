@@ -29,6 +29,8 @@ public struct AlertSettings: Sendable, Equatable {
     public var sound = true
     public var flash = true
     public var flashOnDone = true
+    /// Whether a "done" banner shows the start of Claude's reply.
+    public var showsReplyPreview = false
 
     public init() {}
 

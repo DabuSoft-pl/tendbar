@@ -27,6 +27,7 @@ import TendbarDomain
     }
 
     @Test func aFinishedTurnShowsTheReplyAndFlashesGreen() async {
+        settings.alertSettings.showsReplyPreview = true
         let handle = useCase(preview: "Gotowe: testy przechodzą")
 
         await handle.execute(event(.userPromptSubmit))
@@ -37,6 +38,14 @@ import TendbarDomain
         #expect(flasher.tones == [.success])
         #expect(sessions.store.sessions["s1"]?.state == .done)
         #expect(sessions.shown.last == sessions.store)
+    }
+
+    @Test func aDoneBannerLeavesTheReplyOutByDefault() async {
+        await useCase(preview: "tajny plan").execute(event(.stop))
+
+        #expect(alerts.presented.map(\.0) == [.done])
+        #expect(alerts.presented.first?.1.preview == nil)
+        #expect(sessions.store.sessions["s1"]?.preview == "tajny plan")
     }
 
     @Test func noGreenFlashWhenTheUserTurnedItOff() async {

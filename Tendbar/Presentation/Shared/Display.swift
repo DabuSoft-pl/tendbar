@@ -53,7 +53,7 @@ extension Session {
     func alertBody(for kind: AlertKind) -> String {
         switch kind {
         case .needsYou, .failed: message ?? state.hint
-        case .done: preview ?? state.hint
+        case .done: preview ?? ""
         }
     }
 }

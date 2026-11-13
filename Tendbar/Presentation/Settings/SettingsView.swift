@@ -184,6 +184,8 @@ private struct NotificationSettings: View {
             }
             Section {
                 Toggle("Dźwięk", isOn: $preferences.playSound)
+                Toggle("Początek odpowiedzi w powiadomieniu „Gotowe”", isOn: $preferences.showReplyPreview)
+                    .disabled(!preferences.notifyDone)
                 Toggle("Świecąca ramka ekranu", isOn: $preferences.edgeGlow)
                 Toggle("Ramka także po skończonej pracy", isOn: $preferences.glowOnDone)
                     .disabled(!preferences.edgeGlow)
