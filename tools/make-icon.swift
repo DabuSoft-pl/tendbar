@@ -21,45 +21,7 @@ func ellipse(_ c: CGContext, center: CGPoint, rx: CGFloat, ry: CGFloat, angle: C
     return CGPath(ellipseIn: CGRect(x: -rx, y: -ry, width: rx * 2, height: ry * 2), transform: &t)
 }
 
-func draw(size: Int) -> CGImage {
-    let space = CGColorSpace(name: CGColorSpace.sRGB)!
-    let c = CGContext(data: nil, width: size, height: size, bitsPerComponent: 8, bytesPerRow: 0, space: space,
-                      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
-    let s = CGFloat(size) / 1024
-    c.scaleBy(x: s, y: s)
-    c.setAllowsAntialiasing(true)
-    c.interpolationQuality = .high
-
-    let body = CGRect(x: 100, y: 100, width: 824, height: 824)
-    let squircle = CGPath(roundedRect: body, cornerWidth: 186, cornerHeight: 186, transform: nil)
-
-    c.saveGState()
-    c.setShadow(offset: CGSize(width: 0, height: -14), blur: 28, color: rgb(0x000000, 0.35))
-    c.addPath(squircle)
-    c.setFillColor(rgb(0x1c1c20))
-    c.fillPath()
-    c.restoreGState()
-
-    c.saveGState()
-    c.addPath(squircle)
-    c.clip()
-    c.drawLinearGradient(gradient(0x303036, 0x141417), start: CGPoint(x: 512, y: 924), end: CGPoint(x: 512, y: 100), options: [])
-    c.addPath(squircle)
-    c.setStrokeColor(rgb(0xffffff, 0.08))
-    c.setLineWidth(3)
-    c.strokePath()
-
-    let barRect = CGRect(x: 236, y: 318, width: 552, height: 44)
-    c.addPath(CGPath(roundedRect: barRect, cornerWidth: 22, cornerHeight: 22, transform: nil))
-    c.setFillColor(rgb(0xe9e6df))
-    c.fillPath()
-
-    for x in [468.0, 548.0] {
-        c.addPath(CGPath(roundedRect: CGRect(x: x - 7, y: 358, width: 14, height: 98), cornerWidth: 7, cornerHeight: 7, transform: nil))
-        c.setFillColor(rgb(0xc9780f))
-        c.fillPath()
-    }
-
+func drawBird(_ c: CGContext) {
     c.saveGState()
     let tail = CGMutablePath()
     tail.move(to: CGPoint(x: 395, y: 560))
@@ -105,6 +67,49 @@ func draw(size: Int) -> CGImage {
     c.setFillColor(rgb(0xffffff, 0.9))
     c.fillPath()
 
+}
+
+func draw(size: Int) -> CGImage {
+    let space = CGColorSpace(name: CGColorSpace.sRGB)!
+    let c = CGContext(data: nil, width: size, height: size, bitsPerComponent: 8, bytesPerRow: 0, space: space,
+                      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+    let s = CGFloat(size) / 1024
+    c.scaleBy(x: s, y: s)
+    c.setAllowsAntialiasing(true)
+    c.interpolationQuality = .high
+
+    let body = CGRect(x: 100, y: 100, width: 824, height: 824)
+    let squircle = CGPath(roundedRect: body, cornerWidth: 186, cornerHeight: 186, transform: nil)
+
+    c.saveGState()
+    c.setShadow(offset: CGSize(width: 0, height: -14), blur: 28, color: rgb(0x000000, 0.35))
+    c.addPath(squircle)
+    c.setFillColor(rgb(0x1c1c20))
+    c.fillPath()
+    c.restoreGState()
+
+    c.saveGState()
+    c.addPath(squircle)
+    c.clip()
+    c.drawLinearGradient(gradient(0x303036, 0x141417), start: CGPoint(x: 512, y: 924), end: CGPoint(x: 512, y: 100), options: [])
+    c.addPath(squircle)
+    c.setStrokeColor(rgb(0xffffff, 0.08))
+    c.setLineWidth(3)
+    c.strokePath()
+
+    let barRect = CGRect(x: 236, y: 318, width: 552, height: 44)
+    c.addPath(CGPath(roundedRect: barRect, cornerWidth: 22, cornerHeight: 22, transform: nil))
+    c.setFillColor(rgb(0xe9e6df))
+    c.fillPath()
+
+    for x in [468.0, 548.0] {
+        c.addPath(CGPath(roundedRect: CGRect(x: x - 7, y: 358, width: 14, height: 98), cornerWidth: 7, cornerHeight: 7, transform: nil))
+        c.setFillColor(rgb(0xc9780f))
+        c.fillPath()
+    }
+
+    drawBird(c)
+
     c.restoreGState()
     return c.makeImage()!
 }
@@ -128,4 +133,29 @@ for entry in entries {
 }
 let contents: [String: Any] = ["images": images, "info": ["version": 1, "author": "xcode"]]
 try JSONSerialization.data(withJSONObject: contents, options: [.prettyPrinted, .sortedKeys]).write(to: output.appendingPathComponent("Contents.json"))
+func drawMenuBar(width: Int, height: Int) -> CGImage {
+    let c = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
+                      space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+    let scale = CGFloat(height) / 372
+    c.scaleBy(x: scale, y: scale)
+    c.translateBy(x: -200, y: -352)
+    drawBird(c)
+    return c.makeImage()!
+}
+
+if CommandLine.arguments.count > 3 {
+    let menu = URL(fileURLWithPath: CommandLine.arguments[3])
+    try FileManager.default.createDirectory(at: menu, withIntermediateDirectories: true)
+    write(drawMenuBar(width: 30, height: 18), to: menu.appendingPathComponent("menubar.png"))
+    write(drawMenuBar(width: 60, height: 36), to: menu.appendingPathComponent("menubar@2x.png"))
+    let menuContents: [String: Any] = [
+        "images": [
+            ["idiom": "universal", "filename": "menubar.png", "scale": "1x"],
+            ["idiom": "universal", "filename": "menubar@2x.png", "scale": "2x"],
+        ],
+        "info": ["version": 1, "author": "xcode"],
+        "properties": ["template-rendering-intent": "original"],
+    ]
+    try JSONSerialization.data(withJSONObject: menuContents, options: [.prettyPrinted, .sortedKeys]).write(to: menu.appendingPathComponent("Contents.json"))
+}
 write(draw(size: 1024), to: URL(fileURLWithPath: CommandLine.arguments.count > 2 ? CommandLine.arguments[2] : "preview.png"))

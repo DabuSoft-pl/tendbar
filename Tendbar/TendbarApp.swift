@@ -8,19 +8,18 @@ struct TendbarApp: App {
         MenuBarExtra {
             MenuContent(model: model)
         } label: {
-            let limit = Int(model.highestLimit.rounded())
-            if model.needsYouCount > 0 {
-                Text("\(Image(systemName: "bird.fill")) \(model.needsYouCount)")
-            } else if limit >= 90 {
-                Text("\(Image(systemName: "bird")) \(limit)%")
-            } else {
-                Image(systemName: "bird")
-            }
+            Image(nsImage: MenuBarLabel.image(text: menuBarText))
         }
         .menuBarExtraStyle(.window)
 
         Settings {
             SettingsView(model: model)
         }
+    }
+
+    private var menuBarText: String? {
+        if model.needsYouCount > 0 { return "\(model.needsYouCount)" }
+        let limit = Int(model.highestLimit.rounded())
+        return limit >= 90 ? "\(limit)%" : nil
     }
 }
