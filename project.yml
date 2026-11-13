@@ -9,8 +9,8 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
-    MARKETING_VERSION: "0.1.0"
-    CURRENT_PROJECT_VERSION: "2"
+    MARKETING_VERSION: "0.0.1"
+    CURRENT_PROJECT_VERSION: "3"
     CODE_SIGN_IDENTITY: "-"
     CODE_SIGN_STYLE: Manual
     DEVELOPMENT_TEAM: ""
@@ -29,6 +29,8 @@ targets:
       path: Tendbar/Info.plist
       properties:
         CFBundleDisplayName: Tendbar
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleDevelopmentRegion: pl
         LSUIElement: true
         LSApplicationCategoryType: public.app-category.developer-tools
