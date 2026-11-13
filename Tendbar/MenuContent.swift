@@ -5,6 +5,7 @@ import TendbarKit
 struct MenuContent: View {
     let model: AppModel
     @Environment(\.openSettings) private var openSettings
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         sessionsPanel
@@ -73,6 +74,7 @@ struct MenuContent: View {
                 .disabled(!model.sessions.contains { $0.unread })
             Spacer()
             Button {
+                dismiss()
                 NSApp.activate()
                 openSettings()
             } label: {
