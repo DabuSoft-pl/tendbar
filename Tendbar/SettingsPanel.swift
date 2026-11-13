@@ -24,6 +24,12 @@ struct SettingsPanel: View {
                 Toggle("Gdy tura zakończy się błędem", isOn: $preferences.notifyFailed)
                 Toggle("Dźwięk", isOn: $preferences.playSound)
                 HStack {
+                    Toggle("Świecąca ramka na krawędziach ekranu", isOn: $preferences.edgeGlow)
+                    Spacer()
+                    Button("Pokaż") { model.previewGlow() }
+                        .controlSize(.small)
+                }
+                HStack {
                     Text(notificationStatusText).foregroundStyle(.secondary)
                     Spacer()
                     Button("Wyślij testowe") { model.sendTestNotification() }

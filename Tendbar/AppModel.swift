@@ -20,6 +20,7 @@ final class AppModel {
     @ObservationIgnored private let server: UnixSocketServer
     @ObservationIgnored private let installer: HookInstaller?
     @ObservationIgnored private let notifier = Notifier()
+    @ObservationIgnored private let glow = EdgeGlow()
 
     static var hookExecutablePath: String? {
         Bundle.main.url(forAuxiliaryExecutable: "tendbar-hook")?.path
@@ -201,6 +202,11 @@ final class AppModel {
         case .done: body = session.preview ?? session.state.hint
         }
         notifier.post(kind, for: session, body: body, sound: preferences.playSound)
+        if preferences.edgeGlow { glow.flash(kind.color) }
+    }
+
+    func previewGlow() {
+        glow.flash(AlertKind.needsYou.color)
     }
 
     private func persist() {
