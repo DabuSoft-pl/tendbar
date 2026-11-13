@@ -3,7 +3,7 @@ APP := $(DERIVED)/Build/Products/Debug/Tendbar.app
 RELEASE_APP := $(DERIVED)/Build/Products/Release/Tendbar.app
 INSTALL_DIR := /Applications
 
-.PHONY: generate build test run install clean
+.PHONY: generate build test run install screenshots clean
 
 generate:
 	xcodegen generate --quiet
@@ -23,6 +23,9 @@ install: generate
 	rm -rf $(INSTALL_DIR)/Tendbar.app
 	ditto $(RELEASE_APP) $(INSTALL_DIR)/Tendbar.app
 	open $(INSTALL_DIR)/Tendbar.app
+
+screenshots: build
+	$(APP)/Contents/MacOS/Tendbar -AppleLanguages "(en)" -screenshots docs/images
 
 clean:
 	rm -rf $(DERIVED) Tendbar.xcodeproj Packages/TendbarKit/.build

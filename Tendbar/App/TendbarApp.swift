@@ -2,7 +2,14 @@ import SwiftUI
 
 @main
 struct TendbarApp: App {
-    @State private var container = AppContainer.live()
+    @State private var container: AppContainer
+
+    init() {
+        #if DEBUG
+        Screenshots.runIfRequested()
+        #endif
+        _container = State(initialValue: AppContainer.live())
+    }
 
     var body: some Scene {
         MenuBarExtra {
