@@ -12,6 +12,7 @@ final class AppModel {
     private(set) var connectionError: String?
     private(set) var startError: String?
     private(set) var notificationStatus: UNAuthorizationStatus = .notDetermined
+    private(set) var notificationError: String?
     private(set) var launchAtLogin: SMAppService.Status = LaunchAtLogin.status
     private(set) var launchAtLoginError: String?
     let preferences = Preferences()
@@ -32,7 +33,7 @@ final class AppModel {
         notifier.onOpen = { [weak self] id in self?.open(sessionID: id) }
         start()
         refreshConnection()
-        Task { notificationStatus = await notifier.requestAuthorization() }
+        requestNotifications()
     }
 
     var sessions: [Session] {
@@ -68,6 +69,25 @@ final class AppModel {
 
     func disconnect() {
         change { try $0.disconnect() }
+    }
+
+    func requestNotifications() {
+        Task {
+            notificationStatus = await notifier.requestAuthorization()
+            notificationError = notifier.lastError
+        }
+    }
+
+    func sendTestNotification() {
+        Task {
+            notificationStatus = await notifier.requestAuthorization()
+            notificationError = notifier.lastError
+            do {
+                try await notifier.postTest(sound: preferences.playSound)
+            } catch {
+                notificationError = error.localizedDescription
+            }
+        }
     }
 
     func setLaunchAtLogin(_ enabled: Bool) {

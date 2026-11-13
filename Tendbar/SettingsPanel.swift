@@ -23,6 +23,20 @@ struct SettingsPanel: View {
                 Toggle("Gdy sesja skończy pracę", isOn: $preferences.notifyDone)
                 Toggle("Gdy tura zakończy się błędem", isOn: $preferences.notifyFailed)
                 Toggle("Dźwięk", isOn: $preferences.playSound)
+                HStack {
+                    Text(notificationStatusText).foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Wyślij testowe") { model.sendTestNotification() }
+                        .controlSize(.small)
+                }
+                .font(.callout)
+                if let error = model.notificationError {
+                    Text("Błąd powiadomień: \(error)")
+                        .font(.callout)
+                        .foregroundStyle(.red)
+                        .textSelection(.enabled)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 if model.notificationStatus == .denied {
                     HStack {
                         Text("Powiadomienia Tendbara są wyłączone w Ustawieniach systemowych.")
@@ -74,6 +88,15 @@ struct SettingsPanel: View {
         .toggleStyle(.switch)
         .controlSize(.small)
         .onAppear { model.refresh() }
+    }
+
+    private var notificationStatusText: String {
+        switch model.notificationStatus {
+        case .authorized, .provisional, .ephemeral: String(localized: "Uprawnienia: przyznane")
+        case .denied: String(localized: "Uprawnienia: odmowa")
+        case .notDetermined: String(localized: "Uprawnienia: jeszcze nie przyznane")
+        @unknown default: String(localized: "Uprawnienia: nieznany stan")
+        }
     }
 
     private var connectionText: String {

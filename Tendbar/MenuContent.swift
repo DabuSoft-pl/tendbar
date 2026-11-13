@@ -153,7 +153,7 @@ struct SessionRow: View {
                         if session.unread {
                             Circle().fill(.blue).frame(width: 7, height: 7)
                         }
-                        Text(session.updatedAt, format: .relative(presentation: .numeric, unitsStyle: .abbreviated))
+                        Text(age)
                             .foregroundStyle(.secondary)
                             .monospacedDigit()
                     }
@@ -170,6 +170,11 @@ struct SessionRow: View {
         }
         .buttonStyle(.plain)
         .background(session.unread ? Color.accentColor.opacity(0.08) : .clear, in: RoundedRectangle(cornerRadius: 6))
+    }
+
+    private var age: String {
+        if Date().timeIntervalSince(session.updatedAt) < 10 { return String(localized: "teraz") }
+        return session.updatedAt.formatted(.relative(presentation: .numeric, unitsStyle: .abbreviated))
     }
 
     private var detail: String {

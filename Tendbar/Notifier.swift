@@ -1,4 +1,5 @@
 import Foundation
+import os
 import TendbarKit
 import UserNotifications
 
@@ -12,8 +13,18 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
         center.delegate = self
     }
 
+    private let log = Logger(subsystem: "pl.dabusoft.tendbar", category: "notifications")
+    private(set) var lastError: String?
+
     func requestAuthorization() async -> UNAuthorizationStatus {
-        _ = try? await center.requestAuthorization(options: [.alert, .sound])
+        do {
+            let granted = try await center.requestAuthorization(options: [.alert, .sound])
+            log.info("authorization granted: \(granted)")
+            lastError = nil
+        } catch {
+            log.error("authorization failed: \(error, privacy: .public)")
+            lastError = error.localizedDescription
+        }
         return await authorizationStatus()
     }
 
@@ -29,7 +40,18 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
         content.threadIdentifier = session.id
         content.userInfo = ["sessionID": session.id]
         if sound { content.sound = .default }
-        center.add(UNNotificationRequest(identifier: Self.identifier(session.id), content: content, trigger: nil))
+        let request = UNNotificationRequest(identifier: Self.identifier(session.id), content: content, trigger: nil)
+        center.add(request) { [log] error in
+            if let error { log.error("post failed: \(error, privacy: .public)") }
+        }
+    }
+
+    func postTest(sound: Bool) async throws {
+        let content = UNMutableNotificationContent()
+        content.title = "Tendbar"
+        content.body = String(localized: "Powiadomienia działają.")
+        if sound { content.sound = .default }
+        try await center.add(UNNotificationRequest(identifier: "test", content: content, trigger: nil))
     }
 
     func clear(_ sessionID: String) {
