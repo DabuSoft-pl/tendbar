@@ -8,6 +8,8 @@ import UserNotifications
 @Observable
 final class AppModel {
     private(set) var store: SessionStore
+    private(set) var usage = UsagePersistence.load()
+    @ObservationIgnored private var accountNames: [String: String] = [:]
     private(set) var connection: HookInstaller.Status?
     private(set) var connectionError: String?
     private(set) var startError: String?
@@ -165,14 +167,31 @@ final class AppModel {
         do {
             try server.start { [weak self] data in
                 EventLog.append(data)
-                guard let envelope = try? HookEnvelope.decoder.decode(HookEnvelope.self, from: data),
-                      let payload = try? envelope.payload()
-                else { return }
+                guard let envelope = try? HookEnvelope.decoder.decode(HookEnvelope.self, from: data) else { return }
+                if envelope.isStatusLine {
+                    Task { @MainActor in self?.receiveStatusLine(envelope) }
+                    return
+                }
+                guard let payload = try? envelope.payload() else { return }
                 Task { @MainActor in self?.receive(payload, envelope: envelope) }
             }
         } catch {
             startError = String(describing: error)
         }
+    }
+
+    private func receiveStatusLine(_ envelope: HookEnvelope) {
+        guard usage.apply(envelope) else { return }
+        try? UsagePersistence.save(usage)
+    }
+
+    func accountName(_ account: AccountUsage) -> String {
+        if let cached = accountNames[account.id] { return cached }
+        let name = ClaudeAccount.email(configDirectory: account.configDirectory)
+            ?? account.configDirectory.map { URL(fileURLWithPath: $0).lastPathComponent }
+            ?? String(localized: "Konto domyślne")
+        accountNames[account.id] = name
+        return name
     }
 
     private func receive(_ payload: HookPayload, envelope: HookEnvelope) {

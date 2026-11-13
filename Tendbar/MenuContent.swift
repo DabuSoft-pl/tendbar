@@ -27,6 +27,10 @@ struct MenuContent: View {
                     .font(.callout)
             }
             ConnectionBanner(model: model)
+            if !model.usage.accounts.isEmpty {
+                Divider()
+                UsageSection(model: model)
+            }
             if let message = model.jumpMessage {
                 HStack(alignment: .top) {
                     Image(systemName: "info.circle.fill").foregroundStyle(.orange)

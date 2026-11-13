@@ -33,14 +33,22 @@ public struct TerminalContext: Codable, Sendable, Equatable {
 }
 
 public struct HookEnvelope: Codable, Sendable, Equatable {
+    public static let statusLineChannel = "statusline"
+
     public var sentAt: Date
     public var terminal: TerminalContext
     public var raw: String
+    public var channel: String?
 
-    public init(sentAt: Date, terminal: TerminalContext, raw: String) {
+    public init(sentAt: Date, terminal: TerminalContext, raw: String, channel: String? = nil) {
         self.sentAt = sentAt
         self.terminal = terminal
         self.raw = raw
+        self.channel = channel
+    }
+
+    public var isStatusLine: Bool {
+        channel == Self.statusLineChannel
     }
 
     public func payload() throws -> HookPayload {

@@ -40,6 +40,21 @@ Or just press "Połącz" in the app: it adds the hooks for you (also `PostToolUs
 once you approve a tool), after a backup of `settings.json` (the last five are kept), and "Rozłącz z Claude Code"
 removes only Tendbar's hooks. The file is rewritten with sorted keys.
 
+## Usage limits
+
+Connecting also wraps the profile's `statusLine`: `tendbar-hook --statusline` sends the `rate_limits` Claude Code
+passes to status lines (five-hour and weekly windows, Pro/Max only) to the app, then runs your previous status line
+command with the same input and prints its output unchanged. The previous command is kept base64-encoded after
+`--next`, and disconnecting puts it back. No tokens, no network calls: accounts are told apart by `CLAUDE_CONFIG_DIR`.
+
+## Install
+
+```bash
+make install   # Release build into /Applications/Tendbar.app
+```
+
+Then press "Połącz" so the hooks point at the installed app.
+
 ## Requirements
 
 macOS 14+, Xcode 16+, [XcodeGen](https://github.com/yonaskolb/XcodeGen).

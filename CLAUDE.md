@@ -19,7 +19,9 @@ languages; code, commits and docs are English. Claude Code only: no Codex, Curso
 
 - Accounts are separate `CLAUDE_CONFIG_DIR` profiles. Never touch OAuth tokens or the Keychain, never switch or
   rotate accounts, never call unofficial endpoints. Limits come only from the statusLine `rate_limits` input.
-- Changing `settings.json` of a Claude profile: back it up first, write atomically, touch only our own hooks.
+- Changing `settings.json` of a Claude profile: back it up first, write atomically, touch only our own hooks and our
+  `statusLine` wrapper (the previous command stays base64-encoded after `--next` and is restored on disconnect).
+  Only on an explicit user action, never automatically at launch.
 - Nothing leaves the Mac: no network calls, no analytics.
 - User-facing strings are Polish literals (SwiftUI `Text` / `String(localized:)`), so they land in the catalog.
 
@@ -29,6 +31,7 @@ languages; code, commits and docs are English. Claude Code only: no Codex, Curso
 make test       # TendbarKit tests
 make build      # xcodegen + xcodebuild (Debug, ad-hoc signed) into build/
 make run        # build and open the app
+make install    # Release build into /Applications (then "Połącz" in the app)
 ```
 
 Plan: https://claude.ai/artifact/5KoBQbPYDmyNbsJrpXraj8

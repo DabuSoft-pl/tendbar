@@ -34,19 +34,26 @@ public struct HookInstaller: Sendable {
         return base.appendingPathComponent("settings.json")
     }
 
+    public static let statusLineFlag = "--statusline"
+    public static let nextFlag = "--next"
+
     public func status() throws -> Status {
-        let commands = Self.ourCommands(in: try load())
-        if commands.isEmpty { return .disconnected }
+        let settings = try load()
+        let commands = Self.ourCommands(in: settings)
+        let statusLine = Self.statusLineCommand(in: settings)
+        let wrapped = statusLine.map(Self.isOurs(command:)) == true
+        if commands.isEmpty && !wrapped { return .disconnected }
         let expected = Self.command(for: hookPath)
-        let complete = Self.events.allSatisfy { commands[$0] == [expected] }
-        return complete && commands.count == Self.events.count ? .connected : .outdated
+        let complete = Self.events.allSatisfy { commands[$0] == [expected] } && commands.count == Self.events.count
+        let statusLineCurrent = statusLine?.hasPrefix(expected + " " + Self.statusLineFlag) == true
+        return complete && statusLineCurrent ? .connected : .outdated
     }
 
     @discardableResult
     public func connect(now: Date = Date()) throws -> URL? {
-        let settings = try Self.addingHooks(
-            to: Self.removingOurHooks(from: try load()),
-            command: Self.command(for: hookPath)
+        let settings = try Self.wrappingStatusLine(
+            in: Self.addingHooks(to: Self.removingOurHooks(from: try load()), command: Self.command(for: hookPath)),
+            hookPath: hookPath
         )
         let backup = try backupIfPresent(now: now)
         try write(settings)
@@ -56,10 +63,65 @@ public struct HookInstaller: Sendable {
     @discardableResult
     public func disconnect(now: Date = Date()) throws -> URL? {
         guard FileManager.default.fileExists(atPath: settingsURL.path) else { return nil }
-        let settings = Self.removingOurHooks(from: try load())
+        let settings = Self.unwrappingStatusLine(in: Self.removingOurHooks(from: try load()))
         let backup = try backupIfPresent(now: now)
         try write(settings)
         return backup
+    }
+
+    public static func statusLineCommand(hookPath: String, next: String?) -> String {
+        var command = command(for: hookPath) + " " + statusLineFlag
+        if let next, !next.isEmpty {
+            command += " " + nextFlag + " " + Data(next.utf8).base64EncodedString()
+        }
+        return command
+    }
+
+    public static func wrappedCommand(in command: String) -> String? {
+        guard let range = command.range(of: " \(nextFlag) ", options: .backwards) else { return nil }
+        let encoded = command[range.upperBound...].trimmingCharacters(in: .whitespaces)
+        guard let data = Data(base64Encoded: encoded) else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    static func isOurs(command: String) -> Bool {
+        command.contains(marker) && command.contains(statusLineFlag)
+    }
+
+    static func statusLineCommand(in settings: [String: Any]) -> String? {
+        (settings["statusLine"] as? [String: Any])?["command"] as? String
+    }
+
+    static func wrappingStatusLine(in settings: [String: Any], hookPath: String) throws -> [String: Any] {
+        var result = settings
+        switch settings["statusLine"] {
+        case nil:
+            result["statusLine"] = ["type": "command", "command": statusLineCommand(hookPath: hookPath, next: nil)]
+        case var existing as [String: Any]:
+            let current = existing["command"] as? String
+            let next = current.map { isOurs(command: $0) ? wrappedCommand(in: $0) : $0 } ?? nil
+            existing["type"] = "command"
+            existing["command"] = statusLineCommand(hookPath: hookPath, next: next)
+            result["statusLine"] = existing
+        default:
+            throw HookInstallerError.unexpectedHooksFormat("statusLine")
+        }
+        return result
+    }
+
+    static func unwrappingStatusLine(in settings: [String: Any]) -> [String: Any] {
+        guard var existing = settings["statusLine"] as? [String: Any],
+              let current = existing["command"] as? String,
+              isOurs(command: current)
+        else { return settings }
+        var result = settings
+        if let next = wrappedCommand(in: current) {
+            existing["command"] = next
+            result["statusLine"] = existing
+        } else {
+            result["statusLine"] = nil
+        }
+        return result
     }
 
     static func command(for path: String) -> String {
