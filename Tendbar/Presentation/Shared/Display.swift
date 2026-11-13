@@ -57,6 +57,14 @@ extension AlertKind {
 }
 
 extension Session {
+    /// How long a working session has been at it, or how long ago anything else last changed.
+    func timeText(now: Date = Date()) -> String {
+        if state == .working {
+            return String(localized: "for \(Elapsed.text(now.timeIntervalSince(turnStartedAt ?? updatedAt)))")
+        }
+        return Elapsed.ago(updatedAt, now: now)
+    }
+
     /// The banner text for an alert about this session.
     func alertBody(for kind: AlertKind) -> String {
         switch kind {
@@ -71,6 +79,31 @@ extension AccountUsage {
         email
             ?? configDirectory.map { URL(fileURLWithPath: $0).lastPathComponent }
             ?? String(localized: "Default account")
+    }
+
+    /// The part of the e-mail address before the @, for rows too narrow for the whole address.
+    var shortName: String {
+        guard let email, let at = email.firstIndex(of: "@"), at > email.startIndex else { return displayName }
+        return String(email[..<at])
+    }
+}
+
+/// One way to write a stretch of time across the app: a single unit, abbreviated, such as "6 min", "2 hr" or "3 days".
+enum Elapsed {
+    static func text(_ interval: TimeInterval) -> String {
+        let seconds = max(interval, 60)
+        return Duration.seconds(seconds).formatted(
+            .units(allowed: [.days, .hours, .minutes], width: .abbreviated, maximumUnitCount: 1)
+        )
+    }
+
+    static func ago(_ date: Date, now: Date = Date()) -> String {
+        if now.timeIntervalSince(date) < 60 { return String(localized: "now") }
+        return String(localized: "\(text(now.timeIntervalSince(date))) ago")
+    }
+
+    static func until(_ date: Date, now: Date = Date()) -> String {
+        text(date.timeIntervalSince(now))
     }
 }
 
@@ -93,9 +126,11 @@ func limitColor(_ percentage: Double) -> Color {
 }
 
 /// A limit bar in the limit's color. ProgressView loses its tint in windows that are not key, such as the notch.
+/// The optional tick marks the even pace: usage past it is ahead of the window.
 struct LimitBar: View {
     let percentage: Double
     var height: CGFloat = 6
+    var pace: Double?
 
     var body: some View {
         GeometryReader { proxy in
@@ -104,6 +139,12 @@ struct LimitBar: View {
                 Capsule()
                     .fill(limitColor(percentage))
                     .frame(width: proxy.size.width * min(max(percentage, 0), 100) / 100)
+                if let pace {
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(Color.primary.opacity(0.7))
+                        .frame(width: 2, height: height + 4)
+                        .offset(x: min(max(proxy.size.width * pace / 100 - 1, 0), proxy.size.width - 2))
+                }
             }
         }
         .frame(height: height)

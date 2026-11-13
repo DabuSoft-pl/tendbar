@@ -16,6 +16,7 @@ struct MenuContent: View {
         sessionsPanel
         .padding(16)
         .frame(width: 400)
+        .fitsWindow()
     }
 
     private var sessionsPanel: some View {
@@ -103,17 +104,30 @@ struct MenuContent: View {
         HStack(alignment: .firstTextBaseline) {
             Text("Tendbar").font(.headline)
             Spacer()
-            StateCount(state: .needsYou, count: sessions.count(of: .needsYou))
-            StateCount(state: .failed, count: sessions.count(of: .failed))
-            StateCount(state: .done, count: sessions.count(of: .done))
-            StateCount(state: .working, count: sessions.count(of: .working))
+            Text(summary)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
         }
+    }
+
+    /// What is going on, in words, most urgent first: "1 waiting · 2 working".
+    private var summary: String {
+        let waiting = sessions.count(of: .needsYou)
+        let failed = sessions.count(of: .failed)
+        let working = sessions.count(of: .working)
+        var parts: [String] = []
+        if waiting > 0 { parts.append(String(localized: "\(waiting) waiting")) }
+        if failed > 0 { parts.append(String(localized: "\(failed) with an error")) }
+        if working > 0 { parts.append(String(localized: "\(working) working")) }
+        return parts.joined(separator: " · ")
     }
 
     private var footer: some View {
         HStack {
-            Button("Mark all as read") { actions.markAllAsRead() }
-                .disabled(!sessions.hasUnread)
+            if sessions.hasUnread {
+                Button("Mark all as read") { actions.markAllAsRead() }
+            }
             Spacer()
             Button {
                 dismiss()
@@ -172,23 +186,6 @@ struct ConnectionBanner: View {
     }
 }
 
-struct StateCount: View {
-    let state: SessionState
-    let count: Int
-
-    var body: some View {
-        if count > 0 {
-            HStack(spacing: 4) {
-                StateMark(state: state, unread: true)
-                Text("\(count)").monospacedDigit()
-            }
-            .font(.callout)
-            .foregroundStyle(.secondary)
-            .help(state.label)
-        }
-    }
-}
-
 struct SessionRow: View {
     let session: Session
     var showsDetail = true
@@ -204,11 +201,13 @@ struct SessionRow: View {
                         Text(session.folderName).fontWeight(.medium).lineLimit(1)
                         Text(session.state.label).foregroundStyle(.secondary)
                         Spacer()
-                        Text(age)
-                            .foregroundStyle(.secondary)
-                            .monospacedDigit()
+                        TimelineView(.periodic(from: .now, by: 30)) { context in
+                            Text(session.timeText(now: context.date))
+                                .foregroundStyle(.secondary)
+                                .monospacedDigit()
+                        }
                     }
-                    if showsDetail {
+                    if showsDetail, session.state != .working {
                         Text(detail)
                             .foregroundStyle(.secondary)
                             .lineLimit(2)
@@ -223,10 +222,7 @@ struct SessionRow: View {
         .buttonStyle(.plain)
     }
 
-    private var age: String {
-        if Date().timeIntervalSince(session.updatedAt) < 10 { return String(localized: "now") }
-        return session.updatedAt.formatted(.relative(presentation: .numeric, unitsStyle: .abbreviated))
-    }
+
 
     private var detail: String {
         if let message = session.message { return message }

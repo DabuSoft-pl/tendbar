@@ -12,6 +12,26 @@ public struct LimitWindow: Sendable, Equatable {
     public func percentage(at now: Date) -> Double {
         now >= resetsAt ? 0 : min(max(usedPercentage, 0), 100)
     }
+
+    public static let fiveHourLength: TimeInterval = 5 * 60 * 60
+    public static let sevenDayLength: TimeInterval = 7 * 24 * 60 * 60
+
+    /// The share of the window that has passed, as a percentage: where usage would be at an even pace.
+    public func evenPace(at now: Date, length: TimeInterval) -> Double? {
+        guard now < resetsAt, length > 0 else { return nil }
+        let elapsed = length - resetsAt.timeIntervalSince(now)
+        return min(max(elapsed / length * 100, 0), 100)
+    }
+
+    /// When the limit runs out if usage keeps the pace it had at the reading, or nil when it lasts until the reset.
+    /// Readings from the first 5% of a window say too little about the pace and give nil too.
+    public func runsOut(readAt: Date, now: Date, length: TimeInterval) -> Date? {
+        guard now < resetsAt, usedPercentage > 0, usedPercentage < 100 else { return nil }
+        let elapsed = length - resetsAt.timeIntervalSince(readAt)
+        guard elapsed >= length * 0.05 else { return nil }
+        let date = readAt.addingTimeInterval((100 - usedPercentage) / (usedPercentage / elapsed))
+        return date < resetsAt && date > now ? date : nil
+    }
 }
 
 public struct AccountUsage: Sendable, Equatable, Identifiable {

@@ -24,6 +24,7 @@ struct SessionRecord: Codable {
     var state: String
     var startedAt: Date
     var updatedAt: Date
+    var turnStartedAt: Date?
     var unread: Bool
     var message: String?
     var preview: String?
@@ -36,6 +37,7 @@ struct SessionRecord: Codable {
         state = session.state.rawValue
         startedAt = session.startedAt
         updatedAt = session.updatedAt
+        turnStartedAt = session.turnStartedAt
         unread = session.unread
         message = session.message
         preview = session.preview
@@ -50,6 +52,7 @@ struct SessionRecord: Codable {
             state: SessionState(rawValue: state) ?? .idle,
             startedAt: startedAt,
             updatedAt: updatedAt,
+            turnStartedAt: turnStartedAt,
             unread: unread,
             message: message,
             preview: preview

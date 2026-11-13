@@ -61,6 +61,8 @@ public struct Session: Sendable, Identifiable, Equatable {
     public var state: SessionState
     public var startedAt: Date
     public var updatedAt: Date
+    /// When the current or last turn began, so a working session can say how long it has been at it.
+    public var turnStartedAt: Date?
     public var unread: Bool
     public var message: String?
     public var preview: String?
@@ -73,6 +75,7 @@ public struct Session: Sendable, Identifiable, Equatable {
         state: SessionState = .idle,
         startedAt: Date,
         updatedAt: Date,
+        turnStartedAt: Date? = nil,
         unread: Bool = false,
         message: String? = nil,
         preview: String? = nil
@@ -84,6 +87,7 @@ public struct Session: Sendable, Identifiable, Equatable {
         self.state = state
         self.startedAt = startedAt
         self.updatedAt = updatedAt
+        self.turnStartedAt = turnStartedAt
         self.unread = unread
         self.message = message
         self.preview = preview

@@ -29,6 +29,16 @@ import Testing
         for event in events { store.apply(event) }
     }
 
+    @Test func remembersWhenTheTurnStarted() {
+        var store = SessionStore()
+
+        apply(&store, event("SessionStart"), event("UserPromptSubmit", at: 5), event("PostToolUse", at: 30))
+        #expect(store.sessions["s1"]?.turnStartedAt == start.addingTimeInterval(5))
+
+        apply(&store, event("Stop", at: 60), event("UserPromptSubmit", at: 90))
+        #expect(store.sessions["s1"]?.turnStartedAt == start.addingTimeInterval(90))
+    }
+
     @Test func followsATypicalTurn() {
         var store = SessionStore()
 

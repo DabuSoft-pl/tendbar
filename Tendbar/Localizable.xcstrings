@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@ ago": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ temu"
+          }
+        }
+      }
+    },
     "%@ limit: %lld%%": {
       "localizations": {
         "pl": {
@@ -37,6 +47,84 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sesje (%lld): %@"
+          }
+        }
+      }
+    },
+    "%lld waiting": {
+      "localizations": {
+        "pl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld czeka"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld czekają"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld czeka"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld czeka"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld with an error": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld z błędem"
+          }
+        }
+      }
+    },
+    "%lld working": {
+      "localizations": {
+        "pl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld pracuje"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld pracują"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld pracuje"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld pracuje"
+                }
+              }
+            }
           }
         }
       }
@@ -1211,22 +1299,12 @@
         }
       }
     },
-    "current": {
+    "at this pace out in %@": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "aktywne"
-          }
-        }
-      }
-    },
-    "current account": {
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "aktywne konto"
+            "value": "w tym tempie koniec za %@"
           }
         }
       }
@@ -1267,6 +1345,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "błąd"
+          }
+        }
+      }
+    },
+    "for %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "od %@"
           }
         }
       }
@@ -1321,16 +1409,6 @@
         }
       }
     },
-    "other account": {
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "nieaktywne konto"
-          }
-        }
-      }
-    },
     "read %@": {
       "localizations": {
         "pl": {
@@ -1351,12 +1429,12 @@
         }
       }
     },
-    "resets %@": {
+    "resets in %@": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "reset %@"
+            "value": "reset za %@"
           }
         }
       }

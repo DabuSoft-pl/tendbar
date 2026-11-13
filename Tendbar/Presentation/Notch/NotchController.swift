@@ -232,7 +232,7 @@ struct NotchView: View {
             }
 
             if expanded {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 0) {
                     ForEach(active.prefix(6)) { session in
                         NotchRow(session: session)
                             .onTapGesture {
@@ -244,14 +244,12 @@ struct NotchView: View {
                     if !accounts.isEmpty {
                         VStack(alignment: .leading, spacing: 4) {
                             ForEach(accounts) { account in
-                                NotchLimitRow(
-                                    name: account.displayName,
-                                    account: account,
-                                    active: usage.isCurrent(account)
-                                )
+                                CompactLimits(account: account, active: usage.isCurrent(account), barWidth: 50)
+                                    .font(.system(size: 11))
+                                    .padding(.horizontal, 8)
                             }
                         }
-                        .padding(.top, active.isEmpty ? 0 : 6)
+                        .padding(.top, active.isEmpty ? 0 : 8)
                     }
                 }
                 .padding(.horizontal, 12)
@@ -319,48 +317,9 @@ private struct Breathing: ViewModifier {
     }
 }
 
-private struct NotchLimitRow: View {
-    let name: String
-    let account: AccountUsage
-    let active: Bool
-
-    var body: some View {
-        let now = Date()
-        HStack(spacing: 8) {
-            Circle()
-                .fill(active ? Color.white : Color.clear)
-                .strokeBorder(.white.opacity(0.4), lineWidth: active ? 0 : 1)
-                .frame(width: 6, height: 6)
-                .accessibilityLabel(active ? String(localized: "current account") : String(localized: "other account"))
-            Text(name)
-                .foregroundStyle(active ? .primary : .secondary)
-                .lineLimit(1)
-                .truncationMode(.middle)
-            Spacer(minLength: 4)
-            gauge(String(localized: "5h"), account.fiveHour, now: now)
-            gauge(String(localized: "7d"), account.sevenDay, now: now)
-        }
-        .font(.system(size: 11))
-        .foregroundStyle(.white)
-        .opacity(active ? 1 : 0.6)
-        .padding(.horizontal, 8)
-    }
-
-    private func gauge(_ title: String, _ window: LimitWindow?, now: Date) -> some View {
-        let percentage = window?.percentage(at: now) ?? 0
-        return HStack(spacing: 4) {
-            Text(title).foregroundStyle(.secondary).fixedSize()
-            LimitBar(percentage: percentage, height: 4)
-                .frame(width: 50)
-            Text(window == nil ? "–" : "\(Int(percentage.rounded()))%")
-                .monospacedDigit()
-                .frame(width: 32, alignment: .trailing)
-        }
-    }
-}
-
 private struct NotchRow: View {
     let session: Session
+    @State private var hovered = false
 
     var body: some View {
         HStack(spacing: 8) {
@@ -368,12 +327,16 @@ private struct NotchRow: View {
             Text(session.folderName).fontWeight(.medium).lineLimit(1)
             Text(session.state.label).foregroundStyle(.secondary).lineLimit(1)
             Spacer()
+            Text(session.timeText())
+                .foregroundStyle(.tertiary)
+                .monospacedDigit()
         }
         .font(.system(size: 12))
         .foregroundStyle(.white)
-        .padding(.vertical, 8)
+        .padding(.vertical, 6)
         .padding(.horizontal, 8)
         .contentShape(Rectangle())
-        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
+        .background(Color.white.opacity(hovered ? 0.08 : 0), in: RoundedRectangle(cornerRadius: 6))
+        .onHover { hovered = $0 }
     }
 }

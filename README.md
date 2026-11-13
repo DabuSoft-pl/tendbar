@@ -36,7 +36,8 @@ permission prompt. Tendbar watches them for you. Everything stays on your Mac: n
 - **A pill by the notch.** The lead state, a count and two thin lines for the five-hour and weekly limits. Hover it
   for the sessions and every account's limits. On Macs without a notch it sits in the middle of the menu bar.
 - **Usage limits per account.** Five-hour and weekly usage with a warning at 80% and 90%, for every account you use,
-  including separate `CLAUDE_CONFIG_DIR` profiles.
+  including separate `CLAUDE_CONFIG_DIR` profiles. A tick on each bar marks the even pace, and when you run ahead of
+  it Tendbar tells you when the limit would run out.
 - **Shown your way.** Settings → Appearance picks what sits next to the bird in the menu bar, when the pill shows up,
   and how dense the panel is: with or without reply previews, full or one-line limits.
 - **English and Polish.** Follows the macOS language, or pick one in Settings → General.

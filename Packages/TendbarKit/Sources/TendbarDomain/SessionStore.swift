@@ -46,6 +46,7 @@ public struct SessionStore: Sendable, Equatable {
             if session.state == .ended { session.state = .idle }
         case .userPromptSubmit:
             session.state = .working
+            session.turnStartedAt = event.sentAt
             session.unread = false
             session.message = nil
         case .postToolUse:
