@@ -243,6 +243,7 @@ private struct GeneralSettings: View {
     @Bindable var preferences: Preferences
     let system: SystemViewModel
     let systemActions: SystemController
+    @State private var language = AppLanguage.current
 
     var body: some View {
         Form {
@@ -274,6 +275,19 @@ private struct GeneralSettings: View {
                     Text(error).foregroundStyle(.red)
                 } else {
                     Text("Everything stays on this Mac. Tendbar sends nothing over the network")
+                }
+            }
+            Section {
+                Picker("Language", selection: $language) {
+                    Text("System").tag(AppLanguage.system)
+                    Text(verbatim: "English").tag(AppLanguage.english)
+                    Text(verbatim: "Polski").tag(AppLanguage.polish)
+                }
+                .onChange(of: language) { language.apply() }
+                if language != AppLanguage.launched {
+                    LabeledContent("Takes effect after a restart") {
+                        Button("Restart Tendbar") { AppLanguage.relaunch() }
+                    }
                 }
             }
         }

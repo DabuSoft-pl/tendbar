@@ -511,6 +511,16 @@
         }
       }
     },
+    "Language": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Język"
+          }
+        }
+      }
+    },
     "Mark all as read": {
       "localizations": {
         "pl": {
@@ -721,6 +731,16 @@
         }
       }
     },
+    "Restart Tendbar": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uruchom ponownie"
+          }
+        }
+      }
+    },
     "Session closed": {
       "localizations": {
         "pl": {
@@ -801,12 +821,32 @@
         }
       }
     },
+    "System": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Systemowy"
+          }
+        }
+      }
+    },
     "System Settings": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
             "value": "Ustawienia systemowe"
+          }
+        }
+      }
+    },
+    "Takes effect after a restart": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zmiana po ponownym uruchomieniu"
           }
         }
       }
