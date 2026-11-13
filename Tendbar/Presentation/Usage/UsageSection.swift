@@ -103,7 +103,7 @@ private struct WindowLimit: View {
                 .accessibilityValue("\(Int(percentage.rounded()))%")
             if let window {
                 HStack(spacing: 0) {
-                    Text(resetText(window))
+                    Text(resetText(window, short: runsOut != nil))
                         .foregroundStyle(.tertiary)
                     if let runsOut {
                         Text(" · ").foregroundStyle(.tertiary)
@@ -117,8 +117,10 @@ private struct WindowLimit: View {
         }
     }
 
-    private func resetText(_ window: LimitWindow) -> String {
+    /// With a run-out forecast beside it only the clock time fits, so the countdown goes.
+    private func resetText(_ window: LimitWindow, short: Bool) -> String {
         if now >= window.resetsAt { return String(localized: "reset") }
+        if short { return String(localized: "resets \(Elapsed.clock(window.resetsAt, now: now))") }
         return String(localized: "resets in \(Elapsed.until(window.resetsAt, now: now)), at \(Elapsed.clock(window.resetsAt, now: now))")
     }
 }

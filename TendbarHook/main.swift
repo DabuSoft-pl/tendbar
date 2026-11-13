@@ -8,7 +8,11 @@ let isStatusLine = arguments.contains(HookInstaller.statusLineFlag)
 let input = FileHandle.standardInput.readDataToEndOfFile()
 let envelope = HookEnvelope(
     sentAt: Date(),
-    terminal: .capture(environment: environment, tty: ProcessTTY.controllingTTY()),
+    terminal: .capture(
+        environment: environment,
+        tty: ProcessTTY.controllingTTY(),
+        process: isStatusLine ? nil : ClaudeProcess.parent()
+    ),
     raw: HookRedaction.redact(input, statusLine: isStatusLine),
     channel: isStatusLine ? HookEnvelope.statusLineChannel : nil
 )

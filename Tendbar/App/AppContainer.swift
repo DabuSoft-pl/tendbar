@@ -24,6 +24,7 @@ final class AppContainer {
         var connector: HookConnecting?
         var profileDirectories: ProfileDirectories
         var loginItems: LoginItemControlling
+        var processes: SessionProcessChecking
         var clock: Clock
     }
 
@@ -43,6 +44,7 @@ final class AppContainer {
     private let handleHookEvent: HandleHookEvent
     private let recordUsage: RecordUsageReading
     private let checkAttention: CheckAttention
+    private let endGoneSessions: EndGoneSessions
     private let checkWarnings: CheckLimitWarnings
     let permissionDesk: PermissionDesk
     private var timer: Timer?
@@ -65,6 +67,9 @@ final class AppContainer {
         )
         checkAttention = CheckAttention(
             repository: a.sessions, output: sessions, alerts: a.alerts, flasher: a.flasher, settings: preferences, clock: a.clock
+        )
+        endGoneSessions = EndGoneSessions(
+            repository: a.sessions, output: sessions, processes: a.processes, desk: permissionDesk, clock: a.clock
         )
         recordUsage = RecordUsageReading(repository: a.usage, output: usage, emails: a.emails, checkWarnings: checkWarnings)
 
@@ -99,10 +104,11 @@ final class AppContainer {
         claudeCodeActions.refreshConnection()
     }
 
-    /// Reminders, quiet sessions and limit resets have no event of their own, so a timer looks for them.
+    /// Reminders, quiet sessions, closed tabs and limit resets have no event of their own, so a timer looks for them.
     private func startTimer() {
         let timer = Timer(timeInterval: 30, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated {
+                self?.endGoneSessions.execute()
                 self?.checkAttention.execute()
                 self?.checkWarnings.checkResets()
             }
@@ -110,6 +116,7 @@ final class AppContainer {
         timer.tolerance = 5
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer
+        endGoneSessions.execute()
         checkAttention.execute()
         checkWarnings.checkResets()
     }
@@ -136,6 +143,7 @@ final class AppContainer {
                 connector: hookPath.map(ClaudeHookConnector.init(hookPath:)),
                 profileDirectories: ClaudeProfileDirectories(),
                 loginItems: LaunchAtLoginService(),
+                processes: SessionProcessChecker(),
                 clock: SystemClock()
             ),
             eventLog: TendbarPaths.eventLog,

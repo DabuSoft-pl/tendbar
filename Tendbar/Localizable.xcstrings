@@ -411,16 +411,6 @@
         }
       }
     },
-    "Answer from the notification": {
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Odpowiedź z powiadomienia"
-          }
-        }
-      }
-    },
     "Appearance": {
       "localizations": {
         "pl": {
@@ -517,6 +507,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Claude potrzebuje Twojej decyzji"
+          }
+        }
+      }
+    },
+    "Close": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zamknij"
           }
         }
       }
@@ -1641,16 +1641,6 @@
         }
       }
     },
-    "The notification shows the whole command or file. The terminal prompt keeps working, and whichever you answer first decides. Your deny rules still apply": {
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Powiadomienie pokazuje całe polecenie albo plik. Pytanie w terminalu dalej działa i decyduje ta odpowiedź, której udzielisz pierwszą. Twoje reguły odmowy nadal obowiązują"
-          }
-        }
-      }
-    },
     "The pill and the glow stay off shared screens and recordings": {
       "localizations": {
         "pl": {
@@ -1811,6 +1801,16 @@
         }
       }
     },
+    "With Allow and Deny the notification shows the whole command or file. The terminal prompt keeps working, and whichever you answer first decides. Your deny rules still apply": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Z przyciskami Zezwól i Odmów powiadomienie pokazuje całe polecenie albo plik. Pytanie w terminalu dalej działa i decyduje ta odpowiedź, której udzielisz pierwszą. Twoje reguły odmowy nadal obowiązują"
+          }
+        }
+      }
+    },
     "at this pace out in %@": {
       "localizations": {
         "pl": {
@@ -1937,6 +1937,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "zresetowany"
+          }
+        }
+      }
+    },
+    "resets %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "odnowa %@"
           }
         }
       }

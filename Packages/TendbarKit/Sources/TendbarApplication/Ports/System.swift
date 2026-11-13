@@ -36,3 +36,8 @@ public struct SystemClock: Clock {
     public init() {}
     public func now() -> Date { Date() }
 }
+
+/// Tells whether the Claude Code process behind a session still runs. Nil when it cannot tell.
+public protocol SessionProcessChecking: Sendable {
+    func isRunning(_ terminal: TerminalContext) -> Bool?
+}

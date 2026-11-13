@@ -23,6 +23,10 @@ public struct TerminalContext: Sendable, Equatable {
     public var kittySocket: String?
     public var tmuxPane: String?
     public var tmuxSocket: String?
+    /// The Claude Code process and when it started, so a session whose process is gone can be told apart from a
+    /// new process that got the same id.
+    public var processID: Int32?
+    public var processStartedAt: Double?
 
     public init(
         program: String? = nil,
@@ -36,7 +40,9 @@ public struct TerminalContext: Sendable, Equatable {
         kittyWindowID: String? = nil,
         kittySocket: String? = nil,
         tmuxPane: String? = nil,
-        tmuxSocket: String? = nil
+        tmuxSocket: String? = nil,
+        processID: Int32? = nil,
+        processStartedAt: Double? = nil
     ) {
         self.program = program
         self.hostBundleID = hostBundleID
@@ -50,6 +56,8 @@ public struct TerminalContext: Sendable, Equatable {
         self.kittySocket = kittySocket
         self.tmuxPane = tmuxPane
         self.tmuxSocket = tmuxSocket
+        self.processID = processID
+        self.processStartedAt = processStartedAt
     }
 }
 

@@ -45,8 +45,18 @@ struct SettingsView: View {
                 .ignoresSafeArea(edges: .top)
         }
         .frame(width: 700, height: 500)
+        .background(closeOnEscape)
         .unifiedTitleBar()
         .onAppear(perform: refresh)
+    }
+
+    /// Esc closes the window, as in most macOS settings windows. An open picker menu still takes Esc first.
+    private var closeOnEscape: some View {
+        Button("Close") { NSApp.keyWindow?.performClose(nil) }
+            .keyboardShortcut(.cancelAction)
+            .opacity(0)
+            .frame(width: 0, height: 0)
+            .accessibilityHidden(true)
     }
 
     private var sidebar: some View {
@@ -194,21 +204,20 @@ private struct NotificationSettings: View {
 
     var body: some View {
         Form {
-            Section("Notify when") {
-                Toggle("A session waits for you", isOn: $preferences.notifyNeedsYou)
-                Toggle("A session finishes", isOn: $preferences.notifyDone)
-                Toggle("A turn fails", isOn: $preferences.notifyFailed)
-                Toggle("An account passes 80% and 90% of a limit", isOn: $preferences.notifyLimits)
-                Toggle("That limit is available again", isOn: $preferences.notifyLimitResets)
-                    .disabled(!preferences.notifyLimits)
-            }
             Section {
+                Toggle("A session waits for you", isOn: $preferences.notifyNeedsYou)
                 Toggle("Allow and Deny on permission notifications", isOn: $preferences.permissionActions)
                     .disabled(!preferences.notifyNeedsYou)
+                    .padding(.leading, 16)
+                Toggle("A session finishes", isOn: $preferences.notifyDone)
+                Toggle("Start of the reply in “Done” notifications", isOn: $preferences.showReplyPreview)
+                    .disabled(!preferences.notifyDone)
+                    .padding(.leading, 16)
+                Toggle("A turn fails", isOn: $preferences.notifyFailed)
             } header: {
-                Text("Answer from the notification")
+                Text("Notify when")
             } footer: {
-                Text("The notification shows the whole command or file. The terminal prompt keeps working, and whichever you answer first decides. Your deny rules still apply")
+                Text("With Allow and Deny the notification shows the whole command or file. The terminal prompt keeps working, and whichever you answer first decides. Your deny rules still apply")
             }
             Section {
                 Picker("Remind about a wait after", selection: $preferences.remindAfterMinutes) {
@@ -218,6 +227,10 @@ private struct NotificationSettings: View {
                 Picker("Flag a quiet session after", selection: $preferences.quietAfterMinutes) {
                     minutes([10, 15, 30])
                 }
+                Toggle("An account passes 80% and 90% of a limit", isOn: $preferences.notifyLimits)
+                Toggle("That limit is available again", isOn: $preferences.notifyLimitResets)
+                    .disabled(!preferences.notifyLimits)
+                    .padding(.leading, 16)
             } header: {
                 Text("Follow up")
             } footer: {
@@ -230,11 +243,10 @@ private struct NotificationSettings: View {
                     Text("System sound").tag(SoundStyle.system)
                 }
                 .disabled(!preferences.playSound)
-                Toggle("Start of the reply in “Done” notifications", isOn: $preferences.showReplyPreview)
-                    .disabled(!preferences.notifyDone)
                 Toggle("Glowing screen edge", isOn: $preferences.edgeGlow)
                 Toggle("Glow when a session finishes too", isOn: $preferences.glowOnDone)
                     .disabled(!preferences.edgeGlow)
+                    .padding(.leading, 16)
                 LabeledContent {
                     HStack {
                         Button("Preview glow") { actions.showFlash() }

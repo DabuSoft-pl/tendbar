@@ -5,7 +5,22 @@ import TendbarDomain
 @MainActor
 enum PreviewData {
     static func container(sessions: [Session] = PreviewData.sessions, accounts: [AccountUsage] = PreviewData.accounts) -> AppContainer {
-        AppContainer.preview(sessions: sessions, accounts: accounts)
+        let container = AppContainer.preview(sessions: sessions, accounts: accounts)
+        if !sessions.isEmpty { container.activity.show(activity) }
+        return container
+    }
+
+    static var activity: ActivityStats {
+        var day = DayActivity()
+        day.turns = 23
+        day.workSeconds = 2 * 3600 + 14 * 60
+        day.waits = 9
+        day.waitSeconds = 41 * 60
+        day.longestTurn = 26 * 60
+        day.longestTurnFolder = "shop-api"
+        day.longestWait = 12 * 60
+        day.longestWaitFolder = "infra"
+        return ActivityStats(days: [ActivityStats.key(for: Date(), calendar: .current): day])
     }
 
     static var sessions: [Session] {
@@ -24,7 +39,7 @@ enum PreviewData {
 
     static var accounts: [AccountUsage] {
         [
-            account("|damian@example.com", email: "damian@example.com", five: 92, week: 63, minutesAgo: 1),
+            account("|alex@example.com", email: "alex@example.com", five: 92, week: 63, minutesAgo: 1),
             account("|work@example.com", email: "work@example.com", five: 41, week: 87, minutesAgo: 180),
         ]
     }
@@ -96,7 +111,7 @@ private struct NotchPreview: View {
 #Preview("Notch, working") {
     NotchPreview(container: PreviewData.container(
         sessions: [PreviewData.session("b2", folder: "tendbar", state: .working, minutesAgo: 1)],
-        accounts: [PreviewData.account("|damian@example.com", email: "damian@example.com", five: 33, week: 63, minutesAgo: 1)]
+        accounts: [PreviewData.account("|alex@example.com", email: "alex@example.com", five: 33, week: 63, minutesAgo: 1)]
     ))
 }
 

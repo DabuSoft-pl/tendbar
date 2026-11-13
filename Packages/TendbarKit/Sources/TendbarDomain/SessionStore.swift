@@ -96,6 +96,18 @@ public struct SessionStore: Sendable, Equatable {
         return session
     }
 
+    /// A session whose Claude Code process is gone without a SessionEnd, as when its terminal tab was closed.
+    public mutating func markEnded(_ id: String, at date: Date) {
+        guard var session = sessions[id], session.state != .ended else { return }
+        session.state = .ended
+        session.unread = false
+        session.waitingSince = nil
+        session.waitingAgent = nil
+        session.flaggedQuiet = false
+        session.updatedAt = max(session.updatedAt, date)
+        sessions[id] = session
+    }
+
     public mutating func markReminded(_ id: String) {
         sessions[id]?.remindedWait = true
     }

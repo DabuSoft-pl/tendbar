@@ -29,7 +29,8 @@ permission prompt. Tendbar watches them for you. Everything stays on your Mac: n
 ## Features
 
 - **Every session in one list.** Folder, state and the start of Claude's last reply. A ring while Claude works, amber
-  when it waits for you, vermilion after an error, sage green until you read a finished reply.
+  when it waits for you, vermilion after an error, sage green until you read a finished reply. Close a terminal tab
+  and its session ends there too.
 - **Back to the right terminal.** Click a session, or pick it with the arrow keys and press Return, to jump to its
   tab or pane (see [Terminals](#terminals)).
 - **Notifications that matter.** A banner when a session needs you, finishes or fails, each one switchable, with
@@ -105,7 +106,7 @@ Everything Tendbar keeps lives in `~/Library/Application Support/Tendbar` (folde
 
 | File | Contents |
 |---|---|
-| `sessions.json` | Session id, folder, terminal ids, state, the permission message and the first 200 characters of the last reply |
+| `sessions.json` | Session id, folder, terminal ids, the Claude Code process id, state, the permission message and the first 200 characters of the last reply |
 | `usage.json` | Limit readings per account, keyed by config directory and e-mail address |
 | `activity.json` | Per day for the last month: the number of turns and waits, their total time, and the longest wait and turn with their folder name |
 | `events.jsonl` | Only when Settings → General → Event log is on (off by default; turning it off deletes it). Hook events for troubleshooting: session id, event, folder, transcript path, message, notification type, the error of a failed turn, and limits when they change. Rotated at 5 MB |
@@ -114,15 +115,19 @@ Everything Tendbar keeps lives in `~/Library/Application Support/Tendbar` (folde
 
 Connecting adds Tendbar's hooks to Claude Code. On each hook event Claude Code runs `tendbar-hook`, a small helper
 inside the app bundle. It keeps only the fields Tendbar uses, adds the terminal context (`TERM_PROGRAM`, the host
-app, iTerm/Terminal session ids, WezTerm, kitty and tmux pane ids and sockets, the TTY, `CLAUDE_CONFIG_DIR`), sends
-the event over a Unix socket (`~/Library/Application Support/Tendbar/tendbar.sock`, mode 0600) and exits at once. It
-prints nothing and always exits 0, so Claude Code is never slowed down or blocked, even when Tendbar is not running.
+app, iTerm/Terminal session ids, WezTerm, kitty and tmux pane ids and sockets, the TTY, `CLAUDE_CONFIG_DIR`, the
+Claude Code process id and its start time), sends the event over a Unix socket
+(`~/Library/Application Support/Tendbar/tendbar.sock`, mode 0600) and exits at once. It prints nothing and always
+exits 0, so Claude Code is never slowed down or blocked, even when Tendbar is not running.
 
 A permission prompt is the one place the helper waits. It asks the app whether to wait for Allow or Deny from a
 banner: with the setting off the app answers at once and the helper exits; with it on, the helper waits (up to 590
 seconds, under a 600 second hook timeout) while Claude Code shows its usual prompt. Answering in the terminal goes
 ahead as normal, and the helper is released with no output as soon as the session moves on. Only Allow or Deny on
 the banner makes it print Claude Code's `PermissionRequest` decision.
+
+A tab closed or a process killed sends no `SessionEnd`, so every 30 seconds the app checks that each session's
+Claude Code process still runs, and ends the session when it is gone.
 
 Limits come from the `rate_limits` Claude Code passes to status lines (five-hour and weekly windows on Pro and Max
 plans, after the first reply of a session). Connecting wraps your `statusLine`: `tendbar-hook --statusline` sends the

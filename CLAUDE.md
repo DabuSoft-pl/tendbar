@@ -19,9 +19,9 @@ Domain  <-  Application  <-  Infrastructure
   `LimitWarnings`, `ProfileName`, `Attention` (reminders, quiet sessions), `ActivityStats` (turns and waits per day),
   `PermissionAsk`.
 - `TendbarApplication` — use cases, one class each (`HandleHookEvent`, `OpenSession`, `RecordUsageReading`,
-  `CheckLimitWarnings`, `CheckAttention`, `AddProfile`, …, plus `PermissionDesk` holding prompts that wait for a
-  banner answer) and the ports they need: repositories, `AlertPresenting`, `ScreenFlashing`,
-  `TerminalNavigating`, `HookConnecting`, `AlertSettingsProviding`, `Clock`, and the output ports `SessionsOutput`,
+  `CheckLimitWarnings`, `CheckAttention`, `EndGoneSessions`, `AddProfile`, …, plus `PermissionDesk` holding prompts
+  that wait for a banner answer) and the ports they need: repositories, `AlertPresenting`, `ScreenFlashing`,
+  `SessionProcessChecking`, `TerminalNavigating`, `HookConnecting`, `AlertSettingsProviding`, `Clock`, and the output ports `SessionsOutput`,
   `UsageOutput` and `ActivityOutput`; `PermissionReply` is the way back to a waiting hook. Use cases never import AppKit, SwiftUI or UserNotifications.
 - `TendbarInfrastructure` — adapters that touch files, sockets and processes: the hook wire format (`HookEnvelope`,
   `HookRedaction`, `InboundMessage` maps it to domain values), `HookEventListener`, JSON repositories with storage

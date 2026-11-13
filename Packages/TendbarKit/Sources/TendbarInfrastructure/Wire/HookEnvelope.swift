@@ -15,6 +15,8 @@ public struct TerminalRecord: Codable, Sendable, Equatable {
     public var kittySocket: String?
     public var tmuxPane: String?
     public var tmuxSocket: String?
+    public var processID: Int32?
+    public var processStartedAt: Double?
 
     public init(_ context: TerminalContext) {
         program = context.program
@@ -29,6 +31,8 @@ public struct TerminalRecord: Codable, Sendable, Equatable {
         kittySocket = context.kittySocket
         tmuxPane = context.tmuxPane
         tmuxSocket = context.tmuxSocket
+        processID = context.processID
+        processStartedAt = context.processStartedAt
     }
 
     public var context: TerminalContext {
@@ -44,13 +48,15 @@ public struct TerminalRecord: Codable, Sendable, Equatable {
             kittyWindowID: kittyWindowID,
             kittySocket: kittySocket,
             tmuxPane: tmuxPane,
-            tmuxSocket: tmuxSocket
+            tmuxSocket: tmuxSocket,
+            processID: processID,
+            processStartedAt: processStartedAt
         )
     }
 }
 
 extension TerminalContext {
-    public static func capture(environment: [String: String], tty: String?) -> TerminalContext {
+    public static func capture(environment: [String: String], tty: String?, process: ClaudeProcess? = nil) -> TerminalContext {
         TerminalContext(
             program: environment["TERM_PROGRAM"],
             hostBundleID: environment["__CFBundleIdentifier"],
@@ -63,7 +69,9 @@ extension TerminalContext {
             kittyWindowID: environment["KITTY_WINDOW_ID"],
             kittySocket: environment["KITTY_LISTEN_ON"],
             tmuxPane: environment["TMUX_PANE"],
-            tmuxSocket: environment["TMUX"].flatMap { $0.split(separator: ",").first.map(String.init) }
+            tmuxSocket: environment["TMUX"].flatMap { $0.split(separator: ",").first.map(String.init) },
+            processID: process?.id,
+            processStartedAt: process?.startedAt
         )
     }
 }

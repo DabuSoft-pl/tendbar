@@ -49,7 +49,7 @@ private final class Silent: AlertPresenting, NotificationPermissions, ScreenFlas
     func sendTest(sound: AlertSound) async throws {}
     func flash(_ tone: FlashTone) {}
     func jump(to session: Session) -> JumpOutcome { .jumped }
-    func email(configDirectory: String?) -> String? { configDirectory == nil ? "damian@example.com" : "work@example.com" }
+    func email(configDirectory: String?) -> String? { configDirectory == nil ? "alex@example.com" : "work@example.com" }
     func status(configDirectory: String?) throws -> HookConnection { .connected }
     func connect(configDirectory: String?) throws {}
     func disconnect(configDirectory: String?) throws {}
@@ -63,6 +63,10 @@ private final class MemoryActivity: ActivityRepository {
     var stats = ActivityStats()
     func load() -> ActivityStats { stats }
     func save(_ stats: ActivityStats) { self.stats = stats }
+}
+
+private struct UnknownProcesses: SessionProcessChecking {
+    func isRunning(_ terminal: TerminalContext) -> Bool? { nil }
 }
 
 private struct NoTranscripts: TranscriptReading {
@@ -91,6 +95,7 @@ extension AppContainer {
                 connector: silent,
                 profileDirectories: silent,
                 loginItems: silent,
+                processes: UnknownProcesses(),
                 clock: SystemClock()
             ),
             eventLog: URL(fileURLWithPath: "/tmp/events.jsonl"),

@@ -3,6 +3,7 @@ import AppKit
 import SwiftUI
 
 /// `Tendbar -screenshots <folder>` (Debug builds) renders the README images from sample data and quits.
+/// `-screenshots-extra` adds the other settings pages and an empty panel, for checking the layout.
 @MainActor
 enum Screenshots {
     static func runIfRequested() {
@@ -16,7 +17,10 @@ enum Screenshots {
             render(panel(container), size: CGSize(width: 400, height: 640), appearance: appearance, to: folder.appendingPathComponent("panel-\(name).png"))
             renderWindow(SettingsView(container: container), appearance: appearance, to: folder.appendingPathComponent("settings-\(name).png"))
         }
-        if arguments.contains("-screenshots-empty") {
+        if arguments.contains("-screenshots-extra") {
+            for page in SettingsPage.allCases where page != .claudeCode {
+                renderWindow(SettingsView(container: container, page: page), appearance: .darkAqua, to: folder.appendingPathComponent("settings-\(page.rawValue).png"))
+            }
             let empty = PreviewData.container(sessions: [], accounts: [])
             render(panel(empty), size: CGSize(width: 400, height: 640), appearance: .darkAqua, to: folder.appendingPathComponent("panel-empty.png"))
         }
