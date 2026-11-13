@@ -44,7 +44,7 @@ Everything lives in `~/Library/Application Support/Tendbar` (folder 0700, files 
 |---|---|
 | `sessions.json` | Session id, folder, terminal ids, state, the permission message and the first 200 characters of the last reply |
 | `usage.json` | Limit readings per account, keyed by config directory and e-mail address |
-| `events.jsonl` | Only when Settings → Ogólne → "Log zdarzeń" is on (off by default; turning it off deletes it). A debug log of hook events, rotated at 5 MB: session id, event, folder, transcript path, message, notification type, error type and details of a failed turn, and limits when they change. A run of tool calls is logged once |
+| `events.jsonl` | Only when Settings → General → "Event log" is on (off by default; turning it off deletes it). A debug log of hook events, rotated at 5 MB: session id, event, folder, transcript path, message, notification type, error type and details of a failed turn, and limits when they change. A run of tool calls is logged once |
 
 Prompts, tool inputs and outputs, file contents and Claude's replies are dropped by the helper before they reach the
 app. The last reply preview is read from the local transcript file.
@@ -55,14 +55,14 @@ app. The last reply preview is read from the local transcript file.
 make install   # Release build into /Applications/Tendbar.app
 ```
 
-Open Settings (the gear in the panel, or ⌘,) → Claude Code and press "Połącz". It adds Tendbar's hooks to
-`~/.claude/settings.json` and wraps the status line, after a backup of the file (the last five are kept). "Rozłącz"
+Open Settings (the gear in the panel, or ⌘,) → Claude Code and press "Connect". It adds Tendbar's hooks to
+`~/.claude/settings.json` and wraps the status line, after a backup of the file (the last five are kept). "Disconnect"
 removes only Tendbar's entries. Settings change only when you press one of these buttons, never at launch. The file
 is rewritten with sorted keys.
 
 Keep the app in `/Applications`: the hooks point at the helper inside it.
 
-Settings → Ogólne → "Uruchamiaj przy logowaniu" keeps Tendbar running after a restart.
+Settings → General → "Open at login" keeps Tendbar running after a restart.
 
 ## Develop
 
@@ -74,6 +74,11 @@ make install    # Release build into /Applications
 
 The code follows Clean Architecture (domain, use cases, adapters); `CLAUDE.md` describes the layers. The app
 icon is drawn by `tools/make-icon.swift`.
+
+## Languages
+
+English and Polish, following the macOS language. To pick one for Tendbar only: System Settings → General →
+Language & Region → Applications.
 
 ## Requirements
 

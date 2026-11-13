@@ -10,8 +10,8 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
     var title: LocalizedStringKey {
         switch self {
         case .claudeCode: "Claude Code"
-        case .notifications: "Powiadomienia"
-        case .general: "Ogólne"
+        case .notifications: "Notifications"
+        case .general: "General"
         }
     }
 
@@ -69,7 +69,7 @@ struct SettingsView: View {
             }
             Spacer()
             VStack(alignment: .leading, spacing: 4) {
-                Button("Folder danych") { container.systemActions.revealDataFolder() }
+                Button("Data folder") { container.systemActions.revealDataFolder() }
                 Text(Self.version)
                     .monospacedDigit()
                     .foregroundStyle(.tertiary)
@@ -100,7 +100,7 @@ struct SettingsView: View {
         let info = Bundle.main.infoDictionary
         let short = info?["CFBundleShortVersionString"] as? String ?? "0"
         let build = info?["CFBundleVersion"] as? String ?? "0"
-        return String(localized: "Wersja \(short) (\(build))")
+        return String(localized: "Version \(short) (\(build))")
     }
 
     private func refresh() {
@@ -129,9 +129,9 @@ private struct ClaudeCodeSettings: View {
                 LabeledContent {
                     switch model.connection {
                     case .connected, .outdated:
-                        Button("Rozłącz") { actions.disconnect() }
+                        Button("Disconnect") { actions.disconnect() }
                     case .disconnected:
-                        Button("Połącz") { actions.connect() }
+                        Button("Connect") { actions.connect() }
                             .buttonStyle(.borderedProminent)
                     case nil:
                         EmptyView()
@@ -141,7 +141,7 @@ private struct ClaudeCodeSettings: View {
                         StatusDot(color: model.connection == .connected ? .green : .orange)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(connectionText)
-                            Text("Hooki w ~/.claude/settings.json")
+                            Text("Hooks in ~/.claude/settings.json")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -151,7 +151,7 @@ private struct ClaudeCodeSettings: View {
                 if let error = model.connectionError {
                     Text(error).foregroundStyle(.red).textSelection(.enabled)
                 } else {
-                    Text("Przed każdą zmianą powstaje kopia settings.json")
+                    Text("settings.json is backed up before every change")
                 }
             }
             AccountsSection(model: model, actions: actions)
@@ -161,10 +161,10 @@ private struct ClaudeCodeSettings: View {
 
     private var connectionText: String {
         switch model.connection {
-        case .connected: String(localized: "Połączone z Claude Code")
-        case .outdated: String(localized: "Połączenie do aktualizacji")
-        case .disconnected: String(localized: "Niepołączone")
-        case nil: String(localized: "Brak tendbar-hook")
+        case .connected: String(localized: "Connected to Claude Code")
+        case .outdated: String(localized: "Connection needs an update")
+        case .disconnected: String(localized: "Not connected")
+        case nil: String(localized: "tendbar-hook missing")
         }
     }
 }
@@ -176,31 +176,31 @@ private struct NotificationSettings: View {
 
     var body: some View {
         Form {
-            Section("Powiadamiaj, gdy") {
-                Toggle("Sesja czeka na Ciebie", isOn: $preferences.notifyNeedsYou)
-                Toggle("Sesja skończy pracę", isOn: $preferences.notifyDone)
-                Toggle("Tura zakończy się błędem", isOn: $preferences.notifyFailed)
-                Toggle("Limit konta przekroczy 80% i 90%", isOn: $preferences.notifyLimits)
+            Section("Notify when") {
+                Toggle("A session waits for you", isOn: $preferences.notifyNeedsYou)
+                Toggle("A session finishes", isOn: $preferences.notifyDone)
+                Toggle("A turn fails", isOn: $preferences.notifyFailed)
+                Toggle("An account passes 80% and 90% of a limit", isOn: $preferences.notifyLimits)
             }
             Section {
-                Toggle("Dźwięk", isOn: $preferences.playSound)
-                Toggle("Początek odpowiedzi w powiadomieniu „Gotowe”", isOn: $preferences.showReplyPreview)
+                Toggle("Sound", isOn: $preferences.playSound)
+                Toggle("Start of the reply in “Done” notifications", isOn: $preferences.showReplyPreview)
                     .disabled(!preferences.notifyDone)
-                Toggle("Świecąca ramka ekranu", isOn: $preferences.edgeGlow)
-                Toggle("Ramka także po skończonej pracy", isOn: $preferences.glowOnDone)
+                Toggle("Glowing screen edge", isOn: $preferences.edgeGlow)
+                Toggle("Glow when a session finishes too", isOn: $preferences.glowOnDone)
                     .disabled(!preferences.edgeGlow)
                 LabeledContent {
                     HStack {
-                        Button("Podgląd ramki") { actions.showFlash() }
-                        Button("Testowe powiadomienie") { actions.sendTestNotification() }
+                        Button("Preview glow") { actions.showFlash() }
+                        Button("Test notification") { actions.sendTestNotification() }
                     }
                 } label: {
-                    Text("Wypróbuj")
+                    Text("Try it")
                 }
             } header: {
-                Text("Jak")
+                Text("How")
             } footer: {
-                Text("Ramka jest pomarańczowa, gdy sesja czeka, zielona po skończeniu, czerwona po błędzie i przy 90% limitu")
+                Text("The edge glows orange when a session waits, green when it finishes, red after an error and at 90% of a limit")
             }
             if !granted || model.notificationError != nil {
                 Section {
@@ -208,16 +208,16 @@ private struct NotificationSettings: View {
                         LabeledContent {
                             HStack {
                                 if model.notificationPermission == .notDetermined {
-                                    Button("Poproś o zgodę") { actions.requestNotifications() }
+                                    Button("Ask for permission") { actions.requestNotifications() }
                                 }
-                                Button("Ustawienia systemowe") { actions.openNotificationSettings() }
+                                Button("System Settings") { actions.openNotificationSettings() }
                             }
                         } label: {
                             HStack(spacing: 8) {
                                 StatusDot(color: .orange)
                                 Text(model.notificationPermission == .notDetermined
-                                    ? String(localized: "macOS jeszcze nie zapytał o zgodę")
-                                    : String(localized: "Powiadomienia wyłączone w systemie"))
+                                    ? String(localized: "macOS has not asked for permission yet")
+                                    : String(localized: "Notifications are turned off in macOS"))
                             }
                         }
                     }
@@ -247,33 +247,33 @@ private struct GeneralSettings: View {
     var body: some View {
         Form {
             Section {
-                Toggle("Uruchamiaj przy logowaniu", isOn: Binding(
+                Toggle("Open at login", isOn: Binding(
                     get: { system.loginItem != .disabled },
                     set: { systemActions.setLaunchAtLogin($0) }
                 ))
-                Toggle(NotchController.hasNotch ? "Stan sesji w notchu" : "Stan sesji na środku paska menu", isOn: $preferences.notchView)
+                Toggle(NotchController.hasNotch ? "Session state next to the notch" : "Session state in the middle of the menu bar", isOn: $preferences.notchView)
                 Toggle(isOn: $preferences.logEvents) {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Log zdarzeń")
-                            Text("Do diagnozy problemów. Wyłączenie usuwa log")
+                            Text("Event log")
+                            Text("For troubleshooting. Turning it off deletes the log")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                         Spacer()
                         if preferences.logEvents {
-                            Button("Pokaż") { systemActions.revealEventLog() }
+                            Button("Show") { systemActions.revealEventLog() }
                         }
                     }
                 }
             } footer: {
                 if system.loginItem == .requiresApproval {
-                    Text("Zatwierdź Tendbar w Ustawieniach systemowych → Ogólne → Rzeczy otwierane podczas logowania")
+                    Text("Allow Tendbar in System Settings → General → Login Items")
                         .foregroundStyle(.secondary)
                 } else if let error = system.loginItemError {
                     Text(error).foregroundStyle(.red)
                 } else {
-                    Text("Wszystko zostaje na tym Macu. Tendbar nie wysyła nic do sieci")
+                    Text("Everything stays on this Mac. Tendbar sends nothing over the network")
                 }
             }
         }

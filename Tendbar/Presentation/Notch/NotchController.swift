@@ -267,8 +267,8 @@ struct NotchView: View {
     private func accessibilityText(lead: SessionState?) -> String {
         var parts: [String] = []
         if let lead { parts.append(lead.label) }
-        if let badge { parts.append(String(localized: "\(badge.count) sesji: \(badge.state.label)")) }
-        if highestLimit > 0 { parts.append(String(localized: "limit aktywnego konta \(Int(highestLimit.rounded()))%")) }
+        if let badge { parts.append(String(localized: "\(badge.count) sessions: \(badge.state.label)")) }
+        if highestLimit > 0 { parts.append(String(localized: "current account limit \(Int(highestLimit.rounded()))%")) }
         return parts.joined(separator: ", ")
     }
 }
@@ -323,7 +323,7 @@ private struct NotchLimitRow: View {
                 .fill(active ? Color.white : Color.clear)
                 .strokeBorder(.white.opacity(0.4), lineWidth: active ? 0 : 1)
                 .frame(width: 6, height: 6)
-                .accessibilityLabel(active ? String(localized: "aktywne konto") : String(localized: "nieaktywne konto"))
+                .accessibilityLabel(active ? String(localized: "current account") : String(localized: "other account"))
             Text(name)
                 .foregroundStyle(active ? .primary : .secondary)
                 .lineLimit(1)

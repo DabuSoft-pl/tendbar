@@ -43,13 +43,13 @@ final class SessionsController {
         case .jumped, .activated:
             nil
         case .notRunning:
-            String(localized: "Terminal tej sesji nie jest uruchomiony.")
+            String(localized: "This session's terminal is not running.")
         case .unavailable:
-            String(localized: "Nie umiem jeszcze przełączyć na ten terminal.")
+            String(localized: "Tendbar cannot switch to this terminal yet.")
         case let .notAuthorized(app):
-            String(localized: "Zezwól Tendbarowi na sterowanie aplikacją \(app): Ustawienia systemowe → Prywatność i ochrona → Automatyzacja.")
+            String(localized: "Allow Tendbar to control \(app) in System Settings → Privacy & Security → Automation.")
         case let .failed(message):
-            String(localized: "Nie udało się przełączyć na sesję: \(message)")
+            String(localized: "Could not switch to the session: \(message)")
         }
     }
 }

@@ -20,7 +20,7 @@ struct MenuContent: View {
         VStack(alignment: .leading, spacing: 12) {
             header
             if let error = sessions.listenerError {
-                Text("Nie udało się uruchomić odbiornika: \(error)")
+                Text("Could not start the listener: \(error)")
                     .foregroundStyle(.red)
                     .font(.callout)
             }
@@ -73,7 +73,7 @@ struct MenuContent: View {
 
     private var footer: some View {
         HStack {
-            Button("Oznacz jako przeczytane") { actions.markAllAsRead() }
+            Button("Mark all as read") { actions.markAllAsRead() }
                 .disabled(!sessions.hasUnread)
             Spacer()
             Button {
@@ -88,11 +88,11 @@ struct MenuContent: View {
                 Image(systemName: "gearshape")
             }
             .buttonStyle(.borderless)
-            .help("Ustawienia (⌘,)")
+            .help("Settings (⌘,)")
             Menu {
-                Button("Usuń zakończone sesje") { actions.removeEndedSessions() }
+                Button("Remove ended sessions") { actions.removeEndedSessions() }
                 Divider()
-                Button("Zakończ Tendbar") { NSApplication.shared.terminate(nil) }
+                Button("Quit Tendbar") { NSApplication.shared.terminate(nil) }
             } label: {
                 Image(systemName: "ellipsis.circle")
             }
@@ -109,13 +109,13 @@ struct ConnectionBanner: View {
 
     var body: some View {
         if let error = model.connectionError {
-            banner(Text("Nie udało się zmienić ustawień Claude Code: \(error)"), color: .red, button: false)
+            banner(Text("Could not change the Claude Code settings: \(error)"), color: .red, button: false)
         } else if model.connection == .disconnected {
-            banner(Text("Tendbar nie jest połączony z Claude Code"), color: .secondary, button: true)
+            banner(Text("Tendbar is not connected to Claude Code"), color: .secondary, button: true)
         } else if model.connection == .outdated {
-            banner(Text("Hooki Tendbara są nieaktualne albo niepełne"), color: .secondary, button: true)
+            banner(Text("Tendbar's hooks are outdated or incomplete"), color: .secondary, button: true)
         } else if !model.helperAvailable {
-            banner(Text("Nie znaleziono pomocnika tendbar-hook w aplikacji"), color: .red, button: false)
+            banner(Text("The tendbar-hook helper is missing from the app"), color: .red, button: false)
         }
     }
 
@@ -125,7 +125,7 @@ struct ConnectionBanner: View {
             text.font(.callout).fixedSize(horizontal: false, vertical: true)
             Spacer()
             if button {
-                Button("Połącz") { actions.connect() }
+                Button("Connect") { actions.connect() }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
             }
@@ -182,7 +182,7 @@ struct SessionRow: View {
     }
 
     private var age: String {
-        if Date().timeIntervalSince(session.updatedAt) < 10 { return String(localized: "teraz") }
+        if Date().timeIntervalSince(session.updatedAt) < 10 { return String(localized: "now") }
         return session.updatedAt.formatted(.relative(presentation: .numeric, unitsStyle: .abbreviated))
     }
 
@@ -212,7 +212,7 @@ struct StateMark: View {
         }
         .frame(width: 8, height: 8)
         .help(state.label)
-        .accessibilityLabel(unread && state == .done ? String(localized: "\(state.label), nieprzeczytane") : state.label)
+        .accessibilityLabel(unread && state == .done ? String(localized: "\(state.label), unread") : state.label)
     }
 }
 
@@ -222,8 +222,8 @@ struct EmptySessions: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Żadna sesja nie jest uruchomiona").fontWeight(.medium)
-                Text("Sesje pojawią się tu same, gdy uruchomisz Claude Code w terminalu")
+                Text("No sessions running").fontWeight(.medium)
+                Text("Sessions show up here once you start Claude Code in a terminal")
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -240,12 +240,12 @@ struct EmptySessions: View {
                     Image(systemName: "doc.on.doc")
                 }
                 .buttonStyle(.borderless)
-                .help("Kopiuj polecenie")
-                .accessibilityLabel("Kopiuj polecenie claude")
+                .help("Copy command")
+                .accessibilityLabel("Copy the claude command")
             }
             HStack(spacing: 8) {
                 Circle().fill(connection == .connected ? Color.green : Color.orange).frame(width: 8, height: 8)
-                Text(connection == .connected ? "Połączono z Claude Code" : "Nie połączono z Claude Code")
+                Text(connection == .connected ? "Connected to Claude Code" : "Not connected to Claude Code")
                     .foregroundStyle(.secondary)
             }
             .font(.caption)

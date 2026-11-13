@@ -1,8 +1,8 @@
 # CLAUDE.md
 
 Tendbar — open-source (MIT) macOS menu bar app that watches Claude Code sessions through hooks. Swift 6 (strict
-concurrency), SwiftUI `MenuBarExtra`, macOS 14+. UI is Polish (String Catalog, source language `pl`), ready for more
-languages; code, commits and docs are English. Claude Code only: no Codex, Cursor or others.
+concurrency), SwiftUI `MenuBarExtra`, macOS 14+. UI is English with a Polish translation
+(String Catalog `Tendbar/Localizable.xcstrings`, source language `en`); code, commits and docs are English. Claude Code only: no Codex, Cursor or others.
 
 ## Architecture (Clean Architecture)
 
@@ -48,7 +48,8 @@ Tests: `TendbarDomainTests` (rules), `TendbarApplicationTests` (use cases on fak
   `statusLine` wrapper (the previous command stays base64-encoded after `--next` and is restored on disconnect).
   Only on an explicit user action, never automatically at launch.
 - Nothing leaves the Mac: no network calls, no analytics.
-- User-facing strings are Polish literals (SwiftUI `Text` / `String(localized:)`), so they land in the catalog.
+- User-facing strings are English literals (SwiftUI `Text` / `String(localized:)`); add the Polish translation of
+  every new or changed string to `Localizable.xcstrings` (xcodebuild does not sync the catalog, Xcode does).
 
 ## Commands
 
@@ -56,7 +57,7 @@ Tests: `TendbarDomainTests` (rules), `TendbarApplicationTests` (use cases on fak
 make test       # Domain, Application and Infrastructure tests
 make build      # xcodegen + xcodebuild (Debug, ad-hoc signed) into build/
 make run        # build and open the app
-make install    # Release build into /Applications (then "Połącz" in the app)
+make install    # Release build into /Applications (then "Connect" in the app)
 ```
 
 Plan: https://claude.ai/artifact/5KoBQbPYDmyNbsJrpXraj8

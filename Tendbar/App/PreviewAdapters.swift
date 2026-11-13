@@ -31,7 +31,7 @@ private final class MemoryFired: FiredWarningRepository {
 
 @MainActor
 private final class MemoryProfiles: ProfileRepository {
-    var directories = ["/Users/me/.claude-praca"]
+    var directories = ["/Users/me/.claude-work"]
     func load() -> [String] { directories }
     func save(_ directories: [String]) { self.directories = directories }
 }
@@ -47,7 +47,7 @@ private final class Silent: AlertPresenting, NotificationPermissions, ScreenFlas
     func sendTest(sound: Bool) async throws {}
     func flash(_ tone: FlashTone) {}
     func jump(to session: Session) -> JumpOutcome { .jumped }
-    func email(configDirectory: String?) -> String? { configDirectory == nil ? "damian@example.com" : "praca@example.com" }
+    func email(configDirectory: String?) -> String? { configDirectory == nil ? "damian@example.com" : "work@example.com" }
     func status(configDirectory: String?) throws -> HookConnection { .connected }
     func connect(configDirectory: String?) throws {}
     func disconnect(configDirectory: String?) throws {}

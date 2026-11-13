@@ -10,22 +10,22 @@ enum PreviewData {
 
     static var sessions: [Session] {
         [
-            session("a1", folder: "dabusoft_api", state: .needsYou, minutesAgo: 1, unread: true,
+            session("a1", folder: "shop-api", state: .needsYou, minutesAgo: 1, unread: true,
                     message: "Claude needs your permission to use Bash"),
             session("b2", folder: "tendbar", state: .working, minutesAgo: 2),
-            session("c3", folder: "dabusoft_front", state: .done, minutesAgo: 6, unread: true,
-                    preview: "Gotowe: formularz logowania korzysta teraz z nowego endpointu, testy przechodzą."),
-            session("d4", folder: "homelab-ansible", state: .failed, minutesAgo: 14, unread: true,
+            session("c3", folder: "shop-web", state: .done, minutesAgo: 6, unread: true,
+                    preview: "Done: the login form now uses the new endpoint and the tests pass."),
+            session("d4", folder: "infra", state: .failed, minutesAgo: 14, unread: true,
                     message: "API Error: 529 Overloaded"),
             session("e5", folder: "vault", state: .done, minutesAgo: 48,
-                    preview: "Dopisałem notatkę o migracji do Symfony i zaktualizowałem indeks ADR."),
+                    preview: "Added a note on the migration and updated the ADR index."),
         ]
     }
 
     static var accounts: [AccountUsage] {
         [
             account("|damian@example.com", email: "damian@example.com", five: 92, week: 63, minutesAgo: 1),
-            account("|druga@example.com", email: "druga@example.com", five: 41, week: 87, minutesAgo: 180),
+            account("|work@example.com", email: "work@example.com", five: 41, week: 87, minutesAgo: 180),
         ]
     }
 
@@ -35,7 +35,7 @@ enum PreviewData {
     ) -> Session {
         Session(
             id: id,
-            cwd: "/Users/me/Projekty/\(folder)",
+            cwd: "/Users/me/Projects/\(folder)",
             terminal: TerminalContext(program: "iTerm.app"),
             state: state,
             startedAt: date(minutesAgo + 30),
@@ -83,7 +83,7 @@ private struct NotchPreview: View {
     MenuContent(container: PreviewData.container())
 }
 
-#Preview("Panel, pusto") {
+#Preview("Panel, empty") {
     MenuContent(container: PreviewData.container(sessions: [], accounts: []))
 }
 
@@ -91,18 +91,18 @@ private struct NotchPreview: View {
     NotchPreview(container: PreviewData.container())
 }
 
-#Preview("Notch, pracuje") {
+#Preview("Notch, working") {
     NotchPreview(container: PreviewData.container(
         sessions: [PreviewData.session("b2", folder: "tendbar", state: .working, minutesAgo: 1)],
         accounts: [PreviewData.account("|damian@example.com", email: "damian@example.com", five: 33, week: 63, minutesAgo: 1)]
     ))
 }
 
-#Preview("Notch, rozwinięty") {
+#Preview("Notch, expanded") {
     NotchPreview(container: PreviewData.container(), expanded: true)
 }
 
-#Preview("Ustawienia") {
+#Preview("Settings") {
     SettingsView(container: PreviewData.container())
 }
 #endif

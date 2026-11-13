@@ -3,7 +3,7 @@ options:
   bundleIdPrefix: pl.dabusoft
   deploymentTarget:
     macOS: "14.0"
-  developmentLanguage: pl
+  developmentLanguage: en
   createIntermediateGroups: true
 settings:
   base:
@@ -31,10 +31,11 @@ targets:
         CFBundleDisplayName: Tendbar
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
-        CFBundleDevelopmentRegion: pl
+        CFBundleDevelopmentRegion: en
+        CFBundleLocalizations: [en, pl]
         LSUIElement: true
         LSApplicationCategoryType: public.app-category.developer-tools
-        NSAppleEventsUsageDescription: Tendbar przełącza na kartę terminala, w której działa wybrana sesja Claude Code.
+        NSAppleEventsUsageDescription: Tendbar switches to the terminal tab a Claude Code session runs in.
         NSHumanReadableCopyright: "© 2026 Dabusoft. MIT License."
     settings:
       base:

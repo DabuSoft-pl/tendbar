@@ -1,0 +1,11 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSAppleEventsUsageDescription" : {
+      "localizations" : {
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Tendbar przełącza na kartę terminala, w której działa wybrana sesja Claude Code." } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

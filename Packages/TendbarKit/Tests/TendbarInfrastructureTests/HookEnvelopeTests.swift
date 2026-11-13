@@ -123,13 +123,13 @@ import TendbarDomain
 
         guard case let .hook(event) = try #require(envelope.message()) else { Issue.record("not a hook"); return }
         #expect(event.kind == .stopFailure)
-        #expect(event.message == "Przeciążone API (529 Overloaded)")
+        #expect(event.message == "API overloaded (529 Overloaded)")
         #expect(!redacted.contains("last_assistant_message"))
     }
 
     @Test func fallsBackToAGenericLineForUnknownTypes() throws {
         let payload = try JSONDecoder().decode(HookPayload.self, from: Data(#"{"session_id":"s1","hook_event_name":"StopFailure","error":"something_new"}"#.utf8))
 
-        #expect(payload.failureMessage == "Błąd API")
+        #expect(payload.failureMessage == "API error")
     }
 }

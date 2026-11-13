@@ -1,7 +1,1136 @@
 {
-  "sourceLanguage" : "pl",
-  "strings" : {
-
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ limit: %lld%%": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limit %@: %lld%%"
+          }
+        }
+      }
+    },
+    "%@, resets %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, reset %@"
+          }
+        }
+      }
+    },
+    "%@, unread": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, nieprzeczytane"
+          }
+        }
+      }
+    },
+    "%lld sessions: %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sesje (%lld): %@"
+          }
+        }
+      }
+    },
+    "5-hour": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 godz."
+          }
+        }
+      }
+    },
+    "A name has 1–32 characters: lowercase letters, digits and hyphens.": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nazwa może mieć 1–32 znaki: małe litery, cyfry i myślniki."
+          }
+        }
+      }
+    },
+    "A profile is a separate Claude Code directory you sign in to with /login": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profil to osobny katalog Claude Code, w którym logujesz się przez /login"
+          }
+        }
+      }
+    },
+    "A session finishes": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sesja skończy pracę"
+          }
+        }
+      }
+    },
+    "A session waits for you": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sesja czeka na Ciebie"
+          }
+        }
+      }
+    },
+    "A turn fails": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tura zakończy się błędem"
+          }
+        }
+      }
+    },
+    "API error": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Błąd API"
+          }
+        }
+      }
+    },
+    "API overloaded": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przeciążone API"
+          }
+        }
+      }
+    },
+    "API server error": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Błąd serwera API"
+          }
+        }
+      }
+    },
+    "Account on hold": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konto wstrzymane"
+          }
+        }
+      }
+    },
+    "Add": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj"
+          }
+        }
+      }
+    },
+    "Allow Tendbar in System Settings → General → Login Items": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zatwierdź Tendbar w Ustawieniach systemowych → Ogólne → Rzeczy otwierane podczas logowania"
+          }
+        }
+      }
+    },
+    "Allow Tendbar to control %@ in System Settings → Privacy & Security → Automation.": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zezwól Tendbarowi na sterowanie aplikacją %@: Ustawienia systemowe → Prywatność i ochrona → Automatyzacja."
+          }
+        }
+      }
+    },
+    "An account passes 80% and 90% of a limit": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limit konta przekroczy 80% i 90%"
+          }
+        }
+      }
+    },
+    "An account's limits come from Claude Code sessions signed in to it": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limity konta przychodzą z sesji Claude Code zalogowanych na tym koncie"
+          }
+        }
+      }
+    },
+    "Ask for permission": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poproś o zgodę"
+          }
+        }
+      }
+    },
+    "Authentication failed": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Błąd logowania"
+          }
+        }
+      }
+    },
+    "Billing problem": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Problem z płatnością"
+          }
+        }
+      }
+    },
+    "Claude Code profiles": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile Claude Code"
+          }
+        }
+      }
+    },
+    "Claude is working…": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude pracuje…"
+          }
+        }
+      }
+    },
+    "Claude needs your decision": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude potrzebuje Twojej decyzji"
+          }
+        }
+      }
+    },
+    "Cloud credential error": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Błąd poświadczeń chmury"
+          }
+        }
+      }
+    },
+    "Connect": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Połącz"
+          }
+        }
+      }
+    },
+    "Connected": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Połączone"
+          }
+        }
+      }
+    },
+    "Connected to Claude Code": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Połączono z Claude Code"
+          }
+        }
+      }
+    },
+    "Connection needs an update": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Połączenie do aktualizacji"
+          }
+        }
+      }
+    },
+    "Copy command": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopiuj polecenie"
+          }
+        }
+      }
+    },
+    "Copy the claude command": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopiuj polecenie claude"
+          }
+        }
+      }
+    },
+    "Could not change the Claude Code settings: %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się zmienić ustawień Claude Code: %@"
+          }
+        }
+      }
+    },
+    "Could not start the listener: %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się uruchomić odbiornika: %@"
+          }
+        }
+      }
+    },
+    "Could not switch to the session: %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się przełączyć na sesję: %@"
+          }
+        }
+      }
+    },
+    "Creates ~/.claude-%@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Powstanie katalog ~/.claude-%@"
+          }
+        }
+      }
+    },
+    "Data folder": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Folder danych"
+          }
+        }
+      }
+    },
+    "Default account": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konto domyślne"
+          }
+        }
+      }
+    },
+    "Disconnect": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rozłącz"
+          }
+        }
+      }
+    },
+    "Done": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gotowe"
+          }
+        }
+      }
+    },
+    "Error": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Błąd"
+          }
+        }
+      }
+    },
+    "Event log": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Log zdarzeń"
+          }
+        }
+      }
+    },
+    "Everything stays on this Mac. Tendbar sends nothing over the network": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wszystko zostaje na tym Macu. Tendbar nie wysyła nic do sieci"
+          }
+        }
+      }
+    },
+    "For troubleshooting. Turning it off deletes the log": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Do diagnozy problemów. Wyłączenie usuwa log"
+          }
+        }
+      }
+    },
+    "Forget this account": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zapomnij to konto"
+          }
+        }
+      }
+    },
+    "General": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ogólne"
+          }
+        }
+      }
+    },
+    "Glow when a session finishes too": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ramka także po skończonej pracy"
+          }
+        }
+      }
+    },
+    "Glowing screen edge": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Świecąca ramka ekranu"
+          }
+        }
+      }
+    },
+    "Hooks in ~/.claude/settings.json": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hooki w ~/.claude/settings.json"
+          }
+        }
+      }
+    },
+    "How": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jak"
+          }
+        }
+      }
+    },
+    "Invalid request": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieprawidłowe zapytanie"
+          }
+        }
+      }
+    },
+    "Mark all as read": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oznacz jako przeczytane"
+          }
+        }
+      }
+    },
+    "Model not found": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie ma takiego modelu"
+          }
+        }
+      }
+    },
+    "Name or e-mail": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nazwa lub e-mail"
+          }
+        }
+      }
+    },
+    "New profile": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nowy profil"
+          }
+        }
+      }
+    },
+    "No profiles yet. The default ~/.claude profile appears after the first session": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brak profili. Domyślny profil ~/.claude pojawi się po pierwszej sesji"
+          }
+        }
+      }
+    },
+    "No sessions running": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Żadna sesja nie jest uruchomiona"
+          }
+        }
+      }
+    },
+    "Not connected": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niepołączone"
+          }
+        }
+      }
+    },
+    "Not connected to Claude Code": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie połączono z Claude Code"
+          }
+        }
+      }
+    },
+    "Notifications": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Powiadomienia"
+          }
+        }
+      }
+    },
+    "Notifications are turned off in macOS": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Powiadomienia wyłączone w systemie"
+          }
+        }
+      }
+    },
+    "Notifications work.": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Powiadomienia działają."
+          }
+        }
+      }
+    },
+    "Notify when": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Powiadamiaj, gdy"
+          }
+        }
+      }
+    },
+    "Open at login": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uruchamiaj przy logowaniu"
+          }
+        }
+      }
+    },
+    "Organization not allowed": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Organizacja niedozwolona"
+          }
+        }
+      }
+    },
+    "Preview glow": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Podgląd ramki"
+          }
+        }
+      }
+    },
+    "Quit Tendbar": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zakończ Tendbar"
+          }
+        }
+      }
+    },
+    "Rate limit": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limit zapytań"
+          }
+        }
+      }
+    },
+    "Remove ended sessions": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuń zakończone sesje"
+          }
+        }
+      }
+    },
+    "Remove from the list (keeps the directory)": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuń z listy (katalog zostaje)"
+          }
+        }
+      }
+    },
+    "Reply hit the length limit": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odpowiedź przekroczyła limit długości"
+          }
+        }
+      }
+    },
+    "Reply ready": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odpowiedź gotowa"
+          }
+        }
+      }
+    },
+    "Session closed": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sesja zamknięta"
+          }
+        }
+      }
+    },
+    "Session state in the middle of the menu bar": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stan sesji na środku paska menu"
+          }
+        }
+      }
+    },
+    "Session state next to the notch": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stan sesji w notchu"
+          }
+        }
+      }
+    },
+    "Sessions show up here once you start Claude Code in a terminal": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sesje pojawią się tu same, gdy uruchomisz Claude Code w terminalu"
+          }
+        }
+      }
+    },
+    "Settings (⌘,)": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ustawienia (⌘,)"
+          }
+        }
+      }
+    },
+    "Show": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pokaż"
+          }
+        }
+      }
+    },
+    "Sound": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dźwięk"
+          }
+        }
+      }
+    },
+    "Start of the reply in “Done” notifications": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Początek odpowiedzi w powiadomieniu „Gotowe”"
+          }
+        }
+      }
+    },
+    "System Settings": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ustawienia systemowe"
+          }
+        }
+      }
+    },
+    "Tendbar cannot switch to this terminal yet.": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie umiem jeszcze przełączyć na ten terminal."
+          }
+        }
+      }
+    },
+    "Tendbar is not connected to Claude Code": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tendbar nie jest połączony z Claude Code"
+          }
+        }
+      }
+    },
+    "Tendbar's hooks are outdated or incomplete": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hooki Tendbara są nieaktualne albo niepełne"
+          }
+        }
+      }
+    },
+    "Test notification": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Testowe powiadomienie"
+          }
+        }
+      }
+    },
+    "The edge glows orange when a session waits, green when it finishes, red after an error and at 90% of a limit": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ramka jest pomarańczowa, gdy sesja czeka, zielona po skończeniu, czerwona po błędzie i przy 90% limitu"
+          }
+        }
+      }
+    },
+    "The tendbar-hook helper is missing from the app": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie znaleziono pomocnika tendbar-hook w aplikacji"
+          }
+        }
+      }
+    },
+    "The turn ended with an error": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tura zakończyła się błędem"
+          }
+        }
+      }
+    },
+    "This session's terminal is not running.": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminal tej sesji nie jest uruchomiony."
+          }
+        }
+      }
+    },
+    "Try it": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wypróbuj"
+          }
+        }
+      }
+    },
+    "Version %@ (%@)": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wersja %@ (%@)"
+          }
+        }
+      }
+    },
+    "Waiting for the first prompt": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Czeka na pierwsze polecenie"
+          }
+        }
+      }
+    },
+    "Waiting for you": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Czeka na Ciebie"
+          }
+        }
+      }
+    },
+    "current": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aktywne"
+          }
+        }
+      }
+    },
+    "current account": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aktywne konto"
+          }
+        }
+      }
+    },
+    "current account limit %lld%%": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "limit aktywnego konta %lld%%"
+          }
+        }
+      }
+    },
+    "done": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "gotowe"
+          }
+        }
+      }
+    },
+    "ended": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "zakończona"
+          }
+        }
+      }
+    },
+    "error": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "błąd"
+          }
+        }
+      }
+    },
+    "idle": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bezczynna"
+          }
+        }
+      }
+    },
+    "macOS has not asked for permission yet": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS jeszcze nie zapytał o zgodę"
+          }
+        }
+      }
+    },
+    "no data": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "brak danych"
+          }
+        }
+      }
+    },
+    "not signed in": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "niezalogowane"
+          }
+        }
+      }
+    },
+    "now": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "teraz"
+          }
+        }
+      }
+    },
+    "other account": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nieaktywne konto"
+          }
+        }
+      }
+    },
+    "read %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "odczyt %@"
+          }
+        }
+      }
+    },
+    "reset": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "zresetowany"
+          }
+        }
+      }
+    },
+    "resets %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "reset %@"
+          }
+        }
+      }
+    },
+    "settings.json is backed up before every change": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przed każdą zmianą powstaje kopia settings.json"
+          }
+        }
+      }
+    },
+    "tendbar-hook missing": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brak tendbar-hook"
+          }
+        }
+      }
+    },
+    "waiting for you": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "czeka na Ciebie"
+          }
+        }
+      }
+    },
+    "weekly": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "tygodniowy"
+          }
+        }
+      }
+    },
+    "working": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pracuje"
+          }
+        }
+      }
+    }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

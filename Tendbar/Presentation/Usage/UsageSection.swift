@@ -13,7 +13,7 @@ struct UsageSection: View {
                     AccountLimits(name: account.displayName, account: account, active: model.isCurrent(account))
                         .contentShape(Rectangle())
                         .contextMenu {
-                            Button("Zapomnij to konto") { actions.forget(account) }
+                            Button("Forget this account") { actions.forget(account) }
                         }
                 }
             }
@@ -30,8 +30,8 @@ private struct AccountLimits: View {
     var body: some View {
         let now = Date()
         let windows: [(title: String, window: LimitWindow?)] = [
-            (String(localized: "5 godz."), account.fiveHour),
-            (String(localized: "tydzień"), account.sevenDay),
+            (String(localized: "5-hour"), account.fiveHour),
+            (String(localized: "weekly"), account.sevenDay),
         ]
         let sorted = windows.sorted { ($0.window?.percentage(at: now) ?? -1) > ($1.window?.percentage(at: now) ?? -1) }
         let lead = sorted[0]
@@ -41,7 +41,7 @@ private struct AccountLimits: View {
             HStack(alignment: .firstTextBaseline) {
                 Text(name).fontWeight(.medium).lineLimit(1).truncationMode(.middle)
                 if active {
-                    Text("aktywne")
+                    Text("current")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .padding(.horizontal, 6)
@@ -49,7 +49,7 @@ private struct AccountLimits: View {
                         .background(Color.primary.opacity(0.08), in: Capsule())
                 }
                 Spacer()
-                Text("odczyt \(account.updatedAt.formatted(.relative(presentation: .named)))")
+                Text("read \(account.updatedAt.formatted(.relative(presentation: .named)))")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }
@@ -70,7 +70,7 @@ private struct AccountLimits: View {
                     .accessibilityLabel(lead.title)
                     .accessibilityValue("\(Int(percentage.rounded()))%")
             } else {
-                Text("brak danych").foregroundStyle(.tertiary)
+                Text("no data").foregroundStyle(.tertiary)
             }
             if let window = rest.window {
                 let percentage = window.percentage(at: now)
@@ -86,7 +86,7 @@ private struct AccountLimits: View {
     }
 
     private func resetText(_ window: LimitWindow, now: Date) -> String {
-        if now >= window.resetsAt { return String(localized: "zresetowany") }
-        return String(localized: "reset \(window.resetsAt.formatted(.relative(presentation: .named)))")
+        if now >= window.resetsAt { return String(localized: "reset") }
+        return String(localized: "resets \(window.resetsAt.formatted(.relative(presentation: .named)))")
     }
 }

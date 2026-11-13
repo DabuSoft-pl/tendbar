@@ -12,33 +12,33 @@ struct AccountsSection: View {
         Group {
             Section {
                 if model.profiles.isEmpty {
-                    Text("Brak profili. Domyślny profil ~/.claude pojawi się po pierwszej sesji")
+                    Text("No profiles yet. The default ~/.claude profile appears after the first session")
                         .foregroundStyle(.secondary)
                 }
                 ForEach(model.profiles) { profile in
                     ProfileRow(profile: profile, actions: actions)
                 }
             } header: {
-                Text("Profile Claude Code")
+                Text("Claude Code profiles")
             } footer: {
-                Text("Limity konta przychodzą z sesji Claude Code zalogowanych na tym koncie")
+                Text("An account's limits come from Claude Code sessions signed in to it")
             }
             Section {
                 HStack {
-                    TextField("Nazwa lub e-mail", text: $newName)
+                    TextField("Name or e-mail", text: $newName)
                         .onSubmit(add)
-                    Button("Dodaj", action: add)
+                    Button("Add", action: add)
                         .disabled(slug.isEmpty)
                 }
                 if let error = model.profileError {
                     Text(error).foregroundStyle(.red)
                 }
             } header: {
-                Text("Nowy profil")
+                Text("New profile")
             } footer: {
                 Text(slug.isEmpty
-                    ? String(localized: "Profil to osobny katalog Claude Code, w którym logujesz się przez /login")
-                    : String(localized: "Powstanie katalog ~/.claude-\(slug)"))
+                    ? String(localized: "A profile is a separate Claude Code directory you sign in to with /login")
+                    : String(localized: "Creates ~/.claude-\(slug)"))
             }
         }
     }
@@ -61,7 +61,7 @@ private struct ProfileRow: View {
     var body: some View {
         HStack(alignment: .center, spacing: 8) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(profile.email ?? String(localized: "niezalogowane"))
+                Text(profile.email ?? String(localized: "not signed in"))
                     .foregroundStyle(profile.email == nil ? .secondary : .primary)
                     .lineLimit(1)
                 Text(profile.launchCommand)
@@ -76,20 +76,20 @@ private struct ProfileRow: View {
             case .connected:
                 Image(systemName: "checkmark")
                     .foregroundStyle(.secondary)
-                    .help("Połączone")
-                    .accessibilityLabel("Połączone")
+                    .help("Connected")
+                    .accessibilityLabel("Connected")
             case .outdated, .disconnected:
-                Button("Połącz") { actions.connect(profile) }
+                Button("Connect") { actions.connect(profile) }
             case nil:
                 EmptyView()
             }
             Menu {
-                Button("Kopiuj polecenie") {
+                Button("Copy command") {
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString(profile.launchCommand, forType: .string)
                 }
                 if profile.directory != nil {
-                    Button("Usuń z listy (katalog zostaje)") { actions.remove(profile) }
+                    Button("Remove from the list (keeps the directory)") { actions.remove(profile) }
                 }
             } label: {
                 Image(systemName: "ellipsis")

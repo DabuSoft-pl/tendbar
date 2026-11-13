@@ -40,7 +40,7 @@ final class UserNotificationsAdapter: NSObject, UNUserNotificationCenterDelegate
     func sendTest(sound: Bool) async throws {
         let content = UNMutableNotificationContent()
         content.title = "Tendbar"
-        content.body = String(localized: "Powiadomienia działają.")
+        content.body = String(localized: "Notifications work.")
         if sound { content.sound = .default }
         let previous = await center.deliveredNotifications().map(\.request.identifier).filter { $0.hasPrefix("test-") }
         center.removeDeliveredNotifications(withIdentifiers: previous)
@@ -61,8 +61,8 @@ final class UserNotificationsAdapter: NSObject, UNUserNotificationCenterDelegate
     func presentLimit(_ warning: LimitWarning, account: AccountUsage, sound: Bool) {
         let content = UNMutableNotificationContent()
         let reset = warning.resetsAt.formatted(.relative(presentation: .named))
-        content.title = String(localized: "Limit \(LimitWindowName.of(warning.window)): \(Int(warning.percentage.rounded()))%")
-        content.body = String(localized: "\(account.displayName), reset \(reset)")
+        content.title = String(localized: "\(LimitWindowName.of(warning.window)) limit: \(Int(warning.percentage.rounded()))%")
+        content.body = String(localized: "\(account.displayName), resets \(reset)")
         content.threadIdentifier = "limits"
         if sound { content.sound = .default }
         let key = LimitWarnings.key(accountID: warning.accountID, window: warning.window, resetsAt: warning.resetsAt, threshold: warning.threshold)

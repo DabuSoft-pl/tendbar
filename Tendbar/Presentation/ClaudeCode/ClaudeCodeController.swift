@@ -64,7 +64,7 @@ final class ClaudeCodeController {
             try addProfile.execute(name: name)
             model.profileError = nil
         } catch ProfileCreationError.invalidName {
-            model.profileError = String(localized: "Nazwa może mieć 1–32 znaki: małe litery, cyfry i myślniki.")
+            model.profileError = String(localized: "A name has 1–32 characters: lowercase letters, digits and hyphens.")
         } catch let ProfileCreationError.failed(message) {
             model.profileError = message
         } catch {

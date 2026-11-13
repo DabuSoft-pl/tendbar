@@ -128,22 +128,22 @@ public struct HookPayload: Codable, Sendable, Equatable {
         case errorDetails = "error_details"
     }
 
-    /// A readable line for a failed turn, such as "Przeciążone API (529 Overloaded)".
+    /// A readable line for a failed turn, such as "API overloaded (529 Overloaded)".
     public var failureMessage: String? {
         guard let error else { return nil }
         let title = switch error {
-        case "rate_limit": String(localized: "Limit zapytań")
-        case "overloaded": String(localized: "Przeciążone API")
-        case "authentication_failed": String(localized: "Błąd logowania")
-        case "oauth_org_not_allowed": String(localized: "Organizacja niedozwolona")
-        case "account_on_hold": String(localized: "Konto wstrzymane")
-        case "billing_error": String(localized: "Problem z płatnością")
-        case "invalid_request": String(localized: "Nieprawidłowe zapytanie")
-        case "model_not_found": String(localized: "Nie ma takiego modelu")
-        case "server_error": String(localized: "Błąd serwera API")
-        case "max_output_tokens": String(localized: "Odpowiedź przekroczyła limit długości")
-        case "cloud_credential_error": String(localized: "Błąd poświadczeń chmury")
-        default: String(localized: "Błąd API")
+        case "rate_limit": String(localized: "Rate limit")
+        case "overloaded": String(localized: "API overloaded")
+        case "authentication_failed": String(localized: "Authentication failed")
+        case "oauth_org_not_allowed": String(localized: "Organization not allowed")
+        case "account_on_hold": String(localized: "Account on hold")
+        case "billing_error": String(localized: "Billing problem")
+        case "invalid_request": String(localized: "Invalid request")
+        case "model_not_found": String(localized: "Model not found")
+        case "server_error": String(localized: "API server error")
+        case "max_output_tokens": String(localized: "Reply hit the length limit")
+        case "cloud_credential_error": String(localized: "Cloud credential error")
+        default: String(localized: "API error")
         }
         guard let details = errorDetails?.trimmingCharacters(in: .whitespacesAndNewlines), !details.isEmpty else { return title }
         return "\(title) (\(details.prefix(120)))"
