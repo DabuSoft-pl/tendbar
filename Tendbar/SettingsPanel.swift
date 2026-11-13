@@ -61,14 +61,8 @@ struct SettingsPanel: View {
             }
 
             section("Wygląd") {
-                Toggle("Stan sesji w notchu", isOn: $preferences.notchView)
-                    .disabled(!NotchController.isAvailable)
+                Toggle(NotchController.hasNotch ? "Stan sesji w notchu" : "Stan sesji na środku paska menu", isOn: $preferences.notchView)
                     .onChange(of: preferences.notchView) { model.refreshNotch() }
-                if !NotchController.isAvailable {
-                    Text("Ten Mac nie ma ekranu z notchem.")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
             }
 
             section("Ogólne") {

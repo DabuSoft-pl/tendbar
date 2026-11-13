@@ -7,7 +7,7 @@ struct NotchGeometry: Equatable {
     let notchWidth: CGFloat
     let notchHeight: CGFloat
 
-    init?(screen: NSScreen) {
+    init?(notchOf screen: NSScreen) {
         guard screen.safeAreaInsets.top > 0,
               let left = screen.auxiliaryTopLeftArea,
               let right = screen.auxiliaryTopRightArea
@@ -15,6 +15,22 @@ struct NotchGeometry: Equatable {
         screenFrame = screen.frame
         notchWidth = screen.frame.width - left.width - right.width
         notchHeight = screen.safeAreaInsets.top
+    }
+
+    init(menuBarOf screen: NSScreen) {
+        screenFrame = screen.frame
+        notchWidth = 0
+        let menuBar = screen.frame.maxY - screen.visibleFrame.maxY
+        notchHeight = menuBar > 0 ? menuBar : 24
+    }
+
+    static func current() -> NotchGeometry? {
+        if let notch = NSScreen.screens.lazy.compactMap(NotchGeometry.init(notchOf:)).first { return notch }
+        return NSScreen.screens.first.map(NotchGeometry.init(menuBarOf:))
+    }
+
+    var hasNotch: Bool {
+        notchWidth > 0
     }
 
     static let panelWidth: CGFloat = 420
@@ -50,14 +66,12 @@ final class NotchController {
         update()
     }
 
-    static var isAvailable: Bool {
-        NSScreen.screens.contains { NotchGeometry(screen: $0) != nil }
+    static var hasNotch: Bool {
+        NotchGeometry.current()?.hasNotch == true
     }
 
     func update() {
-        guard let model, model.preferences.notchView,
-              let geometry = NSScreen.screens.lazy.compactMap(NotchGeometry.init(screen:)).first
-        else {
+        guard let model, model.preferences.notchView, let geometry = NotchGeometry.current() else {
             close()
             return
         }
@@ -150,7 +164,7 @@ private struct NotchView: View {
                 Image(systemName: "bird.fill")
                     .foregroundStyle(lead.color)
                     .frame(width: wing)
-                Spacer(minLength: notchWidth)
+                Spacer(minLength: max(notchWidth, 4))
                 Group {
                     if let badge {
                         Text("\(badge.count)")
@@ -178,7 +192,7 @@ private struct NotchView: View {
                 .transition(.opacity)
             }
         }
-        .frame(width: expanded ? expandedWidth : notchWidth + wing * 2)
+        .frame(width: expanded ? expandedWidth : max(notchWidth, 4) + wing * 2)
         .background(
             UnevenRoundedRectangle(bottomLeadingRadius: radius, bottomTrailingRadius: radius)
                 .fill(.black)
