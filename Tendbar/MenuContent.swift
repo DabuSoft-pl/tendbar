@@ -4,16 +4,10 @@ import TendbarKit
 
 struct MenuContent: View {
     let model: AppModel
-    @State private var showingSettings = false
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
-        Group {
-            if showingSettings {
-                SettingsPanel(model: model) { showingSettings = false }
-            } else {
-                sessionsPanel
-            }
-        }
+        sessionsPanel
         .padding(16)
         .frame(width: 400)
     }
@@ -82,12 +76,13 @@ struct MenuContent: View {
                 .disabled(!model.sessions.contains { $0.unread })
             Spacer()
             Button {
-                showingSettings = true
+                NSApp.activate()
+                openSettings()
             } label: {
                 Image(systemName: "gearshape")
             }
             .buttonStyle(.borderless)
-            .help("Ustawienia")
+            .help("Ustawienia (⌘,)")
             Menu {
                 Button("Usuń zakończone sesje") { model.removeEnded() }
                 Button("Pokaż log zdarzeń") {

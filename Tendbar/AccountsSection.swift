@@ -7,35 +7,40 @@ struct AccountsSection: View {
     @State private var newName = ""
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        Form {
             if FileManager.default.fileExists(atPath: ClaudeSwapUsage.defaultURL.path) {
-                Label("Wykryto cswap: limity wszystkich jego kont Tendbar czyta z jego pamięci podręcznej. Osobne profile poniżej nie są wtedy potrzebne.", systemImage: "arrow.triangle.2.circlepath")
+                Section {
+                    Label("Limity wszystkich kont cswap Tendbar czyta z jego pamięci podręcznej", systemImage: "arrow.triangle.2.circlepath")
+                } footer: {
+                    Text("Przy cswap osobne profile nie są potrzebne")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Section("Profile Claude Code") {
+                ForEach(model.profiles) { profile in
+                    ProfileRow(model: model, profile: profile)
+                }
+            }
+            Section {
+                HStack {
+                    TextField("Nazwa lub e-mail", text: $newName)
+                        .onSubmit(add)
+                    Button("Dodaj", action: add)
+                        .disabled(slug.isEmpty)
+                }
+                if let error = model.profileError {
+                    Text(error).foregroundStyle(.red)
+                }
+            } header: {
+                Text("Nowy profil")
+            } footer: {
+                Text(slug.isEmpty
+                    ? String(localized: "Profil to osobny katalog Claude Code. Logujesz się w nim poleceniem /login. Ustawienia, CLAUDE.md, agenci, skille i pluginy są wspólne z ~/.claude.")
+                    : String(localized: "Powstanie katalog ~/.claude-\(slug)"))
                     .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
             }
-            ForEach(model.profiles) { profile in
-                ProfileRow(model: model, profile: profile)
-            }
-            HStack {
-                TextField("nazwa lub e-mail drugiego konta", text: $newName)
-                    .textFieldStyle(.roundedBorder)
-                    .onSubmit(add)
-                Button("Dodaj konto", action: add)
-                    .disabled(slug.isEmpty)
-            }
-            if !slug.isEmpty {
-                Text("Powstanie katalog ~/.claude-\(slug)")
-                    .font(.system(.caption, design: .monospaced))
-                    .foregroundStyle(.secondary)
-            }
-            if let error = model.profileError {
-                Text(error).foregroundStyle(.red).fixedSize(horizontal: false, vertical: true)
-            }
-            Text("Wpisana nazwa służy tylko do nazwania katalogu. Na konto logujesz się w Claude: uruchom polecenie z listy w terminalu i wpisz /login. Profil współdzieli z ~/.claude ustawienia, CLAUDE.md, agentów, skille i pluginy.")
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
         }
-        .font(.callout)
+        .formStyle(.grouped)
     }
 
     private var slug: String {
@@ -54,52 +59,41 @@ private struct ProfileRow: View {
     let profile: AppModel.Profile
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            HStack(alignment: .firstTextBaseline) {
+        HStack(alignment: .center, spacing: 8) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(profile.email ?? String(localized: "niezalogowane"))
-                    .fontWeight(.medium)
                     .foregroundStyle(profile.email == nil ? .secondary : .primary)
                     .lineLimit(1)
-                Spacer()
-                switch profile.connection {
-                case .connected:
-                    Label("połączone", systemImage: "checkmark.circle.fill")
-                        .labelStyle(.titleAndIcon)
-                        .foregroundStyle(.green)
-                case .outdated, .disconnected:
-                    Button("Połącz") { model.connect(profile) }
-                        .controlSize(.small)
-                case nil:
-                    EmptyView()
-                }
-            }
-            HStack(spacing: 6) {
                 Text(profile.launchCommand)
                     .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
                     .lineLimit(1)
-                Button {
+                    .truncationMode(.middle)
+            }
+            Spacer()
+            switch profile.connection {
+            case .connected:
+                Text("połączone").foregroundStyle(.secondary)
+            case .outdated, .disconnected:
+                Button("Połącz") { model.connect(profile) }
+            case nil:
+                EmptyView()
+            }
+            Menu {
+                Button("Kopiuj polecenie") {
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString(profile.launchCommand, forType: .string)
-                } label: {
-                    Image(systemName: "doc.on.doc")
                 }
-                .buttonStyle(.borderless)
-                .help("Kopiuj polecenie")
-                Spacer()
                 if profile.directory != nil {
-                    Button {
-                        model.removeProfile(profile)
-                    } label: {
-                        Image(systemName: "minus.circle")
-                    }
-                    .buttonStyle(.borderless)
-                    .help("Usuń z listy (katalog zostaje)")
+                    Button("Usuń z listy (katalog zostaje)") { model.removeProfile(profile) }
                 }
+            } label: {
+                Image(systemName: "ellipsis")
             }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
         }
-        .padding(8)
-        .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
     }
 }
