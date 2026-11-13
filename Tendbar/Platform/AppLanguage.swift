@@ -25,6 +25,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         }
     }
 
+    @MainActor
     static func relaunch() {
         let path = Bundle.main.bundlePath
         let process = Process()
