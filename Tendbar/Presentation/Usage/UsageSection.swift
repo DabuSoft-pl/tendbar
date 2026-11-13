@@ -4,13 +4,20 @@ import TendbarDomain
 struct UsageSection: View {
     let model: UsageViewModel
     let actions: UsageController
+    var compact = false
 
     var body: some View {
         let accounts = model.accounts
         if !accounts.isEmpty {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: compact ? 8 : 16) {
                 ForEach(accounts) { account in
-                    AccountLimits(name: account.displayName, account: account, active: model.isCurrent(account))
+                    Group {
+                        if compact {
+                            CompactLimits(name: account.displayName, account: account, active: model.isCurrent(account))
+                        } else {
+                            AccountLimits(name: account.displayName, account: account, active: model.isCurrent(account))
+                        }
+                    }
                         .contentShape(Rectangle())
                         .contextMenu {
                             Button("Forget this account") { actions.forget(account) }
@@ -87,5 +94,39 @@ private struct AccountLimits: View {
     private func resetText(_ window: LimitWindow, now: Date) -> String {
         if now >= window.resetsAt { return String(localized: "reset") }
         return String(localized: "resets \(window.resetsAt.formatted(.relative(presentation: .named)))")
+    }
+}
+
+/// One line per account: the name, then the five-hour and weekly usage as short bars.
+private struct CompactLimits: View {
+    let name: String
+    let account: AccountUsage
+    let active: Bool
+
+    var body: some View {
+        let now = Date()
+        HStack(spacing: 12) {
+            Text(name)
+                .fontWeight(active ? .medium : .regular)
+                .foregroundStyle(active ? .primary : .secondary)
+                .lineLimit(1)
+                .truncationMode(.middle)
+            Spacer(minLength: 8)
+            gauge(String(localized: "5h"), account.fiveHour, now: now)
+            gauge(String(localized: "7d"), account.sevenDay, now: now)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private func gauge(_ title: String, _ window: LimitWindow?, now: Date) -> some View {
+        let percentage = window?.percentage(at: now) ?? 0
+        return HStack(spacing: 6) {
+            Text(title).foregroundStyle(.tertiary).fixedSize()
+            LimitBar(percentage: percentage, height: 4).frame(width: 44)
+            Text(window == nil ? "–" : "\(Int(percentage.rounded()))%")
+                .monospacedDigit()
+                .foregroundStyle(percentage >= 70 ? limitColor(percentage) : .secondary)
+                .frame(width: 34, alignment: .trailing)
+        }
     }
 }

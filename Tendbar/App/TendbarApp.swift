@@ -15,7 +15,7 @@ struct TendbarApp: App {
         MenuBarExtra {
             MenuContent(container: container)
         } label: {
-            MenuBarLabel(sessions: container.sessions, usage: container.usage)
+            MenuBarLabel(sessions: container.sessions, usage: container.usage, preferences: container.preferences)
         }
         .menuBarExtraStyle(.window)
 
@@ -28,15 +28,29 @@ struct TendbarApp: App {
 private struct MenuBarLabel: View {
     let sessions: SessionsViewModel
     let usage: UsageViewModel
+    let preferences: Preferences
 
     var body: some View {
         let limit = Int(usage.currentLimit.rounded())
-        if sessions.needsYouCount > 0 {
-            Text("\(Image(systemName: "bird.fill")) \(sessions.needsYouCount)")
-        } else if limit >= 90 {
-            Text("\(Image(systemName: "bird")) \(limit)%")
-        } else {
-            Image(systemName: "bird")
+        let waiting = sessions.needsYouCount
+        let bird = Image(systemName: waiting > 0 ? "bird.fill" : "bird")
+        switch preferences.menuBarStyle {
+        case .bird:
+            bird
+        case .waiting:
+            if waiting > 0 {
+                Text("\(bird) \(waiting)")
+            } else if limit >= 90 {
+                Text("\(bird) \(limit)%")
+            } else {
+                bird
+            }
+        case .limit:
+            if usage.isEmpty {
+                bird
+            } else {
+                Text("\(bird) \(limit)%")
+            }
         }
     }
 }

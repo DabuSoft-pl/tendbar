@@ -18,6 +18,11 @@ final class Preferences: AlertSettingsProviding {
         static let limits = "notify.limits"
         static let logEvents = "log.events"
         static let replyPreview = "notify.done.preview"
+        static let menuBar = "view.menuBar"
+        static let pill = "view.pill"
+        static let pillLines = "view.pill.lines"
+        static let panelPreviews = "view.panel.previews"
+        static let usage = "view.panel.usage"
     }
 
     @ObservationIgnored private let defaults: UserDefaults
@@ -32,6 +37,11 @@ final class Preferences: AlertSettingsProviding {
     var glowOnDone: Bool { didSet { defaults.set(glowOnDone, forKey: Key.glowDone) } }
     var showReplyPreview: Bool { didSet { defaults.set(showReplyPreview, forKey: Key.replyPreview) } }
     var notifyLimits: Bool { didSet { defaults.set(notifyLimits, forKey: Key.limits) } }
+    var menuBarStyle: MenuBarStyle { didSet { defaults.set(menuBarStyle.rawValue, forKey: Key.menuBar) } }
+    var pillVisibility: PillVisibility { didSet { defaults.set(pillVisibility.rawValue, forKey: Key.pill) } }
+    var pillLimitLines: Bool { didSet { defaults.set(pillLimitLines, forKey: Key.pillLines) } }
+    var panelPreviews: Bool { didSet { defaults.set(panelPreviews, forKey: Key.panelPreviews) } }
+    var usageStyle: UsageStyle { didSet { defaults.set(usageStyle.rawValue, forKey: Key.usage) } }
     var logEvents: Bool {
         didSet {
             defaults.set(logEvents, forKey: Key.logEvents)
@@ -49,6 +59,7 @@ final class Preferences: AlertSettingsProviding {
         self.defaults = defaults
         defaults.register(defaults: [
             Key.needsYou: true, Key.done: true, Key.failed: true, Key.sound: true, Key.glow: true, Key.glowDone: true, Key.notch: true, Key.limits: true,
+            Key.pillLines: true, Key.panelPreviews: true,
         ])
         notifyNeedsYou = defaults.bool(forKey: Key.needsYou)
         notifyDone = defaults.bool(forKey: Key.done)
@@ -60,6 +71,11 @@ final class Preferences: AlertSettingsProviding {
         notchView = defaults.bool(forKey: Key.notch)
         logEvents = defaults.bool(forKey: Key.logEvents)
         showReplyPreview = defaults.bool(forKey: Key.replyPreview)
+        menuBarStyle = defaults.string(forKey: Key.menuBar).flatMap(MenuBarStyle.init) ?? .waiting
+        pillVisibility = defaults.string(forKey: Key.pill).flatMap(PillVisibility.init) ?? .activity
+        pillLimitLines = defaults.bool(forKey: Key.pillLines)
+        panelPreviews = defaults.bool(forKey: Key.panelPreviews)
+        usageStyle = defaults.string(forKey: Key.usage).flatMap(UsageStyle.init) ?? .full
     }
 
     var alertSettings: AlertSettings {
@@ -74,4 +90,22 @@ final class Preferences: AlertSettingsProviding {
         settings.showsReplyPreview = showReplyPreview
         return settings
     }
+}
+
+/// What the menu bar item shows next to the bird.
+enum MenuBarStyle: String, CaseIterable, Identifiable {
+    case bird, waiting, limit
+    var id: Self { self }
+}
+
+/// When the pill next to the notch is on screen.
+enum PillVisibility: String, CaseIterable, Identifiable {
+    case always, activity, needsYou
+    var id: Self { self }
+}
+
+/// How the panel shows each account's limits.
+enum UsageStyle: String, CaseIterable, Identifiable {
+    case full, compact, hidden
+    var id: Self { self }
 }

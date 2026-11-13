@@ -30,6 +30,7 @@ enum Screenshots {
         NotchView(
             sessions: container.sessions,
             usage: container.usage,
+            preferences: container.preferences,
             onSelect: { _ in },
             notchWidth: 190,
             notchHeight: 32,

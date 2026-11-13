@@ -112,6 +112,7 @@ final class NotchController {
         let view = NSHostingView(rootView: NotchView(
             sessions: sessions,
             usage: usage,
+            preferences: preferences,
             onSelect: { [sessionActions] in sessionActions.select($0) },
             notchWidth: geometry.notchWidth,
             notchHeight: geometry.notchHeight
@@ -126,6 +127,7 @@ final class NotchController {
 struct NotchView: View {
     let sessions: SessionsViewModel
     let usage: UsageViewModel
+    let preferences: Preferences
     let onSelect: (Session) -> Void
     let notchWidth: CGFloat
     let notchHeight: CGFloat
@@ -134,6 +136,7 @@ struct NotchView: View {
     init(
         sessions: SessionsViewModel,
         usage: UsageViewModel,
+        preferences: Preferences,
         onSelect: @escaping (Session) -> Void,
         notchWidth: CGFloat,
         notchHeight: CGFloat,
@@ -141,6 +144,7 @@ struct NotchView: View {
     ) {
         self.sessions = sessions
         self.usage = usage
+        self.preferences = preferences
         self.onSelect = onSelect
         self.notchWidth = notchWidth
         self.notchHeight = notchHeight
@@ -168,13 +172,21 @@ struct NotchView: View {
         return count > 0 ? (count, lead) : nil
     }
 
+    private var showsPill: Bool {
+        switch preferences.pillVisibility {
+        case .always: true
+        case .activity: lead != nil || highestLimit >= 80
+        case .needsYou: lead == .needsYou
+        }
+    }
+
     private var highestLimit: Double {
         usage.currentLimit
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            if lead != nil || highestLimit >= 80 {
+            if showsPill {
                 pill(lead: lead)
             }
             Spacer(minLength: 0)
@@ -193,7 +205,7 @@ struct NotchView: View {
                             .foregroundStyle(lead.color)
                             .modifier(Breathing(active: lead == .working))
                     } else {
-                        Image(systemName: "bird").foregroundStyle(limitColor(highestLimit))
+                        Image(systemName: "bird").foregroundStyle(highestLimit >= 70 ? limitColor(highestLimit) : .secondary)
                     }
                 }
                 .frame(width: wing)
@@ -209,7 +221,7 @@ struct NotchView: View {
             }
             .frame(height: notchHeight)
 
-            if !expanded, highestLimit > 0 {
+            if !expanded, highestLimit > 0, preferences.pillLimitLines {
                 VStack(spacing: 2) {
                     LimitLine(percentage: usage.currentFiveHour ?? 0)
                     LimitLine(percentage: usage.currentSevenDay ?? 0)

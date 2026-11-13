@@ -69,6 +69,7 @@ private struct NotchPreview: View {
         NotchView(
             sessions: container.sessions,
             usage: container.usage,
+            preferences: container.preferences,
             onSelect: { container.sessionActions.select($0) },
             notchWidth: 180,
             notchHeight: 32,

@@ -171,6 +171,16 @@
         }
       }
     },
+    "Always": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zawsze"
+          }
+        }
+      }
+    },
     "An account passes 80% and 90% of a limit": {
       "localizations": {
         "pl": {
@@ -187,6 +197,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Limity konta przychodzą z sesji Claude Code zalogowanych na tym koncie"
+          }
+        }
+      }
+    },
+    "Appearance": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wygląd"
           }
         }
       }
@@ -451,6 +471,16 @@
         }
       }
     },
+    "Full": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pełne"
+          }
+        }
+      }
+    },
     "General": {
       "localizations": {
         "pl": {
@@ -481,12 +511,42 @@
         }
       }
     },
+    "Hidden": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukryte"
+          }
+        }
+      }
+    },
+    "Highest limit": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Najwyższy limit"
+          }
+        }
+      }
+    },
     "Hooks in ~/.claude/settings.json": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
             "value": "Hooki w ~/.claude/settings.json"
+          }
+        }
+      }
+    },
+    "Hover the pill to see the sessions and every account's limits": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Najedź na pigułkę, aby zobaczyć sesje i limity wszystkich kont"
           }
         }
       }
@@ -531,12 +591,32 @@
         }
       }
     },
+    "Limit lines under the pill": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linie limitów pod pigułką"
+          }
+        }
+      }
+    },
     "Mark all as read": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
             "value": "Oznacz jako przeczytane"
+          }
+        }
+      }
+    },
+    "Menu bar": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pasek menu"
           }
         }
       }
@@ -567,6 +647,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nowy profil"
+          }
+        }
+      }
+    },
+    "Next to the bird": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obok ptaka"
           }
         }
       }
@@ -611,6 +701,16 @@
         }
       }
     },
+    "Nothing": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nic"
+          }
+        }
+      }
+    },
     "Notifications": {
       "localizations": {
         "pl": {
@@ -651,6 +751,26 @@
         }
       }
     },
+    "One line per account": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jedna linia na konto"
+          }
+        }
+      }
+    },
+    "Only when a session waits for you": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tylko gdy sesja czeka na Ciebie"
+          }
+        }
+      }
+    },
     "Open at login": {
       "localizations": {
         "pl": {
@@ -667,6 +787,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Organizacja niedozwolona"
+          }
+        }
+      }
+    },
+    "Panel": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panel"
+          }
+        }
+      }
+    },
+    "Pill": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pigułka"
+          }
+        }
+      }
+    },
+    "Pill in the middle of the menu bar": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pigułka na środku paska menu"
+          }
+        }
+      }
+    },
+    "Pill next to the notch": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pigułka przy notchu"
           }
         }
       }
@@ -781,32 +941,22 @@
         }
       }
     },
-    "Session state in the middle of the menu bar": {
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stan sesji na środku paska menu"
-          }
-        }
-      }
-    },
-    "Session state next to the notch": {
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stan sesji w notchu"
-          }
-        }
-      }
-    },
     "Sessions show up here once you start Claude Code in a terminal": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
             "value": "Sesje pojawią się tu same, gdy uruchomisz Claude Code w terminalu"
+          }
+        }
+      }
+    },
+    "Sessions waiting for you": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sesje czekające na Ciebie"
           }
         }
       }
@@ -831,6 +981,16 @@
         }
       }
     },
+    "Show it": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pokazuj"
+          }
+        }
+      }
+    },
     "Sound": {
       "localizations": {
         "pl": {
@@ -847,6 +1007,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Początek odpowiedzi w powiadomieniu „Gotowe”"
+          }
+        }
+      }
+    },
+    "Start of the reply under each session": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Początek odpowiedzi pod każdą sesją"
           }
         }
       }
@@ -981,6 +1151,16 @@
         }
       }
     },
+    "Usage limits": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limity"
+          }
+        }
+      }
+    },
     "Version %@ (%@)": {
       "localizations": {
         "pl": {
@@ -1007,6 +1187,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Czeka na Ciebie"
+          }
+        }
+      }
+    },
+    "When a session works or waits": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gdy sesja pracuje lub czeka"
           }
         }
       }

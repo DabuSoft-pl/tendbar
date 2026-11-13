@@ -3,7 +3,7 @@ import SwiftUI
 import TendbarApplication
 
 private enum SettingsPage: String, CaseIterable, Identifiable {
-    case claudeCode, notifications, general
+    case claudeCode, notifications, appearance, general
 
     var id: Self { self }
 
@@ -11,6 +11,7 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
         switch self {
         case .claudeCode: "Claude Code"
         case .notifications: "Notifications"
+        case .appearance: "Appearance"
         case .general: "General"
         }
     }
@@ -19,6 +20,7 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
         switch self {
         case .claudeCode: "terminal"
         case .notifications: "bell"
+        case .appearance: "macwindow"
         case .general: "gearshape"
         }
     }
@@ -91,6 +93,8 @@ struct SettingsView: View {
             ClaudeCodeSettings(model: container.claudeCode, actions: container.claudeCodeActions)
         case .notifications:
             NotificationSettings(preferences: container.preferences, model: container.system, actions: container.systemActions)
+        case .appearance:
+            AppearanceSettings(preferences: container.preferences)
         case .general:
             GeneralSettings(preferences: container.preferences, system: container.system, systemActions: container.systemActions)
         }
@@ -239,6 +243,46 @@ private struct NotificationSettings: View {
 
 }
 
+private struct AppearanceSettings: View {
+    @Bindable var preferences: Preferences
+
+    var body: some View {
+        Form {
+            Section("Menu bar") {
+                Picker("Next to the bird", selection: $preferences.menuBarStyle) {
+                    Text("Nothing").tag(MenuBarStyle.bird)
+                    Text("Sessions waiting for you").tag(MenuBarStyle.waiting)
+                    Text("Highest limit").tag(MenuBarStyle.limit)
+                }
+            }
+            Section {
+                Toggle(NotchController.hasNotch ? "Pill next to the notch" : "Pill in the middle of the menu bar", isOn: $preferences.notchView)
+                Picker("Show it", selection: $preferences.pillVisibility) {
+                    Text("Always").tag(PillVisibility.always)
+                    Text("When a session works or waits").tag(PillVisibility.activity)
+                    Text("Only when a session waits for you").tag(PillVisibility.needsYou)
+                }
+                .disabled(!preferences.notchView)
+                Toggle("Limit lines under the pill", isOn: $preferences.pillLimitLines)
+                    .disabled(!preferences.notchView)
+            } header: {
+                Text("Pill")
+            } footer: {
+                Text("Hover the pill to see the sessions and every account's limits")
+            }
+            Section("Panel") {
+                Toggle("Start of the reply under each session", isOn: $preferences.panelPreviews)
+                Picker("Usage limits", selection: $preferences.usageStyle) {
+                    Text("Full").tag(UsageStyle.full)
+                    Text("One line per account").tag(UsageStyle.compact)
+                    Text("Hidden").tag(UsageStyle.hidden)
+                }
+            }
+        }
+        .formStyle(.grouped)
+    }
+}
+
 private struct GeneralSettings: View {
     @Bindable var preferences: Preferences
     let system: SystemViewModel
@@ -253,7 +297,6 @@ private struct GeneralSettings: View {
                     get: { system.loginItem != .disabled },
                     set: { systemActions.setLaunchAtLogin($0) }
                 ))
-                Toggle(NotchController.hasNotch ? "Session state next to the notch" : "Session state in the middle of the menu bar", isOn: $preferences.notchView)
                 Toggle(isOn: $preferences.logEvents) {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {

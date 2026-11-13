@@ -45,15 +45,15 @@ struct MenuContent: View {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 4) {
                         ForEach(sessions.sessions) { session in
-                            SessionRow(session: session) { actions.select(session) }
+                            SessionRow(session: session, showsDetail: container.preferences.panelPreviews) { actions.select(session) }
                         }
                     }
                 }
-                .frame(height: min(CGFloat(sessions.sessions.count) * 60, 420))
+                .frame(height: min(CGFloat(sessions.sessions.count) * (container.preferences.panelPreviews ? 60 : 36), 420))
             }
-            if !container.usage.isEmpty {
+            if !container.usage.isEmpty, container.preferences.usageStyle != .hidden {
                 Divider()
-                UsageSection(model: container.usage, actions: container.usageActions)
+                UsageSection(model: container.usage, actions: container.usageActions, compact: container.preferences.usageStyle == .compact)
             }
             Divider()
             footer
@@ -153,6 +153,7 @@ struct StateCount: View {
 
 struct SessionRow: View {
     let session: Session
+    var showsDetail = true
     let onSelect: () -> Void
 
     var body: some View {
@@ -169,10 +170,12 @@ struct SessionRow: View {
                             .foregroundStyle(.secondary)
                             .monospacedDigit()
                     }
-                    Text(detail)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                        .fixedSize(horizontal: false, vertical: true)
+                    if showsDetail {
+                        Text(detail)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
             }
             .font(.callout)
