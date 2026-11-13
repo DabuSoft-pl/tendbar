@@ -14,7 +14,7 @@ has used. Everything stays on your Mac: no account, no network calls, no model c
 - **Notifications.** A banner when a session needs you, finishes or fails, each switchable. A "done" banner shows only the folder unless you turn on the start of the reply. Optionally the screen
   edge glows when a session waits or fails. Clicking a banner opens the session.
 - **Notch pill.** A small pill next to the notch (or at the middle of the menu bar) shows the lead state and a count,
-  with a thin line for the highest usage limit. Hover it to see the sessions and every account's limits.
+  with two thin lines for the five-hour and weekly limits. Hover it to see the sessions and every account's limits.
 - **Usage limits.** Five-hour and weekly usage per account, with a warning at 80% and 90% of each window.
 - **Several accounts.** Readings are filed under the account signed in at the time, so switching accounts in any
   way starts a new entry and the previous account keeps its last reading until its window resets. Separate

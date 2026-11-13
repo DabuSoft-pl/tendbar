@@ -214,10 +214,13 @@ struct NotchView: View {
             .frame(height: notchHeight)
 
             if !expanded, highestLimit > 0 {
-                LimitLine(percentage: highestLimit)
-                    .padding(.horizontal, radius)
-                    .padding(.top, 2)
-                    .padding(.bottom, 6)
+                VStack(spacing: 2) {
+                    LimitLine(percentage: usage.currentFiveHour ?? 0)
+                    LimitLine(percentage: usage.currentSevenDay ?? 0)
+                }
+                .padding(.horizontal, radius)
+                .padding(.top, 2)
+                .padding(.bottom, 6)
             }
 
             if expanded {
