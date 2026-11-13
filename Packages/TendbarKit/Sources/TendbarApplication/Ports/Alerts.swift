@@ -31,6 +31,8 @@ public struct AlertSettings: Sendable, Equatable {
     public var flashOnDone = true
     /// Whether a "done" banner shows the start of Claude's reply.
     public var showsReplyPreview = false
+    /// Folders (session working directories) whose sessions stay quiet.
+    public var mutedFolders: Set<String> = []
 
     public init() {}
 
@@ -40,6 +42,10 @@ public struct AlertSettings: Sendable, Equatable {
         case .done: notifyDone
         case .failed: notifyFailed
         }
+    }
+
+    public func mutes(_ session: Session) -> Bool {
+        session.cwd.map(mutedFolders.contains) ?? false
     }
 
     public func flashes(_ kind: AlertKind) -> Bool {

@@ -48,7 +48,7 @@ public final class HandleHookEvent {
 
     private func notify(_ kind: AlertKind, sessionID: String) {
         let settings = settings.alertSettings
-        guard settings.notifies(kind), var session = repository.load().sessions[sessionID] else { return }
+        guard settings.notifies(kind), var session = repository.load().sessions[sessionID], !settings.mutes(session) else { return }
         if kind == .done, !settings.showsReplyPreview { session.preview = nil }
         alerts.present(kind, for: session, sound: settings.sound)
         if settings.flashes(kind) { flasher.flash(FlashTone(kind)) }

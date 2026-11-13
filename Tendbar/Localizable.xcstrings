@@ -409,6 +409,26 @@
         }
       }
     },
+    "Copied": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skopiowano"
+          }
+        }
+      }
+    },
+    "Copy": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopiuj"
+          }
+        }
+      }
+    },
     "Copy command": {
       "localizations": {
         "pl": {
@@ -485,6 +505,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Konto domyślne"
+          }
+        }
+      }
+    },
+    "Diagnostics for a bug report": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diagnostyka do zgłoszenia błędu"
           }
         }
       }
@@ -619,6 +649,16 @@
         }
       }
     },
+    "Hide from screen sharing": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukrywaj przy udostępnianiu ekranu"
+          }
+        }
+      }
+    },
     "Highest limit": {
       "localizations": {
         "pl": {
@@ -729,6 +769,36 @@
         }
       }
     },
+    "Mute this folder": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wycisz ten folder"
+          }
+        }
+      }
+    },
+    "Muted": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wyciszone"
+          }
+        }
+      }
+    },
+    "Muted folders": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wyciszone foldery"
+          }
+        }
+      }
+    },
     "Name or e-mail": {
       "localizations": {
         "pl": {
@@ -825,6 +895,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Powiadomienia wyłączone w systemie"
+          }
+        }
+      }
+    },
+    "Notifications muted for this folder": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Powiadomienia wyciszone dla tego folderu"
           }
         }
       }
@@ -1039,6 +1119,16 @@
         }
       }
     },
+    "Sessions in these folders still show in the panel, without banners or glow": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sesje z tych folderów nadal widać w panelu, ale bez powiadomień i ramki"
+          }
+        }
+      }
+    },
     "Sessions show up here once you start Claude Code in a terminal": {
       "localizations": {
         "pl": {
@@ -1189,12 +1279,12 @@
         }
       }
     },
-    "The edge glows orange when a session waits, green when it finishes, red after an error and at 90% of a limit": {
+    "The edge glows orange when a session waits, green when it finishes, red after an error and at 90% of a limit. Right-click a session in the panel to mute its folder": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ramka jest pomarańczowa, gdy sesja czeka, zielona po skończeniu, czerwona po błędzie i przy 90% limitu"
+            "value": "Ramka jest pomarańczowa, gdy sesja czeka, zielona po skończeniu, czerwona po błędzie i przy 90% limitu. Kliknij sesję w panelu prawym przyciskiem, aby wyciszyć jej folder"
           }
         }
       }
@@ -1205,6 +1295,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nowy język pojawi się po ponownym uruchomieniu"
+          }
+        }
+      }
+    },
+    "The pill and the glow stay off shared screens and recordings": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pigułka i ramka nie trafiają na udostępniany ekran ani do nagrań"
           }
         }
       }
@@ -1249,6 +1349,26 @@
         }
       }
     },
+    "Unmute": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wyłącz wyciszenie"
+          }
+        }
+      }
+    },
+    "Unmute this folder": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wyłącz wyciszenie folderu"
+          }
+        }
+      }
+    },
     "Usage limits": {
       "localizations": {
         "pl": {
@@ -1265,6 +1385,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wersja %@ (%@)"
+          }
+        }
+      }
+    },
+    "Versions, terminals and settings. No folder names, e-mails or messages": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wersje, terminale i ustawienia. Bez nazw folderów, e-maili i wiadomości"
           }
         }
       }

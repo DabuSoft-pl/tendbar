@@ -1,0 +1,25 @@
+name: Bug
+description: Something in Tendbar does not work as it should
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected and what you saw instead.
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: Settings → General → Diagnostics for a bug report → Copy, then paste here. It holds versions, terminals and settings, without folder names, e-mail addresses or messages.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Event log (optional)
+      description: If the bug is about a session's state, turn on Settings → General → Event log, reproduce it and paste the relevant lines. Check them for anything private first.
+      render: text

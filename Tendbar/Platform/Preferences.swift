@@ -23,6 +23,8 @@ final class Preferences: AlertSettingsProviding {
         static let pillLines = "view.pill.lines"
         static let panelPreviews = "view.panel.previews"
         static let usage = "view.panel.usage"
+        static let hideFromCapture = "view.hideFromCapture"
+        static let muted = "notify.muted"
     }
 
     @ObservationIgnored private let defaults: UserDefaults
@@ -48,6 +50,15 @@ final class Preferences: AlertSettingsProviding {
             onLogEventsChange?(logEvents)
         }
     }
+    /// Keeps the pill and the glow out of screen sharing and recordings, so folder names and limits stay private.
+    var hideFromCapture: Bool {
+        didSet {
+            defaults.set(hideFromCapture, forKey: Key.hideFromCapture)
+            onNotchViewChange?()
+        }
+    }
+    /// Folders whose sessions never raise a banner or a glow.
+    var mutedFolders: [String] { didSet { defaults.set(mutedFolders, forKey: Key.muted) } }
     var notchView: Bool {
         didSet {
             defaults.set(notchView, forKey: Key.notch)
@@ -59,7 +70,7 @@ final class Preferences: AlertSettingsProviding {
         self.defaults = defaults
         defaults.register(defaults: [
             Key.needsYou: true, Key.done: true, Key.failed: true, Key.sound: true, Key.glow: true, Key.glowDone: true, Key.notch: true, Key.limits: true,
-            Key.pillLines: true, Key.panelPreviews: true,
+            Key.pillLines: true, Key.panelPreviews: true, Key.hideFromCapture: true,
         ])
         notifyNeedsYou = defaults.bool(forKey: Key.needsYou)
         notifyDone = defaults.bool(forKey: Key.done)
@@ -76,6 +87,20 @@ final class Preferences: AlertSettingsProviding {
         pillLimitLines = defaults.bool(forKey: Key.pillLines)
         panelPreviews = defaults.bool(forKey: Key.panelPreviews)
         usageStyle = defaults.string(forKey: Key.usage).flatMap(UsageStyle.init) ?? .full
+        hideFromCapture = defaults.bool(forKey: Key.hideFromCapture)
+        mutedFolders = defaults.stringArray(forKey: Key.muted) ?? []
+    }
+
+    func isMuted(_ folder: String?) -> Bool {
+        folder.map(mutedFolders.contains) ?? false
+    }
+
+    func setMuted(_ muted: Bool, folder: String) {
+        if muted, !mutedFolders.contains(folder) {
+            mutedFolders.append(folder)
+        } else if !muted {
+            mutedFolders.removeAll { $0 == folder }
+        }
     }
 
     var alertSettings: AlertSettings {
@@ -88,6 +113,7 @@ final class Preferences: AlertSettingsProviding {
         settings.flash = edgeGlow
         settings.flashOnDone = glowOnDone
         settings.showsReplyPreview = showReplyPreview
+        settings.mutedFolders = Set(mutedFolders)
         return settings
     }
 }

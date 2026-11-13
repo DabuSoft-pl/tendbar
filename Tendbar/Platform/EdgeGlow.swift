@@ -8,6 +8,11 @@ final class EdgeGlow: ScreenFlashing {
 
     private var windows: [NSWindow] = []
     private var hideTask: Task<Void, Never>?
+    private let hidesFromCapture: () -> Bool
+
+    init(hidesFromCapture: @escaping () -> Bool = { true }) {
+        self.hidesFromCapture = hidesFromCapture
+    }
 
     func flash(_ tone: FlashTone) {
         switch tone {
@@ -30,6 +35,7 @@ final class EdgeGlow: ScreenFlashing {
             window.isReleasedWhenClosed = false
             window.level = .screenSaver
             window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]
+            window.sharingType = hidesFromCapture() ? .none : .readOnly
             let radius: CGFloat = screen.safeAreaInsets.top > 0 ? 10 : 0
             window.contentView = NSHostingView(rootView: GlowView(color: color, calm: calm, topRadius: radius))
             window.setFrame(screen.frame, display: false)

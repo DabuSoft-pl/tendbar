@@ -86,6 +86,7 @@ final class NotchController {
             panel = makePanel(geometry: geometry)
             self.geometry = geometry
         }
+        panel?.sharingType = preferences.hideFromCapture ? .none : .readOnly
         panel?.orderFrontRegardless()
     }
 

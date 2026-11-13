@@ -11,12 +11,47 @@ struct MenuContent: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("panel.showsEarlier") private var showsEarlier = false
     @State private var listHeight: CGFloat = 0
+    @State private var selection: String?
+    @FocusState private var focused: Bool
 
     var body: some View {
         sessionsPanel
         .padding(16)
         .frame(width: 400)
+        .focusable()
+        .focused($focused)
+        .focusEffectDisabled()
+        .onKeyPress(.downArrow) { move(by: 1) }
+        .onKeyPress(.upArrow) { move(by: -1) }
+        .onKeyPress(.return) { openSelection() }
+        .onAppear {
+            selection = nil
+            focused = true
+        }
         .fitsWindow()
+    }
+
+    private var current: [Session] { sessions.sessions.filter(\.isCurrent) }
+    private var earlier: [Session] { sessions.sessions.filter { !$0.isCurrent } }
+    private var showsAllEarlier: Bool { showsEarlier || current.isEmpty }
+
+    /// The rows on screen, top to bottom, which the arrow keys walk through.
+    private var visible: [Session] {
+        current + (showsAllEarlier ? earlier : [])
+    }
+
+    private func move(by step: Int) -> KeyPress.Result {
+        let rows = visible
+        guard !rows.isEmpty else { return .ignored }
+        let index = rows.firstIndex { $0.id == selection }.map { $0 + step } ?? (step > 0 ? 0 : rows.count - 1)
+        selection = rows[min(max(index, 0), rows.count - 1)].id
+        return .handled
+    }
+
+    private func openSelection() -> KeyPress.Result {
+        guard let session = visible.first(where: { $0.id == selection }) else { return .ignored }
+        actions.select(session)
+        return .handled
     }
 
     private var sessionsPanel: some View {
@@ -60,10 +95,11 @@ struct MenuContent: View {
     /// Sessions that are busy, waiting or unread come first. Read and ended ones fold under "Earlier", and the list
     /// scrolls past a fixed height, so the panel never grows past the screen.
     private var sessionList: some View {
-        let current = sessions.sessions.filter(\.isCurrent)
-        let earlier = sessions.sessions.filter { !$0.isCurrent }
-        let expanded = showsEarlier || current.isEmpty
-        return ScrollView {
+        let current = current
+        let earlier = earlier
+        let expanded = showsAllEarlier
+        return ScrollViewReader { proxy in
+        ScrollView {
             VStack(alignment: .leading, spacing: 4) {
                 ForEach(current) { row($0) }
                 if !earlier.isEmpty {
@@ -93,11 +129,24 @@ struct MenuContent: View {
             }
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { listHeight = $0 }
         }
+        .onChange(of: selection) {
+            if let selection { proxy.scrollTo(selection) }
+        }
+        }
         .frame(height: min(max(listHeight, 36), 320))
     }
 
     private func row(_ session: Session) -> some View {
-        SessionRow(session: session, showsDetail: container.preferences.panelPreviews) { actions.select(session) }
+        let preferences = container.preferences
+        return SessionRow(
+            session: session,
+            showsDetail: preferences.panelPreviews,
+            highlighted: selection == session.id,
+            muted: preferences.isMuted(session.cwd),
+            onHover: { if $0 { selection = session.id } },
+            onToggleMute: { folder in preferences.setMuted(!preferences.isMuted(folder), folder: folder) }
+        ) { actions.select(session) }
+        .id(session.id)
     }
 
     private var header: some View {
@@ -189,6 +238,10 @@ struct ConnectionBanner: View {
 struct SessionRow: View {
     let session: Session
     var showsDetail = true
+    var highlighted = false
+    var muted = false
+    var onHover: (Bool) -> Void = { _ in }
+    var onToggleMute: ((String) -> Void)?
     let onSelect: () -> Void
 
     var body: some View {
@@ -201,6 +254,13 @@ struct SessionRow: View {
                         Text(session.folderName).fontWeight(.medium).lineLimit(1)
                         Text(session.state.label).foregroundStyle(.secondary)
                         Spacer()
+                        if muted {
+                            Image(systemName: "bell.slash")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                                .help("Notifications muted for this folder")
+                                .accessibilityLabel("Muted")
+                        }
                         TimelineView(.periodic(from: .now, by: 30)) { context in
                             Text(session.timeText(now: context.date))
                                 .foregroundStyle(.secondary)
@@ -217,9 +277,21 @@ struct SessionRow: View {
             }
             .font(.callout)
             .padding(8)
+            .background(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(Color.primary.opacity(highlighted ? 0.07 : 0))
+            )
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .onHover(perform: onHover)
+        .contextMenu {
+            if let folder = session.cwd, let onToggleMute {
+                Button(muted ? String(localized: "Unmute this folder") : String(localized: "Mute this folder")) {
+                    onToggleMute(folder)
+                }
+            }
+        }
     }
 
 

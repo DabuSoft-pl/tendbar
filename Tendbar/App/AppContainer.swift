@@ -91,8 +91,9 @@ final class AppContainer {
     static func live() -> AppContainer {
         let notifications = UserNotificationsAdapter()
         let hookPath = Bundle.main.url(forAuxiliaryExecutable: "tendbar-hook")?.path
+        let preferences = Preferences()
         let container = AppContainer(
-            preferences: Preferences(),
+            preferences: preferences,
             adapters: Adapters(
                 sessions: JSONSessionRepository(),
                 usage: JSONUsageRepository(),
@@ -100,7 +101,7 @@ final class AppContainer {
                 profiles: UserDefaultsProfileRepository(),
                 alerts: notifications,
                 permissions: notifications,
-                flasher: EdgeGlow(),
+                flasher: EdgeGlow { [preferences] in preferences.hideFromCapture },
                 navigator: AppleScriptTerminalNavigator(),
                 emails: AccountEmailCache(),
                 transcripts: FileTranscriptReader(),

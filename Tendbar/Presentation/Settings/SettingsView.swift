@@ -99,7 +99,12 @@ struct SettingsView: View {
         case .appearance:
             AppearanceSettings(preferences: container.preferences)
         case .general:
-            GeneralSettings(preferences: container.preferences, system: container.system, systemActions: container.systemActions)
+            GeneralSettings(
+                preferences: container.preferences,
+                system: container.system,
+                systemActions: container.systemActions,
+                diagnostics: { [container] in Diagnostics.report(container) }
+            )
         }
     }
 
@@ -207,7 +212,29 @@ private struct NotificationSettings: View {
             } header: {
                 Text("How")
             } footer: {
-                Text("The edge glows orange when a session waits, green when it finishes, red after an error and at 90% of a limit")
+                Text("The edge glows orange when a session waits, green when it finishes, red after an error and at 90% of a limit. Right-click a session in the panel to mute its folder")
+            }
+            if !preferences.mutedFolders.isEmpty {
+                Section {
+                    ForEach(preferences.mutedFolders, id: \.self) { folder in
+                        LabeledContent {
+                            Button("Unmute") { preferences.setMuted(false, folder: folder) }
+                        } label: {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(URL(fileURLWithPath: folder).lastPathComponent)
+                                Text(folder)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                                    .truncationMode(.head)
+                            }
+                        }
+                    }
+                } header: {
+                    Text("Muted folders")
+                } footer: {
+                    Text("Sessions in these folders still show in the panel, without banners or glow")
+                }
             }
             if !granted || model.notificationError != nil {
                 Section {
@@ -290,7 +317,9 @@ private struct GeneralSettings: View {
     @Bindable var preferences: Preferences
     let system: SystemViewModel
     let systemActions: SystemController
+    let diagnostics: () -> String
     @State private var language = AppLanguage.current
+    @State private var copied = false
     @State private var asksRestart = false
 
     var body: some View {
@@ -300,6 +329,14 @@ private struct GeneralSettings: View {
                     get: { system.loginItem != .disabled },
                     set: { systemActions.setLaunchAtLogin($0) }
                 ))
+                Toggle(isOn: $preferences.hideFromCapture) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Hide from screen sharing")
+                        Text("The pill and the glow stay off shared screens and recordings")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
                 Toggle(isOn: $preferences.logEvents) {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
@@ -322,6 +359,26 @@ private struct GeneralSettings: View {
                     Text(error).foregroundStyle(Palette.vermilion)
                 } else {
                     Text("Everything stays on this Mac. Tendbar sends nothing over the network")
+                }
+            }
+            Section {
+                LabeledContent {
+                    Button(copied ? String(localized: "Copied") : String(localized: "Copy")) {
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(diagnostics(), forType: .string)
+                        copied = true
+                        Task {
+                            try? await Task.sleep(for: .seconds(2))
+                            copied = false
+                        }
+                    }
+                } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Diagnostics for a bug report")
+                        Text("Versions, terminals and settings. No folder names, e-mails or messages")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
             Section {

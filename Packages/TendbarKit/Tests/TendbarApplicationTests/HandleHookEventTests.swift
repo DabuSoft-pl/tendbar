@@ -57,6 +57,18 @@ import TendbarDomain
         #expect(flasher.tones.isEmpty)
     }
 
+    @Test func aMutedFolderStaysQuietButStillChangesState() async {
+        settings.alertSettings.mutedFolders = ["/Users/me/app"]
+
+        await useCase().execute(event(.permissionRequest))
+        await useCase().execute(event(.stop, at: 1))
+
+        #expect(alerts.presented.isEmpty)
+        #expect(flasher.tones.isEmpty)
+        #expect(sessions.store.sessions["s1"]?.state == .done)
+        #expect(sessions.store.sessions["s1"]?.unread == true)
+    }
+
     @Test func nothingAtAllWhenTheKindIsSwitchedOff() async {
         settings.alertSettings.notifyNeedsYou = false
 

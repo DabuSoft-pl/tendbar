@@ -30,9 +30,10 @@ permission prompt. Tendbar watches them for you. Everything stays on your Mac: n
 
 - **Every session in one list.** Folder, state and the start of Claude's last reply. A ring while Claude works, amber
   when it waits for you, vermilion after an error, sage green until you read a finished reply.
-- **Back to the right terminal.** Click a session to jump to its tab or pane (see [Terminals](#terminals)).
+- **Back to the right terminal.** Click a session, or pick it with the arrow keys and press Return, to jump to its
+  tab or pane (see [Terminals](#terminals)).
 - **Notifications that matter.** A banner when a session needs you, finishes or fails, each one switchable. Optionally
-  the screen edge glows in the state's color.
+  the screen edge glows in the state's color. Right-click a session to mute its folder.
 - **A pill by the notch.** The lead state, a count and two thin lines for the five-hour and weekly limits. Hover it
   for the sessions and every account's limits. On Macs without a notch it sits in the middle of the menu bar.
 - **Usage limits per account.** Five-hour and weekly usage with a warning at 80% and 90%, for every account you use,
@@ -87,6 +88,7 @@ Builds are signed ad hoc, so they run on the Mac that built them.
 - **No secrets.** It never reads tokens or the Keychain and never switches or rotates accounts.
 - **Only what it needs.** The hook helper drops prompts, tool inputs and outputs, file contents and Claude's replies
   before anything reaches the app. The reply preview is read from the local transcript file.
+- **Not on shared screens.** The pill and the glow stay out of screen sharing and recordings (Settings → General).
 - **Your settings, your call.** `~/.claude/settings.json` changes only when you press Connect or Disconnect, never at
   launch. Each change is backed up first (the last five are kept), and Disconnect removes only Tendbar's entries.
 
@@ -126,6 +128,12 @@ make screenshots  # render the README images from sample data
 The code follows Clean Architecture: a domain package, use cases and adapters, described in [`CLAUDE.md`](CLAUDE.md).
 UI strings are English, with the Polish translation in `Tendbar/Localizable.xcstrings`. The app icon is drawn by
 `tools/make-icon.swift`.
+
+## Contributing
+
+Bugs and ideas are welcome in [issues](https://github.com/gruntz12/tendbar/issues); Settings → General → Diagnostics
+copies what a bug report needs without anything private. See [CONTRIBUTING.md](CONTRIBUTING.md), and report security
+problems privately as described in [SECURITY.md](SECURITY.md).
 
 ## License
 
