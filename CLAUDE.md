@@ -24,7 +24,8 @@ Domain  <-  Application  <-  Infrastructure
 - `TendbarInfrastructure` — adapters that touch files, sockets and processes: the hook wire format (`HookEnvelope`,
   `HookRedaction`, `InboundMessage` maps it to domain values), `HookEventListener`, JSON repositories with storage
   records (`Records.swift` keeps `sessions.json`/`usage.json` stable), `HookInstaller`, `ClaudeProfiles`,
-  `TranscriptReader`, `TerminalJump`, `ProcessTTY`.
+  `TranscriptReader`, `TerminalJump` (plans a jump per terminal), `ProcessCommandRunner` (runs `wezterm`, `kitty`, `tmux`
+  without a shell, 2 s timeout), `ProcessTTY`.
 - `Tendbar/App` — `TendbarApp` and `AppContainer`, the only code that knows every layer; `PreviewAdapters.swift`
   builds the same container on in-memory adapters for SwiftUI previews.
 - `Tendbar/Platform` — adapters that need macOS UI frameworks: `UserNotificationsAdapter`, `EdgeGlow`,

@@ -11,23 +11,45 @@ public enum SessionState: String, Sendable, CaseIterable {
 
 public struct TerminalContext: Sendable, Equatable {
     public var program: String?
+    /// The app the terminal runs in (`__CFBundleIdentifier`), which also tells VS Code from Cursor.
+    public var hostBundleID: String?
     public var itermSessionID: String?
     public var terminalSessionID: String?
     public var tty: String?
     public var configDirectory: String?
+    public var weztermPane: String?
+    public var weztermSocket: String?
+    public var kittyWindowID: String?
+    public var kittySocket: String?
+    public var tmuxPane: String?
+    public var tmuxSocket: String?
 
     public init(
         program: String? = nil,
+        hostBundleID: String? = nil,
         itermSessionID: String? = nil,
         terminalSessionID: String? = nil,
         tty: String? = nil,
-        configDirectory: String? = nil
+        configDirectory: String? = nil,
+        weztermPane: String? = nil,
+        weztermSocket: String? = nil,
+        kittyWindowID: String? = nil,
+        kittySocket: String? = nil,
+        tmuxPane: String? = nil,
+        tmuxSocket: String? = nil
     ) {
         self.program = program
+        self.hostBundleID = hostBundleID
         self.itermSessionID = itermSessionID
         self.terminalSessionID = terminalSessionID
         self.tty = tty
         self.configDirectory = configDirectory
+        self.weztermPane = weztermPane
+        self.weztermSocket = weztermSocket
+        self.kittyWindowID = kittyWindowID
+        self.kittySocket = kittySocket
+        self.tmuxPane = tmuxPane
+        self.tmuxSocket = tmuxSocket
     }
 }
 

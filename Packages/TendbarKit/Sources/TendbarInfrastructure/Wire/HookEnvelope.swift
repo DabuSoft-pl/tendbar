@@ -4,26 +4,47 @@ import TendbarDomain
 /// The terminal a hook ran in, as the hook helper sends it and as `sessions.json` stores it.
 public struct TerminalRecord: Codable, Sendable, Equatable {
     public var program: String?
+    public var hostBundleID: String?
     public var itermSessionID: String?
     public var terminalSessionID: String?
     public var tty: String?
     public var configDirectory: String?
+    public var weztermPane: String?
+    public var weztermSocket: String?
+    public var kittyWindowID: String?
+    public var kittySocket: String?
+    public var tmuxPane: String?
+    public var tmuxSocket: String?
 
     public init(_ context: TerminalContext) {
         program = context.program
+        hostBundleID = context.hostBundleID
         itermSessionID = context.itermSessionID
         terminalSessionID = context.terminalSessionID
         tty = context.tty
         configDirectory = context.configDirectory
+        weztermPane = context.weztermPane
+        weztermSocket = context.weztermSocket
+        kittyWindowID = context.kittyWindowID
+        kittySocket = context.kittySocket
+        tmuxPane = context.tmuxPane
+        tmuxSocket = context.tmuxSocket
     }
 
     public var context: TerminalContext {
         TerminalContext(
             program: program,
+            hostBundleID: hostBundleID,
             itermSessionID: itermSessionID,
             terminalSessionID: terminalSessionID,
             tty: tty,
-            configDirectory: configDirectory
+            configDirectory: configDirectory,
+            weztermPane: weztermPane,
+            weztermSocket: weztermSocket,
+            kittyWindowID: kittyWindowID,
+            kittySocket: kittySocket,
+            tmuxPane: tmuxPane,
+            tmuxSocket: tmuxSocket
         )
     }
 }
@@ -32,10 +53,17 @@ extension TerminalContext {
     public static func capture(environment: [String: String], tty: String?) -> TerminalContext {
         TerminalContext(
             program: environment["TERM_PROGRAM"],
+            hostBundleID: environment["__CFBundleIdentifier"],
             itermSessionID: environment["ITERM_SESSION_ID"],
             terminalSessionID: environment["TERM_SESSION_ID"],
             tty: tty,
-            configDirectory: environment["CLAUDE_CONFIG_DIR"]
+            configDirectory: environment["CLAUDE_CONFIG_DIR"],
+            weztermPane: environment["WEZTERM_PANE"],
+            weztermSocket: environment["WEZTERM_UNIX_SOCKET"],
+            kittyWindowID: environment["KITTY_WINDOW_ID"],
+            kittySocket: environment["KITTY_LISTEN_ON"],
+            tmuxPane: environment["TMUX_PANE"],
+            tmuxSocket: environment["TMUX"].flatMap { $0.split(separator: ",").first.map(String.init) }
         )
     }
 }

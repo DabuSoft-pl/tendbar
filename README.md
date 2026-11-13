@@ -8,8 +8,9 @@ has used. Everything stays on your Mac: no account, no network calls, no model c
 
 - **Sessions.** The menu bar panel lists every session with its folder, state and the start of Claude's last reply.
   A single mark shows the state: a ring while Claude works, orange when it waits for you, red after an error, green
-  until you have read a finished reply. Clicking a session switches to its tab in iTerm2 or Terminal; for other
-  terminals Tendbar brings the app forward.
+  until you have read a finished reply. Clicking a session switches to its tab in iTerm2 or Terminal, its pane in
+  WezTerm, kitty (with `allow_remote_control` and `listen_on` set) or tmux, and its folder's window in VS Code and its
+  forks (Cursor and others). For other terminals (Ghostty, Warp) Tendbar brings the app forward.
 - **Notifications.** A banner when a session needs you, finishes or fails, each switchable. Optionally the screen
   edge glows when a session waits or fails. Clicking a banner opens the session.
 - **Notch pill.** A small pill next to the notch (or at the middle of the menu bar) shows the lead state and a count,
@@ -24,7 +25,8 @@ Tendbar never switches or rotates accounts, never reads tokens or the Keychain a
 ## How it works
 
 Claude Code runs `tendbar-hook` (shipped inside the app bundle) on each hook event. The helper keeps only the fields
-Tendbar uses, adds the terminal context (`TERM_PROGRAM`, iTerm/Terminal session ids, the TTY, `CLAUDE_CONFIG_DIR`),
+Tendbar uses, adds the terminal context (`TERM_PROGRAM`, the host app's bundle id, iTerm/Terminal session ids, WezTerm, kitty and tmux
+pane ids and sockets, the TTY, `CLAUDE_CONFIG_DIR`),
 sends the event over a Unix socket (`~/Library/Application Support/Tendbar/tendbar.sock`, mode 0600) and exits at
 once. It prints nothing and always exits 0, so Claude Code is never slowed down or blocked, even when the app is not
 running.

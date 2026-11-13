@@ -71,8 +71,8 @@ final class StubNavigator: TerminalNavigating {
     var outcome: JumpOutcome = .jumped
     private(set) var jumps: [TerminalContext] = []
 
-    func jump(to terminal: TerminalContext) -> JumpOutcome {
-        jumps.append(terminal)
+    func jump(to session: Session) -> JumpOutcome {
+        jumps.append(session.terminal)
         return outcome
     }
 }

@@ -46,7 +46,7 @@ private final class Silent: AlertPresenting, NotificationPermissions, ScreenFlas
     func requestPermission() async -> (NotificationPermission, error: String?) { (.authorized, nil) }
     func sendTest(sound: Bool) async throws {}
     func flash(_ tone: FlashTone) {}
-    func jump(to terminal: TerminalContext) -> JumpOutcome { .jumped }
+    func jump(to session: Session) -> JumpOutcome { .jumped }
     func email(configDirectory: String?) -> String? { configDirectory == nil ? "damian@example.com" : "praca@example.com" }
     func status(configDirectory: String?) throws -> HookConnection { .connected }
     func connect(configDirectory: String?) throws {}

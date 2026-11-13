@@ -24,6 +24,6 @@ public final class OpenSession {
         alerts.dismiss(sessionID: sessionID)
         repository.save(store)
         output.show(store)
-        return navigator.jump(to: session.terminal)
+        return navigator.jump(to: session)
     }
 }

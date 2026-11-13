@@ -10,10 +10,10 @@ public enum JumpOutcome: Sendable, Equatable {
     case failed(String)
 }
 
-/// Brings the terminal tab of a session to the front.
+/// Brings the terminal tab (or editor window) of a session to the front.
 @MainActor
 public protocol TerminalNavigating: AnyObject {
-    func jump(to terminal: TerminalContext) -> JumpOutcome
+    func jump(to session: Session) -> JumpOutcome
 }
 
 public enum LoginItemState: Sendable, Equatable {

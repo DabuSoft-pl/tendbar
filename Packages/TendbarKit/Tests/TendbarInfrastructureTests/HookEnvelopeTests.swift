@@ -61,6 +61,24 @@ import TendbarDomain
         #expect(context.tty == "/dev/ttys001")
     }
 
+    @Test func capturesTerminalSpecificIDs() {
+        let context = TerminalContext.capture(
+            environment: [
+                "TERM_PROGRAM": "tmux", "__CFBundleIdentifier": "com.github.wez.wezterm", "WEZTERM_PANE": "2",
+                "KITTY_WINDOW_ID": "5", "KITTY_LISTEN_ON": "unix:/tmp/k", "TMUX": "/private/tmp/tmux-501/default,812,0",
+                "TMUX_PANE": "%3",
+            ],
+            tty: nil
+        )
+
+        #expect(context.hostBundleID == "com.github.wez.wezterm")
+        #expect(context.weztermPane == "2")
+        #expect(context.kittyWindowID == "5")
+        #expect(context.kittySocket == "unix:/tmp/k")
+        #expect(context.tmuxSocket == "/private/tmp/tmux-501/default")
+        #expect(context.tmuxPane == "%3")
+    }
+
     @Test func socketPathHonoursOverride() {
         #expect(TendbarPaths.socketPath(environment: ["TENDBAR_SOCKET": "/tmp/x.sock"]) == "/tmp/x.sock")
         #expect(TendbarPaths.socketPath(environment: [:]).hasSuffix("Tendbar/tendbar.sock"))

@@ -3,11 +3,24 @@ import TendbarApplication
 import TendbarDomain
 import TendbarInfrastructure
 
-/// Runs the AppleScript plan from `TerminalJump` behind the `TerminalNavigating` port.
+/// Carries out the plan from `TerminalJump` behind the `TerminalNavigating` port: AppleScript for iTerm2 and
+/// Terminal, the terminal's own command line for WezTerm, kitty and tmux, the session folder for VS Code.
 @MainActor
 final class AppleScriptTerminalNavigator: TerminalNavigating {
-    func jump(to terminal: TerminalContext) -> JumpOutcome {
-        switch TerminalJump.plan(for: terminal) {
+    private let tools: TerminalTools
+    private let runner: CommandRunning
+
+    init(tools: TerminalTools = .installed, runner: CommandRunning = ProcessCommandRunner()) {
+        self.tools = tools
+        self.runner = runner
+    }
+
+    func jump(to session: Session) -> JumpOutcome {
+        perform(TerminalJump.plan(for: session.terminal, folder: session.cwd, tools: tools))
+    }
+
+    private func perform(_ plan: JumpPlan) -> JumpOutcome {
+        switch plan {
         case .unavailable:
             return .unavailable
         case let .activate(bundleID):
@@ -25,6 +38,26 @@ final class AppleScriptTerminalNavigator: TerminalNavigating {
             if result?.stringValue == TerminalJump.found { return .jumped }
             app.activate()
             return .activated
+        case let .command(command, bundleID):
+            guard let app = running(bundleID) else { return .notRunning }
+            let succeeded = runner.run(command).succeeded
+            app.activate()
+            return succeeded ? .jumped : .activated
+        case let .openFolder(folder, bundleID):
+            guard let app = running(bundleID), let appURL = app.bundleURL else { return .notRunning }
+            var isDirectory: ObjCBool = false
+            guard FileManager.default.fileExists(atPath: folder, isDirectory: &isDirectory), isDirectory.boolValue else {
+                app.activate()
+                return .activated
+            }
+            let configuration = NSWorkspace.OpenConfiguration()
+            configuration.activates = true
+            NSWorkspace.shared.open([URL(fileURLWithPath: folder, isDirectory: true)], withApplicationAt: appURL, configuration: configuration)
+            return .jumped
+        case let .tmux(target):
+            let client = target.select(using: runner)
+            let outcome = perform(TerminalJump.plan(for: target.host(clientTTY: client), tools: tools))
+            return client != nil && outcome == .activated ? .jumped : outcome
         }
     }
 
