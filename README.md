@@ -60,7 +60,7 @@ permission prompt. Tendbar watches them for you. Everything stays on your Mac: n
 
 ## Install
 
-Tendbar is built from source for now (macOS 14+, Xcode 16+, [XcodeGen](https://github.com/yonaskolb/XcodeGen)):
+Tendbar is built from source for now (macOS 14+, Xcode 27+, [XcodeGen](https://github.com/yonaskolb/XcodeGen)):
 
 ```bash
 brew install xcodegen

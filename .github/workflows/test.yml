@@ -14,10 +14,15 @@ concurrency:
 
 jobs:
   test:
-    runs-on: macos-15
+    # The same Xcode as local builds and, later, releases: an older SDK runs the app in compatibility mode on macOS 26+.
+    runs-on: xcode-27
     timeout-minutes: 20
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_27.2.app/Contents/Developer
     steps:
       - uses: actions/checkout@v4
+      - name: Xcode
+        run: xcodebuild -version
       - name: Tests
         run: make test
       - name: Build the app
