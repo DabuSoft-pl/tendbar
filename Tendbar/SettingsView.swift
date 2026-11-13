@@ -9,7 +9,7 @@ struct SettingsView: View {
     var body: some View {
         TabView {
             NotificationSettings(model: model)
-                .frame(height: 500)
+                .frame(height: 540)
                 .tabItem { Label("Powiadomienia", systemImage: "bell") }
             AccountsSection(model: model)
                 .frame(height: 420)
@@ -44,8 +44,10 @@ private struct NotificationSettings: View {
                         Button("Pokaż") { model.previewGlow() }
                     }
                 }
+                Toggle("Ramka także po skończonej pracy", isOn: $preferences.glowOnDone)
+                    .disabled(!preferences.edgeGlow)
             } footer: {
-                Text("Ramka mignie, gdy sesja czeka, po błędzie i przy 90% limitu")
+                Text("Ramka mignie, gdy sesja czeka (pomarańczowa), skończy (zielona), po błędzie (czerwona) i przy 90% limitu")
                     .foregroundStyle(.secondary)
             }
             Section {
