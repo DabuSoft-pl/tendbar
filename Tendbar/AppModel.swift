@@ -40,7 +40,6 @@ final class AppModel {
         refreshConnection()
         requestNotifications()
         notch = NotchController(model: self)
-        watchClaudeSwap()
         checkLimits()
     }
 
@@ -252,28 +251,6 @@ final class AppModel {
         guard usage.apply(envelope, email: email) else { return }
         try? UsagePersistence.save(usage)
         checkLimits()
-    }
-
-    private func watchClaudeSwap() {
-        Task { [weak self] in
-            var lastModified: Date?
-            while !Task.isCancelled {
-                let url = ClaudeSwapUsage.defaultURL
-                let modified = (try? FileManager.default.attributesOfItem(atPath: url.path))?[.modificationDate] as? Date
-                if let modified, modified != lastModified {
-                    lastModified = modified
-                    let readings = await Task.detached(priority: .utility) { ClaudeSwapUsage.read(from: url) }.value
-                    guard let self else { return }
-                    var changed = false
-                    for reading in readings where self.usage.merge(reading) { changed = true }
-                    if changed {
-                        try? UsagePersistence.save(self.usage)
-                        self.checkLimits()
-                    }
-                }
-                try? await Task.sleep(for: .seconds(30))
-            }
-        }
     }
 
     private static let firedLimitsKey = "limits.fired"

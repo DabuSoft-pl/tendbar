@@ -150,7 +150,6 @@ private struct NotchView: View {
         let now = Date()
         return model.usage.ordered
             .flatMap { LimitWarnings.windows(of: $0).map(\.window) }
-            .filter { $0.resetsAt != .distantFuture }
             .map { $0.percentage(at: now) }
             .max() ?? 0
     }

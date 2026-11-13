@@ -5,13 +5,12 @@ import Testing
 @Suite struct LimitWarningsTests {
     let now = Date(timeIntervalSince1970: 1_800_000_000)
 
-    private func account(five: Double? = nil, week: Double? = nil, scoped: [ScopedWindow]? = nil) -> AccountUsage {
+    private func account(five: Double? = nil, week: Double? = nil) -> AccountUsage {
         AccountUsage(
             id: "|me@example.com",
             email: "me@example.com",
             fiveHour: five.map { LimitWindow(usedPercentage: $0, resetsAt: now.addingTimeInterval(3600)) },
             sevenDay: week.map { LimitWindow(usedPercentage: $0, resetsAt: now.addingTimeInterval(86400)) },
-            scoped: scoped,
             updatedAt: now
         )
     }
@@ -53,18 +52,10 @@ import Testing
         #expect(LimitWarnings.pending(for: next, now: now, fired: fired).count == 1)
     }
 
-    @Test func ignoresWindowsThatResetOrNeverStarted() {
+    @Test func ignoresWindowsThatAlreadyReset() {
         var reset = account(five: 99)
         reset.fiveHour?.resetsAt = now.addingTimeInterval(-1)
-        let notStarted = account(scoped: [ScopedWindow(name: "Fable", window: LimitWindow(usedPercentage: 99, resetsAt: .distantFuture))])
 
         #expect(LimitWarnings.pending(for: reset, now: now, fired: []).isEmpty)
-        #expect(LimitWarnings.pending(for: notStarted, now: now, fired: []).isEmpty)
-    }
-
-    @Test func coversModelScopedWindows() {
-        let scoped = [ScopedWindow(name: "Fable", window: LimitWindow(usedPercentage: 88, resetsAt: now.addingTimeInterval(86400)))]
-
-        #expect(LimitWarnings.pending(for: account(scoped: scoped), now: now, fired: []).map(\.window) == ["Fable"])
     }
 }

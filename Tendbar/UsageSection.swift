@@ -19,9 +19,6 @@ struct UsageSection: View {
                         }
                         LimitRow(title: String(localized: "5 godz."), window: account.fiveHour)
                         LimitRow(title: String(localized: "Tydzień"), window: account.sevenDay)
-                        ForEach(account.scoped ?? [], id: \.name) { scoped in
-                            LimitRow(title: scoped.name, window: scoped.window)
-                        }
                     }
                     .contentShape(Rectangle())
                     .contextMenu {
@@ -34,10 +31,7 @@ struct UsageSection: View {
     }
 
     private func readingText(_ account: AccountUsage) -> String {
-        let when = account.updatedAt.formatted(.relative(presentation: .named))
-        return account.source == .claudeSwap
-            ? String(localized: "cswap, \(when)")
-            : String(localized: "odczyt \(when)")
+        String(localized: "odczyt \(account.updatedAt.formatted(.relative(presentation: .named)))")
     }
 }
 
@@ -72,7 +66,6 @@ private struct LimitRow: View {
     }
 
     private func resetText(_ window: LimitWindow, now: Date) -> String {
-        if window.resetsAt == .distantFuture { return String(localized: "nie rozpoczęty") }
         if now >= window.resetsAt { return String(localized: "zresetowany") }
         return window.resetsAt.formatted(.relative(presentation: .named))
     }

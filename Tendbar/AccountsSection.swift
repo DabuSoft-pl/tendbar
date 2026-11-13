@@ -8,18 +8,15 @@ struct AccountsSection: View {
 
     var body: some View {
         Form {
-            if FileManager.default.fileExists(atPath: ClaudeSwapUsage.defaultURL.path) {
-                Section {
-                    Label("Limity wszystkich kont cswap Tendbar czyta z jego pamięci podręcznej", systemImage: "arrow.triangle.2.circlepath")
-                } footer: {
-                    Text("Przy cswap osobne profile nie są potrzebne")
-                        .foregroundStyle(.secondary)
-                }
-            }
-            Section("Profile Claude Code") {
+            Section {
                 ForEach(model.profiles) { profile in
                     ProfileRow(model: model, profile: profile)
                 }
+            } header: {
+                Text("Profile Claude Code")
+            } footer: {
+                Text("Limity konta przychodzą z każdej sesji Claude Code na tym koncie. Po przelogowaniu w tym samym profilu kolejne odczyty trafiają do nowego konta, a poprzednie zostaje z ostatnim stanem")
+                    .foregroundStyle(.secondary)
             }
             Section {
                 HStack {

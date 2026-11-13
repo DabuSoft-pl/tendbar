@@ -21,13 +21,12 @@ public enum LimitWarnings {
         var result: [(String, LimitWindow)] = []
         if let window = account.fiveHour { result.append((fiveHour, window)) }
         if let window = account.sevenDay { result.append((sevenDay, window)) }
-        for scoped in account.scoped ?? [] { result.append((scoped.name, scoped.window)) }
         return result
     }
 
     public static func pending(for account: AccountUsage, now: Date, fired: Set<String>) -> [LimitWarning] {
         windows(of: account).compactMap { name, window in
-            guard window.resetsAt != .distantFuture, now < window.resetsAt else { return nil }
+            guard now < window.resetsAt else { return nil }
             let percentage = window.percentage(at: now)
             guard let threshold = thresholds.last(where: { percentage >= Double($0) }),
                   !fired.contains(key(accountID: account.id, window: name, resetsAt: window.resetsAt, threshold: threshold))
