@@ -56,12 +56,15 @@ private struct NotificationSettings: View {
                         Button("Wyślij testowe") { model.sendTestNotification() }
                     }
                 }
-                if model.notificationStatus == .denied {
-                    LabeledContent("Wyłączone w systemie") {
-                        Button("Otwórz Ustawienia systemowe") {
-                            if let url = URL(string: "x-apple.systempreferences:com.apple.Notifications-Settings.extension") {
-                                NSWorkspace.shared.open(url)
+                if !granted {
+                    LabeledContent(model.notificationStatus == .notDetermined
+                        ? String(localized: "macOS jeszcze nie zapytał o zgodę")
+                        : String(localized: "Powiadomienia wyłączone w systemie")) {
+                        HStack {
+                            if model.notificationStatus == .notDetermined {
+                                Button("Poproś o zgodę") { model.requestNotifications() }
                             }
+                            Button("Otwórz Ustawienia systemowe") { openNotificationSettings() }
                         }
                     }
                 }
@@ -71,6 +74,20 @@ private struct NotificationSettings: View {
             }
         }
         .formStyle(.grouped)
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            model.refresh()
+        }
+    }
+
+    private func openNotificationSettings() {
+        let id = Bundle.main.bundleIdentifier ?? "pl.dabusoft.tendbar"
+        let urls = [
+            "x-apple.systempreferences:com.apple.Notifications-Settings.extension?id=\(id)",
+            "x-apple.systempreferences:com.apple.Notifications-Settings.extension",
+        ]
+        for string in urls {
+            if let url = URL(string: string), NSWorkspace.shared.open(url) { return }
+        }
     }
 
     private var granted: Bool {
