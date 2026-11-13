@@ -14,13 +14,25 @@ public struct LimitWindow: Codable, Sendable, Equatable {
     }
 }
 
+public struct ScopedWindow: Codable, Sendable, Equatable {
+    public var name: String
+    public var window: LimitWindow
+}
+
+public enum UsageSource: String, Codable, Sendable {
+    case statusLine
+    case claudeSwap
+}
+
 public struct AccountUsage: Codable, Sendable, Equatable, Identifiable {
     public var id: String
     public var configDirectory: String?
     public var email: String?
     public var fiveHour: LimitWindow?
     public var sevenDay: LimitWindow?
+    public var scoped: [ScopedWindow]?
     public var updatedAt: Date
+    public var source: UsageSource?
 }
 
 public struct UsageStore: Codable, Sendable, Equatable {
@@ -56,14 +68,26 @@ public struct UsageStore: Codable, Sendable, Equatable {
         else { return false }
         let directory = Self.accountKey(configDirectory: envelope.terminal.configDirectory)
         let key = Self.key(configDirectory: envelope.terminal.configDirectory, email: email)
-        accounts[key] = AccountUsage(
+        merge(AccountUsage(
             id: key,
             configDirectory: directory.isEmpty ? nil : directory,
             email: email,
             fiveHour: limits.fiveHour?.window,
             sevenDay: limits.sevenDay?.window,
-            updatedAt: envelope.sentAt
-        )
+            scoped: nil,
+            updatedAt: envelope.sentAt,
+            source: .statusLine
+        ))
+        return true
+    }
+
+    @discardableResult
+    public mutating func merge(_ reading: AccountUsage) -> Bool {
+        if let current = accounts[reading.id], current.updatedAt > reading.updatedAt { return false }
+        var reading = reading
+        if reading.scoped == nil { reading.scoped = accounts[reading.id]?.scoped }
+        guard accounts[reading.id] != reading else { return false }
+        accounts[reading.id] = reading
         return true
     }
 

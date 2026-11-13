@@ -8,6 +8,11 @@ struct AccountsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            if FileManager.default.fileExists(atPath: ClaudeSwapUsage.defaultURL.path) {
+                Label("Wykryto cswap: limity wszystkich jego kont Tendbar czyta z jego pamięci podręcznej. Osobne profile poniżej nie są wtedy potrzebne.", systemImage: "arrow.triangle.2.circlepath")
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             ForEach(model.profiles) { profile in
                 ProfileRow(model: model, profile: profile)
             }
