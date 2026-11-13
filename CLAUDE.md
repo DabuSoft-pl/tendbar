@@ -35,3 +35,7 @@ make install    # Release build into /Applications (then "Połącz" in the app)
 ```
 
 Plan: https://claude.ai/artifact/5KoBQbPYDmyNbsJrpXraj8
+
+## App icon
+
+`Tendbar/Assets.xcassets/AppIcon.appiconset` is generated: `swift tools/make-icon.swift Tendbar/Assets.xcassets/AppIcon.appiconset /tmp/preview.png` redraws every size (a bird on a bar, orange = the "needs you" colour). macOS shows it in notifications, so there is no separate notification logo. The menu bar symbol stays a template image on purpose.
