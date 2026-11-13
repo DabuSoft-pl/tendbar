@@ -65,8 +65,7 @@ private struct AccountLimits: View {
                         Text(resetText(window, now: now)).font(.caption).foregroundStyle(.tertiary)
                     }
                 }
-                ProgressView(value: percentage, total: 100)
-                    .tint(limitColor(percentage))
+                LimitBar(percentage: percentage)
                     .accessibilityLabel(lead.title)
                     .accessibilityValue("\(Int(percentage.rounded()))%")
             } else {

@@ -341,9 +341,8 @@ private struct NotchLimitRow: View {
     private func gauge(_ title: String, _ window: LimitWindow?, now: Date) -> some View {
         let percentage = window?.percentage(at: now) ?? 0
         return HStack(spacing: 4) {
-            Text(title).foregroundStyle(.secondary)
-            ProgressView(value: min(percentage, 100), total: 100)
-                .tint(limitColor(percentage))
+            Text(title).foregroundStyle(.secondary).fixedSize()
+            LimitBar(percentage: percentage, height: 4)
                 .frame(width: 50)
             Text(window == nil ? "–" : "\(Int(percentage.rounded()))%")
                 .monospacedDigit()

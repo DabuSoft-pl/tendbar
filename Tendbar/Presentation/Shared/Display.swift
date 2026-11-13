@@ -83,3 +83,21 @@ func limitColor(_ percentage: Double) -> Color {
     default: .red
     }
 }
+
+/// A limit bar in the limit's color. ProgressView loses its tint in windows that are not key, such as the notch.
+struct LimitBar: View {
+    let percentage: Double
+    var height: CGFloat = 6
+
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack(alignment: .leading) {
+                Capsule().fill(Color.primary.opacity(0.12))
+                Capsule()
+                    .fill(limitColor(percentage))
+                    .frame(width: proxy.size.width * min(max(percentage, 0), 100) / 100)
+            }
+        }
+        .frame(height: height)
+    }
+}
