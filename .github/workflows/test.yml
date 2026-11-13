@@ -1,9 +1,15 @@
 name: Test
 
+# While the repository is private, macOS minutes count ten times against the plan: run on pull requests and by hand
+# only, and skip changes to documentation. Once it is public, add `push: branches: [main]` back.
 on:
-  push:
-    branches: [main]
   pull_request:
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/ISSUE_TEMPLATE/**"
+      - "LICENSE"
+  workflow_dispatch:
 
 permissions:
   contents: read
