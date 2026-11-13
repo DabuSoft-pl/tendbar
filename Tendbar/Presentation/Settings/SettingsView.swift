@@ -138,7 +138,7 @@ private struct ClaudeCodeSettings: View {
                     }
                 } label: {
                     HStack(spacing: 10) {
-                        StatusDot(color: model.connection == .connected ? .green : .orange)
+                        StatusDot(color: model.connection == .connected ? Palette.sage : Palette.amber)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(connectionText)
                             Text("Hooks in ~/.claude/settings.json")
@@ -149,7 +149,7 @@ private struct ClaudeCodeSettings: View {
                 }
             } footer: {
                 if let error = model.connectionError {
-                    Text(error).foregroundStyle(.red).textSelection(.enabled)
+                    Text(error).foregroundStyle(Palette.vermilion).textSelection(.enabled)
                 } else {
                     Text("settings.json is backed up before every change")
                 }
@@ -214,7 +214,7 @@ private struct NotificationSettings: View {
                             }
                         } label: {
                             HStack(spacing: 8) {
-                                StatusDot(color: .orange)
+                                StatusDot(color: Palette.amber)
                                 Text(model.notificationPermission == .notDetermined
                                     ? String(localized: "macOS has not asked for permission yet")
                                     : String(localized: "Notifications are turned off in macOS"))
@@ -222,7 +222,7 @@ private struct NotificationSettings: View {
                         }
                     }
                     if let error = model.notificationError {
-                        Text(error).foregroundStyle(.red).textSelection(.enabled)
+                        Text(error).foregroundStyle(Palette.vermilion).textSelection(.enabled)
                     }
                 }
             }
@@ -273,7 +273,7 @@ private struct GeneralSettings: View {
                     Text("Allow Tendbar in System Settings → General → Login Items")
                         .foregroundStyle(.secondary)
                 } else if let error = system.loginItemError {
-                    Text(error).foregroundStyle(.red)
+                    Text(error).foregroundStyle(Palette.vermilion)
                 } else {
                     Text("Everything stays on this Mac. Tendbar sends nothing over the network")
                 }

@@ -21,7 +21,7 @@ struct MenuContent: View {
             header
             if let error = sessions.listenerError {
                 Text("Could not start the listener: \(error)")
-                    .foregroundStyle(.red)
+                    .foregroundStyle(Palette.vermilion)
                     .font(.callout)
             }
             ConnectionBanner(model: container.claudeCode, actions: container.claudeCodeActions)
@@ -65,9 +65,10 @@ struct MenuContent: View {
         HStack(alignment: .firstTextBaseline) {
             Text("Tendbar").font(.headline)
             Spacer()
-            StateCount(state: .working, count: sessions.count(of: .working))
             StateCount(state: .needsYou, count: sessions.count(of: .needsYou))
+            StateCount(state: .failed, count: sessions.count(of: .failed))
             StateCount(state: .done, count: sessions.count(of: .done))
+            StateCount(state: .working, count: sessions.count(of: .working))
         }
     }
 
@@ -109,13 +110,13 @@ struct ConnectionBanner: View {
 
     var body: some View {
         if let error = model.connectionError {
-            banner(Text("Could not change the Claude Code settings: \(error)"), color: .red, button: false)
+            banner(Text("Could not change the Claude Code settings: \(error)"), color: Palette.vermilion, button: false)
         } else if model.connection == .disconnected {
             banner(Text("Tendbar is not connected to Claude Code"), color: .secondary, button: true)
         } else if model.connection == .outdated {
             banner(Text("Tendbar's hooks are outdated or incomplete"), color: .secondary, button: true)
         } else if !model.helperAvailable {
-            banner(Text("The tendbar-hook helper is missing from the app"), color: .red, button: false)
+            banner(Text("The tendbar-hook helper is missing from the app"), color: Palette.vermilion, button: false)
         }
     }
 
@@ -244,7 +245,7 @@ struct EmptySessions: View {
                 .accessibilityLabel("Copy the claude command")
             }
             HStack(spacing: 8) {
-                Circle().fill(connection == .connected ? Color.green : Color.orange).frame(width: 8, height: 8)
+                Circle().fill(connection == .connected ? Palette.sage : Palette.amber).frame(width: 8, height: 8)
                 Text(connection == .connected ? "Connected to Claude Code" : "Not connected to Claude Code")
                     .foregroundStyle(.secondary)
             }

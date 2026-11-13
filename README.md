@@ -28,8 +28,8 @@ permission prompt. Tendbar watches them for you. Everything stays on your Mac: n
 
 ## Features
 
-- **Every session in one list.** Folder, state and the start of Claude's last reply. A ring while Claude works, orange
-  when it waits for you, red after an error, green until you read a finished reply.
+- **Every session in one list.** Folder, state and the start of Claude's last reply. A ring while Claude works, amber
+  when it waits for you, vermilion after an error, sage green until you read a finished reply.
 - **Back to the right terminal.** Click a session to jump to its tab or pane (see [Terminals](#terminals)).
 - **Notifications that matter.** A banner when a session needs you, finishes or fails, each one switchable. Optionally
   the screen edge glows in the state's color.

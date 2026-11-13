@@ -31,7 +31,7 @@ struct AccountsSection: View {
                         .disabled(slug.isEmpty)
                 }
                 if let error = model.profileError {
-                    Text(error).foregroundStyle(.red)
+                    Text(error).foregroundStyle(Palette.vermilion)
                 }
             } header: {
                 Text("New profile")

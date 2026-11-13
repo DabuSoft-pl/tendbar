@@ -11,9 +11,9 @@ final class EdgeGlow: ScreenFlashing {
 
     func flash(_ tone: FlashTone) {
         switch tone {
-        case .attention: flash(color: .orange)
-        case .success: flash(color: .green)
-        case .failure: flash(color: .red)
+        case .attention: flash(color: Palette.amber)
+        case .success: flash(color: Palette.sage)
+        case .failure: flash(color: Palette.vermilion)
         }
     }
 

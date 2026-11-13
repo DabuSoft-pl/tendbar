@@ -27,15 +27,23 @@ extension SessionState {
         }
     }
 
+    /// Color is kept for what asks for you. A working session is the neutral ink of the text around it.
     var color: Color {
         switch self {
         case .idle, .ended: .gray
-        case .working: .blue
-        case .needsYou: .orange
-        case .done: .green
-        case .failed: .red
+        case .working: .primary
+        case .needsYou: Palette.amber
+        case .done: Palette.sage
+        case .failed: Palette.vermilion
         }
     }
+}
+
+/// Tendbar's own colors, taken from the app icon: an amber bird on a cream perch.
+enum Palette {
+    static let amber = Color(red: 1.0, green: 0.60, blue: 0.12)
+    static let sage = Color(red: 0.49, green: 0.72, blue: 0.58)
+    static let vermilion = Color(red: 0.89, green: 0.34, blue: 0.24)
 }
 
 extension AlertKind {
@@ -78,9 +86,9 @@ enum LimitWindowName {
 
 func limitColor(_ percentage: Double) -> Color {
     switch percentage {
-    case ..<70: .blue
-    case ..<90: .orange
-    default: .red
+    case ..<70: .primary.opacity(0.55)
+    case ..<90: Palette.amber
+    default: Palette.vermilion
     }
 }
 
