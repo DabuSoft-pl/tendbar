@@ -168,7 +168,7 @@ private struct NotchView: View {
                 Group {
                     if let lead {
                         Image(systemName: "bird.fill")
-                            .foregroundStyle(lead.notchColor)
+                            .foregroundStyle(lead.color)
                             .modifier(Breathing(active: lead == .working))
                     } else {
                         Image(systemName: "gauge.with.dots.needle.67percent").foregroundStyle(limitColor(highestLimit))
@@ -180,7 +180,7 @@ private struct NotchView: View {
                     if let badge {
                         Text("\(badge.count)")
                             .font(.system(size: 13, weight: .semibold).monospacedDigit())
-                            .foregroundStyle(badge.state.notchColor)
+                            .foregroundStyle(badge.state.color)
                     }
                 }
                 .frame(width: wing)
@@ -347,11 +347,5 @@ private struct NotchRow: View {
         .padding(.horizontal, 8)
         .contentShape(Rectangle())
         .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
-    }
-}
-
-private extension SessionState {
-    var notchColor: Color {
-        self == .working ? .blue : color
     }
 }

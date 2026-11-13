@@ -214,7 +214,7 @@ extension SessionState {
     var color: Color {
         switch self {
         case .idle, .ended: .gray
-        case .working: .secondary
+        case .working: .blue
         case .needsYou: .orange
         case .done: .green
         case .failed: .red
@@ -230,7 +230,7 @@ struct StateMark: View {
         Group {
             switch state {
             case .working:
-                Circle().strokeBorder(.secondary, lineWidth: 1.5)
+                Circle().strokeBorder(state.color, lineWidth: 1.5)
             case .idle, .ended:
                 Circle().fill(.tertiary)
             case .done where !unread:
