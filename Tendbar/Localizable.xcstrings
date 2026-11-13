@@ -521,6 +521,16 @@
         }
       }
     },
+    "Later": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Później"
+          }
+        }
+      }
+    },
     "Mark all as read": {
       "localizations": {
         "pl": {
@@ -731,12 +741,32 @@
         }
       }
     },
+    "Restart": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uruchom ponownie"
+          }
+        }
+      }
+    },
     "Restart Tendbar": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
             "value": "Uruchom ponownie"
+          }
+        }
+      }
+    },
+    "Restart Tendbar now?": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uruchomić Tendbar ponownie?"
           }
         }
       }
@@ -897,6 +927,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ramka jest pomarańczowa, gdy sesja czeka, zielona po skończeniu, czerwona po błędzie i przy 90% limitu"
+          }
+        }
+      }
+    },
+    "The new language shows after a restart": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nowy język pojawi się po ponownym uruchomieniu"
           }
         }
       }

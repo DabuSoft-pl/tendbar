@@ -244,6 +244,7 @@ private struct GeneralSettings: View {
     let system: SystemViewModel
     let systemActions: SystemController
     @State private var language = AppLanguage.current
+    @State private var asksRestart = false
 
     var body: some View {
         Form {
@@ -283,7 +284,10 @@ private struct GeneralSettings: View {
                     Text(verbatim: "English").tag(AppLanguage.english)
                     Text(verbatim: "Polski").tag(AppLanguage.polish)
                 }
-                .onChange(of: language) { language.apply() }
+                .onChange(of: language) {
+                    language.apply()
+                    asksRestart = language != AppLanguage.launched
+                }
                 if language != AppLanguage.launched {
                     LabeledContent("Takes effect after a restart") {
                         Button("Restart Tendbar") { AppLanguage.relaunch() }
@@ -292,6 +296,12 @@ private struct GeneralSettings: View {
             }
         }
         .formStyle(.grouped)
+        .alert("Restart Tendbar now?", isPresented: $asksRestart) {
+            Button("Restart") { AppLanguage.relaunch() }
+            Button("Later", role: .cancel) {}
+        } message: {
+            Text("The new language shows after a restart")
+        }
     }
 }
 
