@@ -202,7 +202,7 @@ final class AppModel {
         case .done: body = session.preview ?? session.state.hint
         }
         notifier.post(kind, for: session, body: body, sound: preferences.playSound)
-        if preferences.edgeGlow { glow.flash(kind.color) }
+        if preferences.edgeGlow, kind != .done { glow.flash(kind.color) }
     }
 
     func previewGlow() {
