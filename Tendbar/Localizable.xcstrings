@@ -489,6 +489,16 @@
         }
       }
     },
+    "Dark": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ciemny"
+          }
+        }
+      }
+    },
     "Data folder": {
       "localizations": {
         "pl": {
@@ -539,6 +549,16 @@
         }
       }
     },
+    "Done after %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gotowe po %@"
+          }
+        }
+      }
+    },
     "Earlier (%lld)": {
       "localizations": {
         "pl": {
@@ -575,6 +595,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wszystko zostaje na tym Macu. Tendbar nie wysyła nic do sieci"
+          }
+        }
+      }
+    },
+    "For the panel and settings. The pill stays dark next to the notch": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dla panelu i ustawień. Pigułka przy notchu zostaje ciemna"
           }
         }
       }
@@ -725,6 +755,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Później"
+          }
+        }
+      }
+    },
+    "Light": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jasny"
           }
         }
       }
@@ -1325,6 +1365,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tura zakończyła się błędem"
+          }
+        }
+      }
+    },
+    "Theme": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Motyw"
           }
         }
       }

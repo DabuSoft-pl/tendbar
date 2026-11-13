@@ -65,6 +65,12 @@ extension Session {
         return Elapsed.ago(updatedAt, now: now)
     }
 
+    /// The line under the folder name: the kind, and for a finished turn how long it took.
+    func alertSubtitle(for kind: AlertKind) -> String {
+        guard kind == .done, let start = turnStartedAt, updatedAt.timeIntervalSince(start) >= 60 else { return kind.title }
+        return String(localized: "Done after \(Elapsed.text(updatedAt.timeIntervalSince(start)))")
+    }
+
     /// The banner text for an alert about this session.
     func alertBody(for kind: AlertKind) -> String {
         switch kind {
@@ -141,7 +147,7 @@ struct LimitBar: View {
                     .frame(width: proxy.size.width * min(max(percentage, 0), 100) / 100)
                 if let pace {
                     RoundedRectangle(cornerRadius: 1)
-                        .fill(Color.primary.opacity(0.7))
+                        .fill(Color.primary.opacity(0.85))
                         .frame(width: 2, height: height + 4)
                         .offset(x: min(max(proxy.size.width * pace / 100 - 1, 0), proxy.size.width - 2))
                 }

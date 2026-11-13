@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Observation
 import TendbarApplication
@@ -25,6 +26,7 @@ final class Preferences: AlertSettingsProviding {
         static let usage = "view.panel.usage"
         static let hideFromCapture = "view.hideFromCapture"
         static let muted = "notify.muted"
+        static let theme = "view.theme"
     }
 
     @ObservationIgnored private let defaults: UserDefaults
@@ -55,6 +57,12 @@ final class Preferences: AlertSettingsProviding {
         didSet {
             defaults.set(hideFromCapture, forKey: Key.hideFromCapture)
             onNotchViewChange?()
+        }
+    }
+    var theme: Theme {
+        didSet {
+            defaults.set(theme.rawValue, forKey: Key.theme)
+            theme.apply()
         }
     }
     /// Folders whose sessions never raise a banner or a glow.
@@ -89,6 +97,7 @@ final class Preferences: AlertSettingsProviding {
         usageStyle = defaults.string(forKey: Key.usage).flatMap(UsageStyle.init) ?? .full
         hideFromCapture = defaults.bool(forKey: Key.hideFromCapture)
         mutedFolders = defaults.stringArray(forKey: Key.muted) ?? []
+        theme = defaults.string(forKey: Key.theme).flatMap(Theme.init) ?? .system
     }
 
     func isMuted(_ folder: String?) -> Bool {
@@ -128,6 +137,21 @@ enum MenuBarStyle: String, CaseIterable, Identifiable {
 enum PillVisibility: String, CaseIterable, Identifiable {
     case always, activity, needsYou
     var id: Self { self }
+}
+
+/// Light or dark for the panel and settings. The pill stays dark, since it sits on the black notch.
+enum Theme: String, CaseIterable, Identifiable {
+    case system, light, dark
+    var id: Self { self }
+
+    @MainActor
+    func apply() {
+        NSApp?.appearance = switch self {
+        case .system: nil
+        case .light: NSAppearance(named: .aqua)
+        case .dark: NSAppearance(named: .darkAqua)
+        }
+    }
 }
 
 /// How the panel shows each account's limits.

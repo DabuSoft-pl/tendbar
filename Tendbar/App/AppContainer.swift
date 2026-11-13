@@ -117,6 +117,7 @@ final class AppContainer {
         container.listen(on: TendbarPaths.socketPath(environment: ProcessInfo.processInfo.environment))
         container.systemActions.requestNotifications()
         container.showNotch()
+        DispatchQueue.main.async { preferences.theme.apply() }
         return container
     }
 

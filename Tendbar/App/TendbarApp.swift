@@ -33,13 +33,17 @@ private struct MenuBarLabel: View {
     var body: some View {
         let limit = Int(usage.currentLimit.rounded())
         let waiting = sessions.needsYouCount
-        let bird = Image(systemName: waiting > 0 ? "bird.fill" : "bird")
+        let failed = sessions.sessions.filter { $0.state == .failed && $0.unread }.count
+        let bird = Image(systemName: waiting > 0 || failed > 0 ? "bird.fill" : "bird")
         switch preferences.menuBarStyle {
         case .bird:
             bird
         case .waiting:
             if waiting > 0 {
                 Text("\(bird) \(waiting)")
+            } else if failed > 0 {
+                Text("\(bird) \(Image(systemName: "exclamationmark"))")
+                    .accessibilityLabel(String(localized: "\(failed) with an error"))
             } else if limit >= 90 {
                 Text("\(bird) \(limit)%")
             } else {

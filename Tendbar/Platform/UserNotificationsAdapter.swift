@@ -50,7 +50,7 @@ final class UserNotificationsAdapter: NSObject, UNUserNotificationCenterDelegate
     func present(_ kind: AlertKind, for session: Session, sound: Bool) {
         let content = UNMutableNotificationContent()
         content.title = session.folderName
-        content.subtitle = kind.title
+        content.subtitle = session.alertSubtitle(for: kind)
         content.body = session.alertBody(for: kind)
         content.threadIdentifier = session.id
         content.userInfo = ["sessionID": session.id]

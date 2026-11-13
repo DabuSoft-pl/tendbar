@@ -105,7 +105,7 @@ struct MenuContent: View {
                 if !earlier.isEmpty {
                     if !current.isEmpty {
                         Button {
-                            showsEarlier.toggle()
+                            withAnimation(.easeOut(duration: 0.2)) { showsEarlier.toggle() }
                         } label: {
                             HStack(spacing: 6) {
                                 Image(systemName: "chevron.right")
@@ -124,6 +124,7 @@ struct MenuContent: View {
                     }
                     if expanded {
                         ForEach(earlier) { row($0) }
+                            .transition(.opacity)
                     }
                 }
             }

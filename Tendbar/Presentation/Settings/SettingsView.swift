@@ -35,6 +35,7 @@ struct SettingsView: View {
             sidebar
             Divider().ignoresSafeArea()
             detail
+                .modifier(NoTopScrollEdge())
                 .padding(.top, 12)
                 .ignoresSafeArea(edges: .top)
         }
@@ -278,6 +279,16 @@ private struct AppearanceSettings: View {
 
     var body: some View {
         Form {
+            Section {
+                Picker("Theme", selection: $preferences.theme) {
+                    Text("System").tag(Theme.system)
+                    Text("Light").tag(Theme.light)
+                    Text("Dark").tag(Theme.dark)
+                }
+                .pickerStyle(.segmented)
+            } footer: {
+                Text("For the panel and settings. The pill stays dark next to the notch")
+            }
             Section("Menu bar") {
                 Picker("Next to the bird", selection: $preferences.menuBarStyle) {
                     Text("Nothing").tag(MenuBarStyle.bird)
@@ -413,5 +424,17 @@ private struct StatusDot: View {
 
     var body: some View {
         Circle().fill(color).frame(width: 8, height: 8).accessibilityHidden(true)
+    }
+}
+
+/// The hidden title bar has nothing to separate, so the scroll edge effect of macOS 26 would only draw a band over
+/// the first section.
+private struct NoTopScrollEdge: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(macOS 26, *) {
+            content.scrollEdgeEffectHidden(true, for: .top)
+        } else {
+            content
+        }
     }
 }
