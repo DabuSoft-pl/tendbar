@@ -36,10 +36,7 @@ struct MenuContent: View {
             }
             Divider()
             if model.sessions.isEmpty {
-                Text("Brak sesji. Uruchom Claude Code, a pojawią się tutaj.")
-                    .foregroundStyle(.secondary)
-                    .font(.callout)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                EmptySessions(connection: model.connection)
             } else {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 4) {
@@ -243,5 +240,45 @@ struct StateMark: View {
         .frame(width: 8, height: 8)
         .help(state.label)
         .accessibilityLabel(unread && state == .done ? String(localized: "\(state.label), nieprzeczytane") : state.label)
+    }
+}
+
+struct EmptySessions: View {
+    let connection: HookInstaller.Status?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Żadna sesja nie jest uruchomiona").fontWeight(.medium)
+                Text("Sesje pojawią się tu same, gdy uruchomisz Claude Code w terminalu")
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            HStack(spacing: 8) {
+                Text("claude")
+                    .font(.system(.callout, design: .monospaced))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 6))
+                Button {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString("claude", forType: .string)
+                } label: {
+                    Image(systemName: "doc.on.doc")
+                }
+                .buttonStyle(.borderless)
+                .help("Kopiuj polecenie")
+                .accessibilityLabel("Kopiuj polecenie claude")
+            }
+            HStack(spacing: 8) {
+                Circle().fill(connection == .connected ? Color.green : Color.orange).frame(width: 8, height: 8)
+                Text(connection == .connected ? "Połączono z Claude Code" : "Nie połączono z Claude Code")
+                    .foregroundStyle(.secondary)
+            }
+            .font(.caption)
+        }
+        .font(.callout)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 4)
     }
 }

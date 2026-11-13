@@ -1,6 +1,7 @@
 import AppKit
 import ServiceManagement
 import SwiftUI
+import TendbarKit
 
 struct SettingsView: View {
     let model: AppModel
@@ -8,13 +9,16 @@ struct SettingsView: View {
     var body: some View {
         TabView {
             NotificationSettings(model: model)
+                .frame(height: 500)
                 .tabItem { Label("Powiadomienia", systemImage: "bell") }
             AccountsSection(model: model)
+                .frame(height: 420)
                 .tabItem { Label("Konta", systemImage: "person.2") }
             GeneralSettings(model: model)
+                .frame(height: 460)
                 .tabItem { Label("Ogólne", systemImage: "gearshape") }
         }
-        .frame(width: 520, height: 460)
+        .frame(width: 520)
         .onAppear { model.refresh() }
     }
 }
@@ -46,7 +50,8 @@ private struct NotificationSettings: View {
             }
             Section {
                 LabeledContent("Uprawnienia") {
-                    HStack {
+                    HStack(spacing: 8) {
+                        StatusDot(color: granted ? .green : .orange)
                         Text(statusText).foregroundStyle(.secondary)
                         Button("Wyślij testowe") { model.sendTestNotification() }
                     }
@@ -66,6 +71,13 @@ private struct NotificationSettings: View {
             }
         }
         .formStyle(.grouped)
+    }
+
+    private var granted: Bool {
+        switch model.notificationStatus {
+        case .authorized, .provisional, .ephemeral: true
+        default: false
+        }
     }
 
     private var statusText: String {
@@ -101,7 +113,8 @@ private struct GeneralSettings: View {
             }
             Section {
                 LabeledContent("Hooki w ~/.claude") {
-                    HStack {
+                    HStack(spacing: 8) {
+                        StatusDot(color: model.connection == .connected ? .green : .orange)
                         Text(connectionText).foregroundStyle(.secondary)
                         switch model.connection {
                         case .connected, .outdated:
@@ -123,8 +136,35 @@ private struct GeneralSettings: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            Section {
+                LabeledContent("Wersja") {
+                    Text(version).foregroundStyle(.secondary).monospacedDigit()
+                }
+                LabeledContent("Dane i log zdarzeń") {
+                    HStack {
+                        Button("Pokaż log") {
+                            NSWorkspace.shared.activateFileViewerSelecting([TendbarPaths.eventLog])
+                        }
+                        Button("Pokaż folder") {
+                            NSWorkspace.shared.open(TendbarPaths.supportDirectory)
+                        }
+                    }
+                }
+            } header: {
+                Text("O Tendbarze")
+            } footer: {
+                Text("Wszystko zostaje na tym Macu. Tendbar nie wysyła nic do sieci")
+                    .foregroundStyle(.secondary)
+            }
         }
         .formStyle(.grouped)
+    }
+
+    private var version: String {
+        let info = Bundle.main.infoDictionary
+        let short = info?["CFBundleShortVersionString"] as? String ?? "0"
+        let build = info?["CFBundleVersion"] as? String ?? "0"
+        return "\(short) (\(build))"
     }
 
     private var connectionText: String {
@@ -134,5 +174,13 @@ private struct GeneralSettings: View {
         case .disconnected: String(localized: "niepołączone")
         case nil: String(localized: "brak tendbar-hook")
         }
+    }
+}
+
+private struct StatusDot: View {
+    let color: Color
+
+    var body: some View {
+        Circle().fill(color).frame(width: 8, height: 8).accessibilityHidden(true)
     }
 }
