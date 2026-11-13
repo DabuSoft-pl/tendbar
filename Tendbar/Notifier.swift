@@ -54,6 +54,17 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
         try await center.add(UNNotificationRequest(identifier: "test", content: content, trigger: nil))
     }
 
+    func postLimit(title: String, body: String, identifier: String, sound: Bool) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.threadIdentifier = "limits"
+        if sound { content.sound = .default }
+        center.add(UNNotificationRequest(identifier: "limit-\(identifier)", content: content, trigger: nil)) { [log] error in
+            if let error { log.error("limit post failed: \(error, privacy: .public)") }
+        }
+    }
+
     func clear(_ sessionID: String) {
         center.removeDeliveredNotifications(withIdentifiers: [Self.identifier(sessionID)])
     }

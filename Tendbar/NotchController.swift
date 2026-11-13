@@ -146,9 +146,18 @@ private struct NotchView: View {
         return working > 0 ? (working, .working) : nil
     }
 
+    private var highestLimit: Double {
+        let now = Date()
+        return model.usage.ordered
+            .flatMap { LimitWarnings.windows(of: $0).map(\.window) }
+            .filter { $0.resetsAt != .distantFuture }
+            .map { $0.percentage(at: now) }
+            .max() ?? 0
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            if let lead {
+            if lead != nil || highestLimit >= 80 {
                 pill(lead: lead)
             }
             Spacer(minLength: 0)
@@ -158,12 +167,17 @@ private struct NotchView: View {
         .animation(.easeInOut(duration: 0.25), value: lead)
     }
 
-    private func pill(lead: SessionState) -> some View {
+    private func pill(lead: SessionState?) -> some View {
         VStack(spacing: 0) {
             HStack(spacing: 0) {
-                Image(systemName: "bird.fill")
-                    .foregroundStyle(lead.color)
-                    .frame(width: wing)
+                Group {
+                    if let lead {
+                        Image(systemName: "bird.fill").foregroundStyle(lead.color)
+                    } else {
+                        Image(systemName: "gauge.with.dots.needle.67percent").foregroundStyle(limitColor(highestLimit))
+                    }
+                }
+                .frame(width: wing)
                 Spacer(minLength: max(notchWidth, 4))
                 Group {
                     if let badge {
@@ -185,6 +199,15 @@ private struct NotchView: View {
                                 model.select(session)
                             }
                     }
+                    let accounts = model.usage.ordered
+                    if !accounts.isEmpty {
+                        VStack(alignment: .leading, spacing: 4) {
+                            ForEach(accounts) { account in
+                                NotchLimitRow(name: model.accountName(account), account: account)
+                            }
+                        }
+                        .padding(.top, active.isEmpty ? 0 : 6)
+                    }
                 }
                 .padding(.horizontal, 12)
                 .padding(.top, 4)
@@ -200,6 +223,45 @@ private struct NotchView: View {
         .contentShape(UnevenRoundedRectangle(bottomLeadingRadius: radius, bottomTrailingRadius: radius))
         .onHover { expanded = $0 }
         .environment(\.colorScheme, .dark)
+    }
+}
+
+func limitColor(_ percentage: Double) -> Color {
+    switch percentage {
+    case ..<70: .blue
+    case ..<90: .orange
+    default: .red
+    }
+}
+
+private struct NotchLimitRow: View {
+    let name: String
+    let account: AccountUsage
+
+    var body: some View {
+        let now = Date()
+        HStack(spacing: 8) {
+            Text(name).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+            Spacer(minLength: 4)
+            gauge(String(localized: "5h"), account.fiveHour, now: now)
+            gauge(String(localized: "7d"), account.sevenDay, now: now)
+        }
+        .font(.system(size: 11))
+        .foregroundStyle(.white)
+        .padding(.horizontal, 8)
+    }
+
+    private func gauge(_ title: String, _ window: LimitWindow?, now: Date) -> some View {
+        let percentage = window?.percentage(at: now) ?? 0
+        return HStack(spacing: 4) {
+            Text(title).foregroundStyle(.secondary)
+            ProgressView(value: min(percentage, 100), total: 100)
+                .tint(limitColor(percentage))
+                .frame(width: 50)
+            Text(window == nil ? "–" : "\(Int(percentage.rounded()))%")
+                .monospacedDigit()
+                .frame(width: 32, alignment: .trailing)
+        }
     }
 }
 

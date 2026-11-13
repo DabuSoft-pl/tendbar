@@ -55,7 +55,7 @@ private struct LimitRow: View {
             if let window {
                 let percentage = window.percentage(at: now)
                 ProgressView(value: percentage, total: 100)
-                    .tint(color(for: percentage))
+                    .tint(limitColor(percentage))
                 Text("\(Int(percentage.rounded())) %")
                     .monospacedDigit()
                     .frame(width: 44, alignment: .trailing)
@@ -75,13 +75,5 @@ private struct LimitRow: View {
         if window.resetsAt == .distantFuture { return String(localized: "nie rozpoczęty") }
         if now >= window.resetsAt { return String(localized: "zresetowany") }
         return window.resetsAt.formatted(.relative(presentation: .named))
-    }
-
-    private func color(for percentage: Double) -> Color {
-        switch percentage {
-        case ..<70: .blue
-        case ..<90: .orange
-        default: .red
-        }
     }
 }

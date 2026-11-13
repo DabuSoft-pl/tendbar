@@ -23,6 +23,7 @@ struct SettingsPanel: View {
                 Toggle("Gdy sesja czeka na Ciebie", isOn: $preferences.notifyNeedsYou)
                 Toggle("Gdy sesja skończy pracę", isOn: $preferences.notifyDone)
                 Toggle("Gdy tura zakończy się błędem", isOn: $preferences.notifyFailed)
+                Toggle("Gdy limit konta przekroczy 80% i 90%", isOn: $preferences.notifyLimits)
                 Toggle("Dźwięk", isOn: $preferences.playSound)
                 HStack {
                     Toggle("Świecąca ramka, gdy sesja czeka lub jest błąd", isOn: $preferences.edgeGlow)

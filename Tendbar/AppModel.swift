@@ -41,6 +41,7 @@ final class AppModel {
         requestNotifications()
         notch = NotchController(model: self)
         watchClaudeSwap()
+        checkLimits()
     }
 
     func refreshNotch() {
@@ -250,6 +251,7 @@ final class AppModel {
         let email = emailCache.email(configDirectory: envelope.terminal.configDirectory)
         guard usage.apply(envelope, email: email) else { return }
         try? UsagePersistence.save(usage)
+        checkLimits()
     }
 
     private func watchClaudeSwap() {
@@ -264,10 +266,48 @@ final class AppModel {
                     guard let self else { return }
                     var changed = false
                     for reading in readings where self.usage.merge(reading) { changed = true }
-                    if changed { try? UsagePersistence.save(self.usage) }
+                    if changed {
+                        try? UsagePersistence.save(self.usage)
+                        self.checkLimits()
+                    }
                 }
                 try? await Task.sleep(for: .seconds(30))
             }
+        }
+    }
+
+    private static let firedLimitsKey = "limits.fired"
+
+    private func checkLimits() {
+        let now = Date()
+        var fired = Set(UserDefaults.standard.stringArray(forKey: Self.firedLimitsKey) ?? [])
+        var warnings: [(AccountUsage, LimitWarning)] = []
+        for account in usage.ordered {
+            for warning in LimitWarnings.pending(for: account, now: now, fired: fired) {
+                warnings.append((account, warning))
+                fired.formUnion(LimitWarnings.keys(firing: warning))
+            }
+        }
+        guard !warnings.isEmpty else { return }
+        UserDefaults.standard.set(Array(fired.sorted().suffix(200)), forKey: Self.firedLimitsKey)
+        guard preferences.notifyLimits else { return }
+        for (account, warning) in warnings {
+            let reset = warning.resetsAt.formatted(.relative(presentation: .named))
+            notifier.postLimit(
+                title: String(localized: "Limit \(Self.windowName(warning.window)): \(Int(warning.percentage.rounded())) %"),
+                body: String(localized: "\(accountName(account)), reset \(reset)"),
+                identifier: LimitWarnings.key(accountID: warning.accountID, window: warning.window, resetsAt: warning.resetsAt, threshold: warning.threshold),
+                sound: preferences.playSound
+            )
+        }
+        if preferences.edgeGlow, warnings.contains(where: { $0.1.threshold >= 90 }) { glow.flash(.orange) }
+    }
+
+    static func windowName(_ window: String) -> String {
+        switch window {
+        case LimitWarnings.fiveHour: String(localized: "5 godz.")
+        case LimitWarnings.sevenDay: String(localized: "tygodniowy")
+        default: window
         }
     }
 
