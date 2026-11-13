@@ -161,15 +161,11 @@ struct NotchView: View {
         return nil
     }
 
+    /// The count always belongs to the bird's state, so the pill says one thing at a time.
     private var badge: (count: Int, state: SessionState)? {
-        let needsYou = active.filter { $0.state == .needsYou }.count
-        if needsYou > 0 { return (needsYou, .needsYou) }
-        let failed = active.filter { $0.state == .failed }.count
-        if failed > 0 { return (failed, .failed) }
-        let done = active.filter { $0.state == .done && $0.unread }.count
-        if done > 0 { return (done, .done) }
-        let working = active.filter { $0.state == .working }.count
-        return working > 0 ? (working, .working) : nil
+        guard let lead else { return nil }
+        let count = active.filter { $0.state == lead }.count
+        return count > 0 ? (count, lead) : nil
     }
 
     private var highestLimit: Double {
