@@ -120,7 +120,8 @@ final class AppContainer {
     }
 
     private func listen(on socketPath: String) {
-        let listener = HookEventListener(socketPath: socketPath)
+        let filter = EventLogFilter { UserDefaults.standard.bool(forKey: EventLog.enabledKey) }
+        let listener = HookEventListener(socketPath: socketPath, logFilter: filter)
         do {
             try listener.start { [weak self] message in self?.receive(message) }
             self.listener = listener
@@ -143,6 +144,7 @@ final class AppContainer {
             sessions: sessions, sessionActions: sessionActions, usage: usage, preferences: preferences
         )
         preferences.onNotchViewChange = { [weak notch] in notch?.update() }
+        preferences.onLogEventsChange = { enabled in if !enabled { EventLog.remove() } }
         self.notch = notch
     }
 }

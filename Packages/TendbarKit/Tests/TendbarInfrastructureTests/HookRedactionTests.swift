@@ -32,3 +32,38 @@ import TendbarDomain
         #expect(HookRedaction.redact(Data("not json".utf8), statusLine: false) == "{}")
     }
 }
+
+@Suite struct EventLogFilterTests {
+    private func envelope(_ raw: String, statusLine: Bool = false) -> HookEnvelope {
+        HookEnvelope(sentAt: Date(), terminal: TerminalContext(), raw: raw, channel: statusLine ? HookEnvelope.statusLineChannel : nil)
+    }
+
+    @Test func logsStatusLineOnlyWhenLimitsChange() {
+        let filter = EventLogFilter()
+        let five = #"{"session_id":"s1","rate_limits":{"five_hour":{"used_percentage":5}}}"#
+        let six = #"{"session_id":"s1","rate_limits":{"five_hour":{"used_percentage":6}}}"#
+
+        #expect(filter.shouldLog(envelope(five, statusLine: true)))
+        #expect(!filter.shouldLog(envelope(five, statusLine: true)))
+        #expect(filter.shouldLog(envelope(six, statusLine: true)))
+    }
+
+    @Test func logsOnlyTheFirstOfARunOfToolCalls() {
+        let filter = EventLogFilter()
+        let tool = #"{"session_id":"s1","hook_event_name":"PostToolUse"}"#
+        let prompt = #"{"session_id":"s1","hook_event_name":"UserPromptSubmit"}"#
+
+        #expect(filter.shouldLog(envelope(prompt)))
+        #expect(filter.shouldLog(envelope(tool)))
+        #expect(!filter.shouldLog(envelope(tool)))
+        #expect(filter.shouldLog(envelope(#"{"session_id":"s2","hook_event_name":"PostToolUse"}"#)))
+        #expect(filter.shouldLog(envelope(prompt)))
+        #expect(filter.shouldLog(envelope(tool)))
+    }
+
+    @Test func logsNothingWhenDisabled() {
+        let filter = EventLogFilter { false }
+
+        #expect(!filter.shouldLog(envelope(#"{"session_id":"s1","hook_event_name":"Stop"}"#)))
+    }
+}

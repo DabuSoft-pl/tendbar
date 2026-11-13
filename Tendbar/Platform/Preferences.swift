@@ -16,10 +16,12 @@ final class Preferences: AlertSettingsProviding {
         static let glowDone = "notify.glow.done"
         static let notch = "view.notch"
         static let limits = "notify.limits"
+        static let logEvents = "log.events"
     }
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored var onNotchViewChange: (() -> Void)?
+    @ObservationIgnored var onLogEventsChange: ((Bool) -> Void)?
 
     var notifyNeedsYou: Bool { didSet { defaults.set(notifyNeedsYou, forKey: Key.needsYou) } }
     var notifyDone: Bool { didSet { defaults.set(notifyDone, forKey: Key.done) } }
@@ -28,6 +30,12 @@ final class Preferences: AlertSettingsProviding {
     var edgeGlow: Bool { didSet { defaults.set(edgeGlow, forKey: Key.glow) } }
     var glowOnDone: Bool { didSet { defaults.set(glowOnDone, forKey: Key.glowDone) } }
     var notifyLimits: Bool { didSet { defaults.set(notifyLimits, forKey: Key.limits) } }
+    var logEvents: Bool {
+        didSet {
+            defaults.set(logEvents, forKey: Key.logEvents)
+            onLogEventsChange?(logEvents)
+        }
+    }
     var notchView: Bool {
         didSet {
             defaults.set(notchView, forKey: Key.notch)
@@ -48,6 +56,7 @@ final class Preferences: AlertSettingsProviding {
         glowOnDone = defaults.bool(forKey: Key.glowDone)
         notifyLimits = defaults.bool(forKey: Key.limits)
         notchView = defaults.bool(forKey: Key.notch)
+        logEvents = defaults.bool(forKey: Key.logEvents)
     }
 
     var alertSettings: AlertSettings {

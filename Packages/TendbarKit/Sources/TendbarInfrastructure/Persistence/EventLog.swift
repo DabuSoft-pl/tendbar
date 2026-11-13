@@ -3,6 +3,14 @@ import Foundation
 public enum EventLog {
     public static let sizeLimit: UInt64 = 5 * 1024 * 1024
 
+    public static let enabledKey = "log.events"
+
+    public static func remove(at url: URL = TendbarPaths.eventLog) {
+        let manager = FileManager.default
+        try? manager.removeItem(at: url)
+        try? manager.removeItem(at: url.deletingPathExtension().appendingPathExtension("1.jsonl"))
+    }
+
     public static func append(_ data: Data, to url: URL = TendbarPaths.eventLog) {
         let manager = FileManager.default
         if let size = (try? manager.attributesOfItem(atPath: url.path))?[.size] as? NSNumber, size.uint64Value > sizeLimit {

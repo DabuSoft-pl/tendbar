@@ -70,7 +70,6 @@ struct SettingsView: View {
             Spacer()
             VStack(alignment: .leading, spacing: 4) {
                 Button("Folder danych") { container.systemActions.revealDataFolder() }
-                Button("Log zdarzeń") { container.systemActions.revealEventLog() }
                 Text(Self.version)
                     .monospacedDigit()
                     .foregroundStyle(.tertiary)
@@ -251,6 +250,20 @@ private struct GeneralSettings: View {
                     set: { systemActions.setLaunchAtLogin($0) }
                 ))
                 Toggle(NotchController.hasNotch ? "Stan sesji w notchu" : "Stan sesji na środku paska menu", isOn: $preferences.notchView)
+                Toggle(isOn: $preferences.logEvents) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Log zdarzeń")
+                            Text("Do diagnozy problemów. Wyłączenie usuwa log")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        if preferences.logEvents {
+                            Button("Pokaż") { systemActions.revealEventLog() }
+                        }
+                    }
+                }
             } footer: {
                 if system.loginItem == .requiresApproval {
                     Text("Zatwierdź Tendbar w Ustawieniach systemowych → Ogólne → Rzeczy otwierane podczas logowania")

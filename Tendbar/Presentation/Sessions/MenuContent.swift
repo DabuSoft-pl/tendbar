@@ -91,7 +91,6 @@ struct MenuContent: View {
             .help("Ustawienia (⌘,)")
             Menu {
                 Button("Usuń zakończone sesje") { actions.removeEndedSessions() }
-                Button("Pokaż log zdarzeń") { container.systemActions.revealEventLog() }
                 Divider()
                 Button("Zakończ Tendbar") { NSApplication.shared.terminate(nil) }
             } label: {
