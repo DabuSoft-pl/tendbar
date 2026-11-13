@@ -7,38 +7,49 @@ struct AccountsSection: View {
     let model: ClaudeCodeViewModel
     let actions: ClaudeCodeController
     @State private var newName = ""
+    @State private var adding = false
+    @FocusState private var nameFocused: Bool
 
     var body: some View {
-        Group {
-            Section {
-                if model.profiles.isEmpty {
-                    Text("No profiles yet. The default ~/.claude profile appears after the first session")
-                        .foregroundStyle(.secondary)
-                }
-                ForEach(model.profiles) { profile in
-                    ProfileRow(profile: profile, actions: actions)
-                }
-            } header: {
-                Text("Claude Code profiles")
-            } footer: {
-                Text("An account's limits come from Claude Code sessions signed in to it")
+        Section {
+            if model.profiles.isEmpty {
+                Text("No profiles yet. The default ~/.claude profile appears after the first session")
+                    .foregroundStyle(.secondary)
             }
-            Section {
+            ForEach(model.profiles) { profile in
+                ProfileRow(profile: profile, actions: actions)
+            }
+            if adding {
                 HStack {
                     TextField("Name or e-mail", text: $newName)
+                        .focused($nameFocused)
                         .onSubmit(add)
+                    Button("Cancel") { stopAdding() }
                     Button("Add", action: add)
                         .disabled(slug.isEmpty)
+                        .keyboardShortcut(.defaultAction)
                 }
-                if let error = model.profileError {
-                    Text(error).foregroundStyle(Palette.vermilion)
+            } else {
+                Button {
+                    adding = true
+                    nameFocused = true
+                } label: {
+                    Label("Add profile", systemImage: "plus")
                 }
-            } header: {
-                Text("New profile")
-            } footer: {
+                .buttonStyle(.borderless)
+            }
+            if let error = model.profileError {
+                Text(error).foregroundStyle(Palette.vermilion)
+            }
+        } header: {
+            Text("Claude Code profiles")
+        } footer: {
+            if adding {
                 Text(slug.isEmpty
                     ? String(localized: "A profile is a separate Claude Code directory you sign in to with /login")
                     : String(localized: "Creates ~/.claude-\(slug)"))
+            } else {
+                Text("An account's limits come from Claude Code sessions signed in to it")
             }
         }
     }
@@ -50,7 +61,12 @@ struct AccountsSection: View {
     private func add() {
         guard !slug.isEmpty else { return }
         actions.addProfile(named: slug)
-        if model.profileError == nil { newName = "" }
+        if model.profileError == nil { stopAdding() }
+    }
+
+    private func stopAdding() {
+        newName = ""
+        adding = false
     }
 }
 
@@ -74,10 +90,12 @@ private struct ProfileRow: View {
             Spacer()
             switch profile.connection {
             case .connected:
-                Image(systemName: "checkmark")
-                    .foregroundStyle(.secondary)
-                    .help("Connected")
-                    .accessibilityLabel("Connected")
+                HStack(spacing: 6) {
+                    StatusDot(color: Palette.sage)
+                    Text("Hooks on").foregroundStyle(.secondary)
+                }
+                .font(.callout)
+                .help("Tendbar's hooks are in this profile's settings.json")
             case .outdated, .disconnected:
                 Button("Connect") { actions.connect(profile) }
             case nil:

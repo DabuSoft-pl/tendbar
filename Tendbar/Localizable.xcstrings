@@ -239,6 +239,16 @@
         }
       }
     },
+    "Add profile": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj profil"
+          }
+        }
+      }
+    },
     "Allow Tendbar in System Settings → General → Login Items": {
       "localizations": {
         "pl": {
@@ -329,6 +339,16 @@
         }
       }
     },
+    "Cancel": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anuluj"
+          }
+        }
+      }
+    },
     "Claude Code profiles": {
       "localizations": {
         "pl": {
@@ -375,16 +395,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Połącz"
-          }
-        }
-      }
-    },
-    "Connected": {
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Połączone"
           }
         }
       }
@@ -709,6 +719,16 @@
         }
       }
     },
+    "Hooks on": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hooki włączone"
+          }
+        }
+      }
+    },
     "Hover the pill to see the sessions and every account's limits": {
       "localizations": {
         "pl": {
@@ -849,16 +869,6 @@
         }
       }
     },
-    "New profile": {
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nowy profil"
-          }
-        }
-      }
-    },
     "Next to the bird": {
       "localizations": {
         "pl": {
@@ -879,12 +889,12 @@
         }
       }
     },
-    "No sessions running": {
+    "No sessions yet": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Żadna sesja nie jest uruchomiona"
+            "value": "Brak sesji"
           }
         }
       }
@@ -895,16 +905,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Niepołączone"
-          }
-        }
-      }
-    },
-    "Not connected to Claude Code": {
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nie połączono z Claude Code"
           }
         }
       }
@@ -1169,16 +1169,6 @@
         }
       }
     },
-    "Sessions show up here once you start Claude Code in a terminal": {
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sesje pojawią się tu same, gdy uruchomisz Claude Code w terminalu"
-          }
-        }
-      }
-    },
     "Sessions waiting for you": {
       "localizations": {
         "pl": {
@@ -1225,6 +1215,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dźwięk"
+          }
+        }
+      }
+    },
+    "Start Claude Code in a terminal and it shows up here": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uruchom Claude Code w terminalu, a sesja pojawi się tutaj"
           }
         }
       }
@@ -1295,6 +1295,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tendbar nie jest połączony z Claude Code"
+          }
+        }
+      }
+    },
+    "Tendbar's hooks are in this profile's settings.json": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hooki Tendbara są w settings.json tego profilu"
           }
         }
       }

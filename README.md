@@ -78,7 +78,7 @@ Builds are signed ad hoc, so they run on the Mac that built them.
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/images/settings-dark.png">
-    <img src="docs/images/settings-light.png" width="700" alt="Tendbar settings: the Claude Code connection and the account profiles">
+    <img src="docs/images/settings-light.png" width="700" alt="Tendbar settings: the Claude Code connection and the profiles with their hooks">
   </picture>
 </p>
 

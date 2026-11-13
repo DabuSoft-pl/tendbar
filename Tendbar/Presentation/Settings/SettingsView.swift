@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 import TendbarApplication
 
-private enum SettingsPage: String, CaseIterable, Identifiable {
+enum SettingsPage: String, CaseIterable, Identifiable {
     case claudeCode, notifications, appearance, general
 
     var id: Self { self }
@@ -28,7 +28,12 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
 
 struct SettingsView: View {
     let container: AppContainer
-    @State private var page: SettingsPage = .claudeCode
+    @State private var page: SettingsPage
+
+    init(container: AppContainer, page: SettingsPage = .claudeCode) {
+        self.container = container
+        _page = State(initialValue: page)
+    }
 
     var body: some View {
         HStack(spacing: 0) {
@@ -419,7 +424,7 @@ private struct GeneralSettings: View {
     }
 }
 
-private struct StatusDot: View {
+struct StatusDot: View {
     let color: Color
 
     var body: some View {

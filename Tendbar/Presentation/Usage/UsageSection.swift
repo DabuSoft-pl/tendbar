@@ -88,6 +88,7 @@ private struct WindowLimit: View {
         let percentage = window?.percentage(at: now) ?? 0
         let pace = window?.evenPace(at: now, length: length)
         let runsOut = window?.runsOut(readAt: readAt, now: now, length: length)
+        let tone = window.map { limitTone($0, readAt: readAt, now: now, length: length) } ?? 0
         VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .firstTextBaseline) {
                 Text(title).foregroundStyle(.secondary)
@@ -95,9 +96,9 @@ private struct WindowLimit: View {
                 Text(window == nil ? "–" : "\(Int(percentage.rounded()))%")
                     .font(.system(size: 17, weight: .medium, design: .rounded))
                     .monospacedDigit()
-                    .foregroundStyle(percentage >= 70 ? limitColor(percentage) : .primary)
+                    .foregroundStyle(tone >= 70 ? limitColor(tone) : .primary)
             }
-            LimitBar(percentage: percentage, pace: pace)
+            LimitBar(percentage: percentage, pace: pace, tone: tone)
                 .accessibilityLabel(title)
                 .accessibilityValue("\(Int(percentage.rounded()))%")
             if let window {
@@ -107,7 +108,7 @@ private struct WindowLimit: View {
                     if let runsOut {
                         Text(" · ").foregroundStyle(.tertiary)
                         Text("at this pace out in \(Elapsed.until(runsOut, now: now))")
-                            .foregroundStyle(limitColor(max(percentage, 70)))
+                            .foregroundStyle(limitColor(tone))
                     }
                 }
                 .font(.caption)
@@ -145,13 +146,14 @@ struct CompactLimits: View {
 
     private func gauge(_ title: String, _ window: LimitWindow?, length: TimeInterval, now: Date) -> some View {
         let percentage = window?.percentage(at: now) ?? 0
+        let tone = window.map { limitTone($0, readAt: account.updatedAt, now: now, length: length) } ?? 0
         return HStack(spacing: 6) {
             Text(title).foregroundStyle(.tertiary).fixedSize()
-            LimitBar(percentage: percentage, height: 4, pace: window?.evenPace(at: now, length: length))
+            LimitBar(percentage: percentage, height: 4, pace: window?.evenPace(at: now, length: length), tone: tone)
                 .frame(width: barWidth)
             Text(window == nil ? "–" : "\(Int(percentage.rounded()))%")
                 .monospacedDigit()
-                .foregroundStyle(percentage >= 70 ? limitColor(percentage) : .secondary)
+                .foregroundStyle(tone >= 70 ? limitColor(tone) : .secondary)
                 .frame(width: 34, alignment: .trailing)
         }
     }

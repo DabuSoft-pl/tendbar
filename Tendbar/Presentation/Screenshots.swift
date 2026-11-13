@@ -14,7 +14,11 @@ enum Screenshots {
         let container = PreviewData.container()
         for (name, appearance) in [("dark", NSAppearance.Name.darkAqua), ("light", .aqua)] {
             render(panel(container), size: CGSize(width: 400, height: 640), appearance: appearance, to: folder.appendingPathComponent("panel-\(name).png"))
-            render(SettingsView(container: container), size: CGSize(width: 700, height: 500), appearance: appearance, to: folder.appendingPathComponent("settings-\(name).png"))
+            renderWindow(SettingsView(container: container), appearance: appearance, to: folder.appendingPathComponent("settings-\(name).png"))
+        }
+        if arguments.contains("-screenshots-empty") {
+            let empty = PreviewData.container(sessions: [], accounts: [])
+            render(panel(empty), size: CGSize(width: 400, height: 640), appearance: .darkAqua, to: folder.appendingPathComponent("panel-empty.png"))
         }
         render(notch(container, expanded: true), size: CGSize(width: 520, height: 280), appearance: .darkAqua, to: folder.appendingPathComponent("notch-expanded.png"))
         exit(0)
@@ -40,6 +44,58 @@ enum Screenshots {
         .background(Color(white: 0.16))
     }
 
+    /// A real settings window, title bar and close button included, drawn with a soft shadow on a clear canvas, so
+    /// the README shows a window rather than a cut-out.
+    private static func renderWindow(_ view: some View, appearance: NSAppearance.Name, to url: URL) {
+        let size = CGSize(width: 700, height: 500)
+        let window = NSWindow(
+            contentRect: CGRect(origin: CGPoint(x: -10_000, y: -10_000), size: size),
+            styleMask: [.titled, .closable, .fullSizeContentView],
+            backing: .buffered,
+            defer: false
+        )
+        window.appearance = NSAppearance(named: appearance)
+        window.titleVisibility = .hidden
+        window.titlebarAppearsTransparent = true
+        window.titlebarSeparatorStyle = .none
+        window.standardWindowButton(.miniaturizeButton)?.isHidden = true
+        window.standardWindowButton(.zoomButton)?.isHidden = true
+        window.contentView = NSHostingView(rootView: view)
+        window.orderFront(nil)
+        RunLoop.main.run(until: Date().addingTimeInterval(0.5))
+        guard let frameView = window.contentView?.superview,
+              let rep = frameView.bitmapImageRepForCachingDisplay(in: frameView.bounds) else { return }
+        frameView.cacheDisplay(in: frameView.bounds, to: rep)
+        window.orderOut(nil)
+
+        let margin: CGFloat = 40
+        let canvas = NSImage(size: CGSize(width: size.width + margin * 2, height: size.height + margin * 2))
+        canvas.lockFocus()
+        let shadow = NSShadow()
+        shadow.shadowColor = NSColor.black.withAlphaComponent(0.25)
+        shadow.shadowBlurRadius = 24
+        shadow.shadowOffset = CGSize(width: 0, height: -8)
+        let image = NSImage(size: size)
+        image.addRepresentation(rep)
+        let rect = CGRect(origin: CGPoint(x: margin, y: margin), size: size)
+        let outline = NSBezierPath(roundedRect: rect, xRadius: 16, yRadius: 16)
+        NSGraphicsContext.saveGraphicsState()
+        shadow.set()
+        NSColor.windowBackgroundColor.setFill()
+        outline.fill()
+        NSGraphicsContext.restoreGraphicsState()
+        NSGraphicsContext.saveGraphicsState()
+        outline.addClip()
+        image.draw(in: rect)
+        NSGraphicsContext.restoreGraphicsState()
+        NSColor.black.withAlphaComponent(appearance == .darkAqua ? 0.6 : 0.12).setStroke()
+        outline.lineWidth = 1
+        outline.stroke()
+        canvas.unlockFocus()
+        guard let data = canvas.tiffRepresentation, let bitmap = NSBitmapImageRep(data: data) else { return }
+        try? bitmap.representation(using: .png, properties: [:])?.write(to: url)
+    }
+
     private static func render(_ view: some View, size: CGSize, appearance: NSAppearance.Name, to url: URL) {
         let host = NSHostingView(rootView: view.frame(width: size.width).fixedSize(horizontal: false, vertical: true))
         host.appearance = NSAppearance(named: appearance)
@@ -58,4 +114,5 @@ enum Screenshots {
         try? rep.representation(using: .png, properties: [:])?.write(to: url)
     }
 }
+
 #endif

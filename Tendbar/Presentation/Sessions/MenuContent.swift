@@ -327,43 +327,63 @@ struct StateMark: View {
     }
 }
 
+/// The first thing a new user sees: the bird from the icon, waiting on its perch, and the one command that wakes it.
 struct EmptySessions: View {
     let connection: HookConnection?
+    @State private var copied = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("No sessions running").fontWeight(.medium)
-                Text("Sessions show up here once you start Claude Code in a terminal")
+        VStack(spacing: 12) {
+            Image(nsImage: NSApp.applicationIconImage)
+                .resizable()
+                .frame(width: 64, height: 64)
+                .accessibilityHidden(true)
+            VStack(spacing: 4) {
+                Text("No sessions yet").fontWeight(.medium)
+                Text("Start Claude Code in a terminal and it shows up here")
                     .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            HStack(spacing: 8) {
-                Text("claude")
-                    .font(.system(.callout, design: .monospaced))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 6))
-                Button {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString("claude", forType: .string)
-                } label: {
-                    Image(systemName: "doc.on.doc")
+            Button {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString("claude", forType: .string)
+                copied = true
+                Task {
+                    try? await Task.sleep(for: .seconds(1.5))
+                    copied = false
                 }
-                .buttonStyle(.borderless)
-                .help("Copy command")
-                .accessibilityLabel("Copy the claude command")
+            } label: {
+                HStack(spacing: 8) {
+                    Text(verbatim: "claude").font(.system(.callout, design: .monospaced))
+                    Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 12)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .strokeBorder(Color.primary.opacity(0.08))
+                )
             }
-            HStack(spacing: 8) {
-                Circle().fill(connection == .connected ? Palette.sage : Palette.amber).frame(width: 8, height: 8)
-                Text(connection == .connected ? "Connected to Claude Code" : "Not connected to Claude Code")
-                    .foregroundStyle(.secondary)
+            .buttonStyle(.plain)
+            .help("Copy command")
+            .accessibilityLabel("Copy the claude command")
+            if connection == .connected {
+                HStack(spacing: 6) {
+                    Circle().fill(Palette.sage).frame(width: 6, height: 6)
+                    Text("Connected to Claude Code")
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
-            .font(.caption)
         }
         .font(.callout)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, 4)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
     }
 }
 
