@@ -9,6 +9,8 @@ final class SystemViewModel {
     var notificationError: String?
     var loginItem: LoginItemState = .disabled
     var loginItemError: String?
+    /// The chosen global shortcut is held by another app.
+    var shortcutTaken = false
     let eventLog: URL
     let dataFolder: URL
 

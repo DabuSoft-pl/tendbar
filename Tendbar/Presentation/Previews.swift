@@ -87,13 +87,13 @@ private struct NotchPreview: View {
 
     var body: some View {
         NotchView(
+            hover: NotchHover(expanded: expanded),
             sessions: container.sessions,
             usage: container.usage,
             preferences: container.preferences,
             onSelect: { container.sessionActions.select($0) },
             notchWidth: 180,
-            notchHeight: 32,
-            expanded: expanded
+            notchHeight: 32
         )
         .frame(width: 420, height: expanded ? 420 : 60)
         .background(.gray.opacity(0.3))

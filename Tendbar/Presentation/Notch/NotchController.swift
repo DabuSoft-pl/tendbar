@@ -71,15 +71,6 @@ final class NotchController {
         ) { [weak self] _ in
             MainActor.assumeIsolated { self?.update() }
         }
-        // SwiftUI's hover misses an entry in a panel that is never key, and when the pill appears or changes width
-        // under a still cursor. Event monitors for mouse moves broke clicks in the menu bar panel, so the pointer is
-        // polled instead; with the notch view off a tick does nothing.
-        let poll = Timer(timeInterval: 0.1, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated { self?.checkMouse() }
-        }
-        poll.tolerance = 0.05
-        RunLoop.main.add(poll, forMode: .common)
-        self.poll = poll
         update()
     }
 
@@ -126,9 +117,26 @@ final class NotchController {
         }
         panel?.sharingType = preferences.hideFromCapture ? .none : .readOnly
         panel?.orderFrontRegardless()
+        startPolling()
+    }
+
+    /// SwiftUI's hover misses an entry in a panel that is never key, and when the pill appears or changes width
+    /// under a still cursor. Event monitors for mouse moves broke clicks in the menu bar panel, so the pointer is
+    /// polled instead, only while the panel is on screen.
+    private func startPolling() {
+        guard poll == nil else { return }
+        let poll = Timer(timeInterval: 0.1, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.checkMouse() }
+        }
+        poll.tolerance = 0.05
+        RunLoop.main.add(poll, forMode: .common)
+        self.poll = poll
     }
 
     private func close() {
+        poll?.invalidate()
+        poll = nil
+        hover.expanded = false
         panel?.orderOut(nil)
         panel = nil
         geometry = nil
@@ -175,11 +183,15 @@ private final class FirstClickHostingView<Content: View>: NSHostingView<Content>
 @MainActor
 @Observable
 final class NotchHover {
-    var expanded = false
+    var expanded: Bool
     /// Where the pill sits in its panel, top left origin; nil while it is hidden.
     @ObservationIgnored var pill: CGRect?
     /// A click on a session closes the pill until the pointer leaves it.
     @ObservationIgnored var closedByClick = false
+
+    init(expanded: Bool = false) {
+        self.expanded = expanded
+    }
 }
 
 struct NotchView: View {
@@ -197,14 +209,13 @@ struct NotchView: View {
     }
 
     init(
-        hover: NotchHover = NotchHover(),
+        hover: NotchHover,
         sessions: SessionsViewModel,
         usage: UsageViewModel,
         preferences: Preferences,
         onSelect: @escaping (Session) -> Void,
         notchWidth: CGFloat,
-        notchHeight: CGFloat,
-        expanded: Bool = false
+        notchHeight: CGFloat
     ) {
         self.sessions = sessions
         self.usage = usage
@@ -213,7 +224,6 @@ struct NotchView: View {
         self.notchWidth = notchWidth
         self.notchHeight = notchHeight
         self.hover = hover
-        if expanded { hover.expanded = true }
     }
 
     private let wing: CGFloat = 44

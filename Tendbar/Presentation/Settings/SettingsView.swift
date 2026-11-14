@@ -462,6 +462,11 @@ private struct GeneralSettings: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+            } footer: {
+                if system.shortcutTaken {
+                    Text("Another app already uses this shortcut. Pick another one")
+                        .foregroundStyle(Palette.vermilion)
+                }
             }
             Section {
                 LabeledContent {

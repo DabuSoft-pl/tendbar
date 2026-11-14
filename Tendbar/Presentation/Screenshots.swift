@@ -36,13 +36,13 @@ enum Screenshots {
 
     private static func notch(_ container: AppContainer, expanded: Bool) -> some View {
         NotchView(
+            hover: NotchHover(expanded: expanded),
             sessions: container.sessions,
             usage: container.usage,
             preferences: container.preferences,
             onSelect: { _ in },
             notchWidth: 190,
-            notchHeight: 32,
-            expanded: expanded
+            notchHeight: 32
         )
         .frame(width: 520, height: expanded ? 280 : 64)
         .background(Color(white: 0.16))

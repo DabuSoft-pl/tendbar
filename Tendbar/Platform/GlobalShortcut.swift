@@ -12,7 +12,7 @@ enum NextSessionShortcut: String, CaseIterable, Identifiable {
         case .off: nil
         case .controlOptionJ: "⌃⌥J"
         case .controlOptionCommandJ: "⌃⌥⌘J"
-        case .controlOptionSpace: "⌃⌥Space"
+        case .controlOptionSpace: String(localized: "⌃⌥Space")
         }
     }
 

@@ -421,6 +421,16 @@
         }
       }
     },
+    "Another app already uses this shortcut. Pick another one": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ten skrót zajmuje już inna aplikacja. Wybierz inny"
+          }
+        }
+      }
+    },
     "Appearance": {
       "localizations": {
         "pl": {
@@ -2097,6 +2107,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "pracuje"
+          }
+        }
+      }
+    },
+    "⌃⌥Space": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌃⌥Spacja"
           }
         }
       }

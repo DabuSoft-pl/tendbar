@@ -193,10 +193,14 @@ final class AppContainer {
 
     private func listenForShortcut() {
         let shortcut = GlobalShortcut { [weak self] in
-            if self?.sessionActions.openNextSession() != true { NSSound.beep() }
+            guard let self else { return }
+            // The panel is closed, so a sound is the only way to say nothing waits or the jump failed.
+            if !sessionActions.openNextSession() || sessions.jumpMessage != nil { NSSound.beep() }
         }
-        shortcut.register(preferences.nextSessionShortcut)
-        preferences.onShortcutChange = { [weak shortcut] in shortcut?.register($0) }
+        system.shortcutTaken = !shortcut.register(preferences.nextSessionShortcut)
+        preferences.onShortcutChange = { [weak self, weak shortcut] in
+            self?.system.shortcutTaken = shortcut?.register($0) == false
+        }
         self.shortcut = shortcut
     }
 
