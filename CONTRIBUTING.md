@@ -31,7 +31,10 @@ build. A release needs the "Developer ID Application" certificate of the team in
    it has to grow with every release.
 2. Locally: `TEAM_ID=… NOTARY_PROFILE=… make release` signs, notarizes and staples the app and a DMG in
    `build/release` (save the profile once with `xcrun notarytool store-credentials`). `SIGN_IDENTITY=- SKIP_NOTARIZE=1`
-   tries the whole script without a certificate.
+   tries the whole script without a certificate. With `gh` signed in, it also makes Sparkle delta updates
+   (`Tendbar<build>-<old build>.delta`) from the last two published releases, so an update downloads a few hundred
+   kB instead of the whole DMG; `DELTA_COUNT=0` skips them. Upload the DMG, its `.sha256`, `appcast.xml` and every
+   `.delta`.
 3. Or push a tag `v<version>`: `.github/workflows/release.yml` does the same and attaches the DMG to a draft GitHub
    release. It needs the `TEAM_ID` variable and the secrets listed at the top of the workflow.
 4. Check the draft and publish it. The app reads `appcast.xml` from the latest published release, so publishing is

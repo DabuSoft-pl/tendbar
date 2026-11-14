@@ -16,6 +16,7 @@
 #   KEYCHAIN        the keychain holding the certificate (CI uses a temporary one)
 #   SKIP_NOTARIZE=1 sign only, for checking the signature without waiting for Apple
 #   SIGN_IDENTITY   another identity; "-" signs ad hoc, for trying the script without a certificate
+#   DELTA_COUNT     how many earlier releases get a Sparkle delta update (default 2, 0 for none); needs `gh`
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -104,13 +105,44 @@ fi
 
 # The Sparkle feed for this release. It goes up with the DMG, and the app reads the copy on the latest published
 # release, so CURRENT_PROJECT_VERSION has to grow with every release.
-SIGN_UPDATE=build/SourcePackages/artifacts/sparkle/Sparkle/bin/sign_update
-if [[ -n "${SPARKLE_KEY_FILE:-}" ]]; then
-    ENCLOSURE=$("$SIGN_UPDATE" --ed-key-file "$SPARKLE_KEY_FILE" "$DMG")
-else
-    ENCLOSURE=$("$SIGN_UPDATE" --account tendbar "$DMG")
-fi
+SPARKLE_BIN=build/SourcePackages/artifacts/sparkle/Sparkle/bin
+sign_update() {
+    if [[ -n "${SPARKLE_KEY_FILE:-}" ]]; then
+        "$SPARKLE_BIN/sign_update" --ed-key-file "$SPARKLE_KEY_FILE" "$1"
+    else
+        "$SPARKLE_BIN/sign_update" --account tendbar "$1"
+    fi
+}
+ENCLOSURE=$(sign_update "$DMG")
 REPO=https://github.com/DabuSoft-pl/tendbar
+
+# Delta updates from the last published releases: a copy installed from one of them downloads only the
+# difference (a few hundred kB instead of the whole DMG), and Sparkle falls back to the DMG when a delta does
+# not apply. Each Tendbar<build>-<old build>.delta goes up with the release.
+DELTAS=""
+if (( ${DELTA_COUNT:-2} > 0 )) && command -v gh >/dev/null; then
+    PREVIOUS="$OUT/previous"
+    mkdir -p "$PREVIOUS"
+    for TAG in $(gh release list --repo DabuSoft-pl/tendbar --exclude-drafts --exclude-pre-releases \
+        --limit "${DELTA_COUNT:-2}" --json tagName --jq '.[].tagName' || true); do
+        gh release download "$TAG" --repo DabuSoft-pl/tendbar --pattern '*.dmg' --dir "$PREVIOUS/$TAG" || continue
+        MOUNT=$(hdiutil attach -nobrowse -readonly -noautoopen "$PREVIOUS/$TAG"/*.dmg 2>/dev/null | awk -F'\t' '/\/Volumes\//{print $NF}')
+        [[ -n "$MOUNT" ]] || continue
+        ditto "$MOUNT/Tendbar.app" "$PREVIOUS/$TAG/Tendbar.app"
+        hdiutil detach -quiet "$MOUNT"
+        OLD_BUILD=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PREVIOUS/$TAG/Tendbar.app/Contents/Info.plist")
+        [[ "$OLD_BUILD" != "$BUILD" ]] || continue
+        DELTA="$OUT/Tendbar$BUILD-$OLD_BUILD.delta"
+        "$SPARKLE_BIN/BinaryDelta" create "$PREVIOUS/$TAG/Tendbar.app" "$APP" "$DELTA"
+        DELTAS+="
+        <enclosure url=\"$REPO/releases/download/v$VERSION/$(basename "$DELTA")\" sparkle:deltaFrom=\"$OLD_BUILD\" type=\"application/octet-stream\" $(sign_update "$DELTA")/>"
+        echo "Delta from $TAG (build $OLD_BUILD): $(stat -f %z "$DELTA") bytes"
+    done
+    rm -rf "$PREVIOUS"
+fi
+[[ -n "$DELTAS" ]] && DELTAS="
+      <sparkle:deltas>$DELTAS
+      </sparkle:deltas>"
 MINIMUM=$(sed -n 's/^ *macOS: *"\(.*\)"/\1/p' project.yml)
 cat > "$OUT/appcast.xml" <<XML
 <?xml version="1.0" encoding="utf-8"?>
@@ -125,7 +157,7 @@ cat > "$OUT/appcast.xml" <<XML
       <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>$MINIMUM</sparkle:minimumSystemVersion>
       <sparkle:fullReleaseNotesLink>$REPO/releases/tag/v$VERSION</sparkle:fullReleaseNotesLink>
-      <enclosure url="$REPO/releases/download/v$VERSION/$(basename "$DMG")" type="application/octet-stream" $ENCLOSURE/>
+      <enclosure url="$REPO/releases/download/v$VERSION/$(basename "$DMG")" type="application/octet-stream" $ENCLOSURE/>$DELTAS
     </item>
   </channel>
 </rss>
