@@ -74,6 +74,8 @@ private struct StatusImage: View {
     let label: String
     var text: String?
     var trailingSymbol: String?
+    /// The scale of the screen the menu bar item is on; a change draws the image again.
+    @Environment(\.displayScale) private var displayScale
 
     var body: some View {
         Image(nsImage: rendered)
@@ -91,9 +93,7 @@ private struct StatusImage: View {
         .foregroundStyle(.black)
         .fixedSize()
         let renderer = ImageRenderer(content: content)
-        // The sharpest screen, not the main one: the menu bar may sit on a Retina display while another screen is
-        // main, and the image is not drawn again when screens change.
-        renderer.scale = NSScreen.screens.map(\.backingScaleFactor).max() ?? 2
+        renderer.scale = displayScale
         let image = renderer.nsImage ?? NSImage(systemSymbolName: symbol, accessibilityDescription: nil) ?? NSImage()
         image.isTemplate = true
         return image

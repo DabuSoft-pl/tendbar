@@ -326,11 +326,12 @@ private struct NotchRow: View {
         HStack(spacing: 8) {
             StateMark(state: session.state, unread: session.unread)
             Text(session.displayName).fontWeight(.medium).lineLimit(1)
-            Text(session.state.label).foregroundStyle(.secondary).lineLimit(1)
+            Text(session.state.label).foregroundStyle(.secondary).lineLimit(1).fixedSize()
             Spacer()
             Text(session.timeText())
                 .foregroundStyle(.tertiary)
                 .monospacedDigit()
+                .fixedSize()
         }
         .font(.system(size: 12))
         .foregroundStyle(.white)

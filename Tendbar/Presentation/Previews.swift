@@ -26,10 +26,12 @@ enum PreviewData {
     static var sessions: [Session] {
         [
             session("a1", folder: "shop-api", state: .needsYou, minutesAgo: 1, unread: true,
-                    message: "Claude needs your permission to use Bash"),
-            session("b2", folder: "tendbar", state: .working, minutesAgo: 0.2, turnMinutesAgo: 7),
+                    message: "Claude needs your permission to use Bash", title: "Rotate the payment API keys"),
+            session("b2", folder: "tendbar", state: .working, minutesAgo: 0.2, turnMinutesAgo: 7,
+                    title: "Session names from Claude Code titles"),
             session("c3", folder: "shop-web", state: .done, minutesAgo: 6, unread: true,
-                    preview: "The login form now uses the new endpoint and the tests pass."),
+                    preview: "The login form now uses the new endpoint and the tests pass.",
+                    title: "Move the login form to the new auth endpoint and update its end-to-end tests"),
             session("d4", folder: "infra", state: .failed, minutesAgo: 14, unread: true,
                     message: "API overloaded (529 Overloaded)"),
             session("e5", folder: "vault", state: .done, minutesAgo: 48,
@@ -46,7 +48,8 @@ enum PreviewData {
 
     static func session(
         _ id: String, folder: String, state: SessionState, minutesAgo: Double,
-        unread: Bool = false, message: String? = nil, preview: String? = nil, turnMinutesAgo: Double? = nil
+        unread: Bool = false, message: String? = nil, preview: String? = nil, turnMinutesAgo: Double? = nil,
+        title: String? = nil
     ) -> Session {
         Session(
             id: id,
@@ -58,7 +61,8 @@ enum PreviewData {
             turnStartedAt: turnMinutesAgo.map(date),
             unread: unread,
             message: message,
-            preview: preview
+            preview: preview,
+            title: title
         )
     }
 

@@ -257,7 +257,8 @@ struct SessionRow: View {
                     HStack(alignment: .firstTextBaseline) {
                         Text(session.displayName).fontWeight(.medium).lineLimit(1)
                             .help(session.cwd ?? session.folderName)
-                        Text(session.state.label).foregroundStyle(.secondary)
+                        // A title runs up to 80 characters, so it is the one that gives way, never the state or time.
+                        Text(session.state.label).foregroundStyle(.secondary).lineLimit(1).fixedSize()
                         Spacer()
                         if muted {
                             Image(systemName: "bell.slash")
@@ -270,6 +271,7 @@ struct SessionRow: View {
                             Text(session.timeText(now: context.date))
                                 .foregroundStyle(.secondary)
                                 .monospacedDigit()
+                                .fixedSize()
                         }
                     }
                     if session.state == .working, session.flaggedQuiet {
