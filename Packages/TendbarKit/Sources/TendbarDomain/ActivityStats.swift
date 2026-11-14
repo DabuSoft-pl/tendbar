@@ -17,6 +17,35 @@ public struct DayActivity: Sendable, Equatable {
     public var isEmpty: Bool {
         turns == 0 && waits == 0
     }
+
+    /// Adds another day's numbers, for a week's total. The longest turn and wait stay the longest of the two.
+    public mutating func add(_ other: DayActivity) {
+        turns += other.turns
+        workSeconds += other.workSeconds
+        waits += other.waits
+        waitSeconds += other.waitSeconds
+        if other.longestWait > longestWait {
+            longestWait = other.longestWait
+            longestWaitFolder = other.longestWaitFolder
+        }
+        if other.longestTurn > longestTurn {
+            longestTurn = other.longestTurn
+            longestTurnFolder = other.longestTurnFolder
+        }
+    }
+}
+
+/// One day of a week view: the day's start and its numbers, empty when nothing happened.
+public struct DatedActivity: Sendable, Equatable, Identifiable {
+    public let day: Date
+    public let activity: DayActivity
+
+    public init(day: Date, activity: DayActivity) {
+        self.day = day
+        self.activity = activity
+    }
+
+    public var id: Date { day }
 }
 
 /// Day by day activity, kept for a month. Filled from session changes, never from prompts or replies.
@@ -79,6 +108,21 @@ public struct ActivityStats: Sendable, Equatable {
 
         if counted { days[key] = day }
         return counted
+    }
+
+    /// The `count` days up to and including the day of `date`, oldest first, so a week has no gaps.
+    public func days(endingAt date: Date, count: Int = 7, calendar: Calendar) -> [DatedActivity] {
+        let today = calendar.startOfDay(for: date)
+        return (0..<max(count, 0)).reversed().compactMap { offset in
+            calendar.date(byAdding: .day, value: -offset, to: today).map {
+                DatedActivity(day: $0, activity: day(of: $0, calendar: calendar))
+            }
+        }
+    }
+
+    /// The numbers of those days added up.
+    public func total(endingAt date: Date, count: Int = 7, calendar: Calendar) -> DayActivity {
+        days(endingAt: date, count: count, calendar: calendar).reduce(into: DayActivity()) { $0.add($1.activity) }
     }
 
     public mutating func prune(now: Date, calendar: Calendar) {

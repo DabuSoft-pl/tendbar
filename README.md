@@ -58,6 +58,7 @@ nowhere else.
   it Tendbar tells you when the limit would run out. Resets show as a clock time, and a limit that warned you
   announces when it is available again.
 - **Your day in one line.** The panel counts today's turns, Claude's working time and how long it waited for you.
+  Click it for the last seven days: a bar per day and the week's totals.
 - **Shown your way.** Settings → Appearance picks what sits next to the bird in the menu bar, when the pill shows up,
   and how dense the panel is: with or without reply previews, full or one-line limits. Right-click the bird for
   Settings, the update check and Quit.

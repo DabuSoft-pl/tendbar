@@ -25,6 +25,10 @@ enum Screenshots {
             render(panel(empty), size: CGSize(width: 400, height: 640), appearance: .darkAqua, to: folder.appendingPathComponent("panel-empty.png"))
             let unhooked = PreviewData.container(hooks: [nil: .helperGone, "/Users/me/.claude-work": .otherCopy])
             render(panel(unhooked), size: CGSize(width: 400, height: 640), appearance: .darkAqua, to: folder.appendingPathComponent("panel-hooks.png"))
+            render(
+                WeekSummary(days: container.activity.week()).padding(16).frame(width: 400).background(.background),
+                size: CGSize(width: 400, height: 200), appearance: .darkAqua, to: folder.appendingPathComponent("week.png")
+            )
             render(notch(unhooked, expanded: false), size: CGSize(width: 520, height: 64), appearance: .darkAqua, to: folder.appendingPathComponent("notch-hooks.png"))
         }
         render(notch(container, expanded: true), size: CGSize(width: 520, height: 280), appearance: .darkAqua, to: folder.appendingPathComponent("notch-expanded.png"))

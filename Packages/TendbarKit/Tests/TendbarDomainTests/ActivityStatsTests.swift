@@ -71,4 +71,36 @@ import Testing
 
         #expect(stats.days.count == ActivityStats.keptDays)
     }
+
+    @Test func aWeekHasSevenDaysOldestFirstWithEmptyOnesFilledIn() throws {
+        var monday = DayActivity()
+        monday.turns = 3
+        monday.workSeconds = 600
+        monday.longestTurn = 400
+        monday.longestTurnFolder = "api"
+        var wednesday = DayActivity()
+        wednesday.turns = 2
+        wednesday.waits = 1
+        wednesday.waitSeconds = 120
+        wednesday.longestWait = 120
+        wednesday.longestWaitFolder = "web"
+        wednesday.longestTurn = 300
+        wednesday.longestTurnFolder = "web"
+        let stats = ActivityStats(days: ["2026-11-09": monday, "2026-11-11": wednesday, "2026-11-01": monday])
+        let sunday = try #require(calendar.date(from: DateComponents(year: 2026, month: 11, day: 15, hour: 21)))
+
+        let week = stats.days(endingAt: sunday, calendar: calendar)
+        let total = stats.total(endingAt: sunday, calendar: calendar)
+
+        #expect(week.map { ActivityStats.key(for: $0.day, calendar: calendar) } == [
+            "2026-11-09", "2026-11-10", "2026-11-11", "2026-11-12", "2026-11-13", "2026-11-14", "2026-11-15",
+        ])
+        #expect(week.map(\.activity.turns) == [3, 0, 2, 0, 0, 0, 0])
+        #expect(total.turns == 5)
+        #expect(total.workSeconds == 600)
+        #expect(total.waitSeconds == 120)
+        #expect(total.longestTurn == 400)
+        #expect(total.longestTurnFolder == "api")
+        #expect(total.longestWaitFolder == "web")
+    }
 }

@@ -13,6 +13,11 @@ final class ActivityViewModel: ActivityOutput {
         stats.day(of: now, calendar: calendar)
     }
 
+    /// The last seven days, oldest first, today included.
+    func week(now: Date = Date(), calendar: Calendar = .current) -> [DatedActivity] {
+        stats.days(endingAt: now, calendar: calendar)
+    }
+
     func show(_ activity: ActivityStats) {
         stats = activity
     }

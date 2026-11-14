@@ -4,11 +4,12 @@ import TendbarDomain
 /// One quiet line about today: finished turns, Claude's working time and how long it waited for you.
 /// The longest wait and turn sit in the tooltip.
 struct TodayLine: View {
+    var title: LocalizedStringKey = "Today"
     let day: DayActivity
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 0) {
-            Text("Today").foregroundStyle(.secondary)
+            Text(title).foregroundStyle(.secondary)
             Spacer(minLength: 12)
             Text(figures)
                 .foregroundStyle(.secondary)

@@ -51,6 +51,26 @@
         }
       }
     },
+    "%@: nothing": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: nic"
+          }
+        }
+      }
+    },
+    "%@: worked %@, waited for you %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: praca %2$@, czekał na Ciebie %3$@"
+          }
+        }
+      }
+    },
     "%lld%% of the limit used": {
       "localizations": {
         "pl": {
@@ -571,6 +591,16 @@
         }
       }
     },
+    "Claude worked": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude pracował"
+          }
+        }
+      }
+    },
     "Close": {
       "localizations": {
         "pl": {
@@ -737,6 +767,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Folder danych"
+          }
+        }
+      }
+    },
+    "Day": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dzień"
           }
         }
       }
@@ -991,6 +1031,16 @@
         }
       }
     },
+    "Hides the last 7 days": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukrywa ostatnie 7 dni"
+          }
+        }
+      }
+    },
     "Highest limit": {
       "localizations": {
         "pl": {
@@ -1017,6 +1067,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hooki włączone"
+          }
+        }
+      }
+    },
+    "Hours": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Godziny"
           }
         }
       }
@@ -1051,12 +1111,32 @@
         }
       }
     },
+    "Kind": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rodzaj"
+          }
+        }
+      }
+    },
     "Language": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
             "value": "Język"
+          }
+        }
+      }
+    },
+    "Last 7 days": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ostatnie 7 dni"
           }
         }
       }
@@ -1641,6 +1721,16 @@
         }
       }
     },
+    "Shows the last 7 days": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pokazuje ostatnie 7 dni"
+          }
+        }
+      }
+    },
     "Sound": {
       "localizations": {
         "pl": {
@@ -2077,6 +2167,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wersje, terminale i ustawienia. Bez nazw folderów, e-maili i wiadomości"
+          }
+        }
+      }
+    },
+    "Waited for you": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Czekał na Ciebie"
           }
         }
       }

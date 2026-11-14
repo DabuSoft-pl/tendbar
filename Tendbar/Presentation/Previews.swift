@@ -25,7 +25,18 @@ enum PreviewData {
         day.longestTurnFolder = "shop-api"
         day.longestWait = 12 * 60
         day.longestWaitFolder = "infra"
-        return ActivityStats(days: [ActivityStats.key(for: Date(), calendar: .current): day])
+        var days = [ActivityStats.key(for: Date(), calendar: .current): day]
+        // Six earlier days with a plausible spread, one of them a day off.
+        for (offset, hours, waited) in [(1, 3.4, 0.6), (2, 1.1, 0.2), (3, 0.0, 0.0), (4, 4.2, 1.1), (5, 2.6, 0.4), (6, 1.8, 0.3)] {
+            guard hours > 0, let date = Calendar.current.date(byAdding: .day, value: -offset, to: Date()) else { continue }
+            var earlier = DayActivity()
+            earlier.turns = Int(hours * 9)
+            earlier.workSeconds = hours * 3600
+            earlier.waits = Int(waited * 12)
+            earlier.waitSeconds = waited * 3600
+            days[ActivityStats.key(for: date, calendar: .current)] = earlier
+        }
+        return ActivityStats(days: days)
     }
 
     static var sessions: [Session] {

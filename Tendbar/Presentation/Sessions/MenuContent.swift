@@ -79,8 +79,8 @@ struct MenuContent: View {
             } else {
                 sessionList
             }
-            if container.preferences.panelToday, case let today = container.activity.today(), !today.isEmpty {
-                TodayLine(day: today)
+            if container.preferences.panelToday {
+                ActivitySection(model: container.activity)
             }
             if !container.usage.isEmpty, container.preferences.usageStyle != .hidden {
                 Divider()
