@@ -89,7 +89,7 @@ struct MenuContent: View {
             Divider()
             footer
         }
-        .onAppear { container.claudeCodeActions.refreshConnection() }
+        .onAppear { container.claudeCodeActions.refreshConnections() }
     }
 
     /// Sessions that are busy, waiting or unread come first. Read and ended ones fold under "Earlier", and the list
@@ -214,23 +214,58 @@ struct ConnectionBanner: View {
 
     var body: some View {
         if let error = model.connectionError {
-            banner(Text("Could not change the Claude Code settings: \(error)"), color: Palette.vermilion, button: false)
-        } else if model.connection == .disconnected {
-            banner(Text("Tendbar is not connected to Claude Code"), color: .secondary, button: true)
-        } else if model.connection == .outdated {
-            banner(Text("Tendbar's hooks are outdated or incomplete"), color: .secondary, button: true)
+            banner(Text("Could not change the Claude Code settings: \(error)"), color: Palette.vermilion)
         } else if !model.helperAvailable {
-            banner(Text("The tendbar-hook helper is missing from the app"), color: Palette.vermilion, button: false)
+            banner(Text("The tendbar-hook helper is missing from the app"), color: Palette.vermilion)
+        } else if let worst = Self.worst(of: model.needsConnect) {
+            banner(
+                message(for: worst),
+                detail: model.needsConnect.map { Self.settingsPath(for: $0.directory) }.joined(separator: ", "),
+                color: worst == .helperGone ? Palette.vermilion : Palette.amber,
+                connect: true
+            )
         }
     }
 
-    private func banner(_ text: Text, color: Color, button: Bool) -> some View {
+    /// With several profiles in different states, the banner names the one that loses the most events.
+    private static func worst(of profiles: [ProfileSummary]) -> HookConnection? {
+        let order: [HookConnection] = [.helperGone, .disconnected, .otherCopy, .outdated]
+        let states = profiles.compactMap(\.connection)
+        return order.first(where: states.contains)
+    }
+
+    private func message(for connection: HookConnection) -> Text {
+        switch connection {
+        case .otherCopy: Text("The hooks run another copy of Tendbar")
+        case .helperGone: Text("The hooks run a Tendbar that is gone, so no sessions arrive")
+        case .outdated: Text("Tendbar's hooks are outdated or incomplete")
+        default: Text("Tendbar is not connected to Claude Code")
+        }
+    }
+
+    /// `~/.claude/settings.json`, or the profile's own, with the home folder shortened.
+    private static func settingsPath(for directory: String?) -> String {
+        let folder = (directory ?? "~/.claude") as NSString
+        return folder.abbreviatingWithTildeInPath + "/settings.json"
+    }
+
+    private func banner(_ text: Text, detail: String? = nil, color: Color, connect: Bool = false) -> some View {
         HStack(alignment: .top) {
             Image(systemName: "exclamationmark.triangle").foregroundStyle(color)
-            text.font(.callout).fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 2) {
+                text.font(.callout)
+                if let detail {
+                    Text(verbatim: detail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                        .truncationMode(.middle)
+                }
+            }
+            .fixedSize(horizontal: false, vertical: true)
             Spacer()
-            if button {
-                Button("Connect") { actions.connect() }
+            if connect {
+                Button("Connect") { actions.connectAll() }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
             }

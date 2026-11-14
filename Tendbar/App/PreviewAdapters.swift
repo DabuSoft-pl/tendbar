@@ -39,6 +39,8 @@ private final class MemoryProfiles: ProfileRepository {
 @MainActor
 private final class Silent: AlertPresenting, NotificationPermissions, ScreenFlashing, TerminalNavigating,
     AccountEmailResolving, HookConnecting, ProfileDirectories, LoginItemControlling {
+    /// Hook states per profile directory, nil for `~/.claude`; a profile left out is connected.
+    var hooks: [String?: HookConnection] = [:]
     func present(_ kind: AlertKind, for session: Session, sound: AlertSound) {}
     func presentLimit(_ warning: LimitWarning, account: AccountUsage, sound: AlertSound) {}
     func presentLimitReset(_ reset: LimitReset, account: AccountUsage, sound: AlertSound) {}
@@ -50,7 +52,7 @@ private final class Silent: AlertPresenting, NotificationPermissions, ScreenFlas
     func flash(_ tone: FlashTone) {}
     func jump(to session: Session) -> JumpOutcome { .jumped }
     func email(configDirectory: String?) -> String? { configDirectory == nil ? "alex@example.com" : "work@example.com" }
-    func status(configDirectory: String?) throws -> HookConnection { .connected }
+    func status(configDirectory: String?) throws -> HookConnection { hooks[configDirectory] ?? .connected }
     func connect(configDirectory: String?) throws {}
     func disconnect(configDirectory: String?) throws {}
     func create(named name: String) throws -> String { "/Users/me/.claude-\(name)" }
@@ -75,8 +77,9 @@ private struct NoTranscripts: TranscriptReading {
 }
 
 extension AppContainer {
-    static func preview(sessions: [Session], accounts: [AccountUsage]) -> AppContainer {
+    static func preview(sessions: [Session], accounts: [AccountUsage], hooks: [String?: HookConnection] = [:]) -> AppContainer {
         let silent = Silent()
+        silent.hooks = hooks
         UserDefaults.standard.removePersistentDomain(forName: "tendbar.preview")
         let defaults = UserDefaults(suiteName: "tendbar.preview") ?? .standard
         return AppContainer(

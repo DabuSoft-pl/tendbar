@@ -9,6 +9,8 @@ public struct HookInstaller: Sendable {
     public enum Status: Equatable, Sendable {
         case connected
         case outdated
+        case otherCopy
+        case helperGone
         case disconnected
     }
 
@@ -26,10 +28,16 @@ public struct HookInstaller: Sendable {
 
     public let settingsURL: URL
     public let hookPath: String
+    private let fileExists: @Sendable (String) -> Bool
 
-    public init(settingsURL: URL, hookPath: String) {
+    public init(
+        settingsURL: URL,
+        hookPath: String,
+        fileExists: @escaping @Sendable (String) -> Bool = { FileManager.default.fileExists(atPath: $0) }
+    ) {
         self.settingsURL = settingsURL
         self.hookPath = hookPath
+        self.fileExists = fileExists
     }
 
     public static func settingsURL(configDirectory: String? = nil) -> URL {
@@ -52,7 +60,30 @@ public struct HookInstaller: Sendable {
         let complete = Self.events.allSatisfy { commands[$0] == [expected] && timeouts[$0] == [Self.timeout(for: $0)] }
             && commands.count == Self.events.count
         let statusLineCurrent = statusLine?.hasPrefix(expected + " " + Self.statusLineFlag) == true
-        return complete && statusLineCurrent ? .connected : .outdated
+        if complete && statusLineCurrent { return .connected }
+        let paths = Set(commands.values.joined().compactMap(Self.helperPath(in:))
+            + [statusLine].compactMap { $0 }.filter(Self.isOurs(command:)).compactMap(Self.helperPath(in:)))
+        let others = paths.subtracting([hookPath])
+        if others.contains(where: { !fileExists($0) }) { return .helperGone }
+        return others.isEmpty ? .outdated : .otherCopy
+    }
+
+    /// The helper a hook command runs: the single-quoted path that `command(for:)` writes, or the first word.
+    static func helperPath(in command: String) -> String? {
+        let trimmed = command.trimmingCharacters(in: .whitespaces)
+        guard trimmed.hasPrefix("'") else {
+            return trimmed.split(separator: " ").first.map(String.init)
+        }
+        var path = ""
+        var rest = trimmed.dropFirst()
+        while let quote = rest.firstIndex(of: "'") {
+            path += rest[..<quote]
+            rest = rest[rest.index(after: quote)...]
+            guard rest.hasPrefix("\\''") else { return path }
+            path += "'"
+            rest = rest.dropFirst(3)
+        }
+        return nil
     }
 
     @discardableResult

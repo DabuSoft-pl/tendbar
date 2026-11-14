@@ -601,12 +601,32 @@
         }
       }
     },
+    "Connect Claude Code": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Połącz z Claude Code"
+          }
+        }
+      }
+    },
     "Connected to Claude Code": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
             "value": "Połączono z Claude Code"
+          }
+        }
+      }
+    },
+    "Connected to another copy of Tendbar": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Połączony z inną kopią Tendbara"
           }
         }
       }
@@ -1791,6 +1811,16 @@
         }
       }
     },
+    "Tendbar's hooks need a click on Connect": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hooki Tendbara czekają na kliknięcie Połącz"
+          }
+        }
+      }
+    },
     "Test notification": {
       "localizations": {
         "pl": {
@@ -1827,6 +1857,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ramka jest pomarańczowa, gdy sesja czeka, zielona po skończeniu, czerwona po błędzie i przy 90% limitu. Kliknij sesję w panelu prawym przyciskiem, aby wyciszyć jej folder"
+          }
+        }
+      }
+    },
+    "The hooks run a Tendbar that is gone, so no sessions arrive": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hooki uruchamiają Tendbara, którego już nie ma, więc sesje nie docierają"
+          }
+        }
+      }
+    },
+    "The hooks run a missing tendbar-hook": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hooki uruchamiają nieistniejący tendbar-hook"
+          }
+        }
+      }
+    },
+    "The hooks run another copy of Tendbar": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hooki uruchamiają inną kopię Tendbara"
           }
         }
       }

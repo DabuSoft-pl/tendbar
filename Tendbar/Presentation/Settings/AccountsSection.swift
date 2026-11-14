@@ -98,7 +98,7 @@ private struct ProfileRow: View {
                 }
                 .font(.callout)
                 .help("Tendbar's hooks are in this profile's settings.json")
-            case .outdated, .disconnected:
+            case .outdated, .otherCopy, .helperGone, .disconnected:
                 Button("Connect") { actions.connect(profile) }
             case nil:
                 EmptyView()

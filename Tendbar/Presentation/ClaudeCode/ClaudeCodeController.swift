@@ -31,18 +31,51 @@ final class ClaudeCodeController {
         model.profiles = listProfiles.execute()
     }
 
+    /// Assigns only what changed: the 30-second timer runs this, and every assignment to the observable model
+    /// redraws the menu bar image.
     func refreshConnection() {
         do {
-            model.connection = try checkConnection.execute()
-            model.helperAvailable = model.connection != nil
-            model.connectionError = nil
+            let connection = try checkConnection.execute()
+            if model.connection != connection { model.connection = connection }
+            if model.helperAvailable != (connection != nil) { model.helperAvailable = connection != nil }
+            if model.connectionError != nil { model.connectionError = nil }
         } catch {
             model.connectionError = String(describing: error)
         }
     }
 
+    /// The default profile and every added one, without reading account emails again. Runs at launch, when the
+    /// panel opens and with the app's 30-second timer, so a `settings.json` changed elsewhere shows up on its own.
+    func refreshConnections() {
+        refreshConnection()
+        guard !model.profiles.isEmpty else {
+            model.profiles = listProfiles.execute()
+            return
+        }
+        let profiles = model.profiles.map { profile in
+            var profile = profile
+            profile.connection = (try? checkConnection.execute(configDirectory: profile.directory)) ?? nil
+            return profile
+        }
+        if profiles != model.profiles { model.profiles = profiles }
+    }
+
     func connect() {
         change(.connect)
+    }
+
+    /// Connects every profile that needs it, each with its own backup. Only from a click.
+    func connectAll() {
+        let profiles = model.needsConnect
+        do {
+            for profile in profiles {
+                try changeConnection.execute(.connect, configDirectory: profile.directory)
+            }
+            model.connectionError = nil
+        } catch {
+            model.connectionError = String(describing: error)
+        }
+        refreshConnections()
     }
 
     func disconnect() {

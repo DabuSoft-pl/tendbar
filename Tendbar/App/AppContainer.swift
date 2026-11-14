@@ -106,7 +106,7 @@ final class AppContainer {
         startSessions.execute()
         startUsage.execute()
         activity.show(a.activity.load())
-        claudeCodeActions.refreshConnection()
+        claudeCodeActions.refreshConnections()
     }
 
     /// Reminders, quiet sessions, closed tabs and limit resets have no event of their own, so a timer looks for them.
@@ -117,6 +117,7 @@ final class AppContainer {
                 self?.checkAttention.execute()
                 self?.checkWarnings.checkResets()
                 self?.usage.tick()
+                self?.claudeCodeActions.refreshConnections()
             }
         }
         timer.tolerance = 5
@@ -165,6 +166,8 @@ final class AppContainer {
         container.showNotch()
         container.listenForShortcut()
         container.statusMenu.updates = container.updates
+        container.statusMenu.claudeCode = container.claudeCode
+        container.statusMenu.connectHooks = { [weak container] in container?.claudeCodeActions.connectAll() }
         container.statusMenu.start()
         container.startTimer()
         DispatchQueue.main.async { preferences.theme.apply() }

@@ -1,6 +1,6 @@
 import AppKit
 
-/// A right click on the menu bar item opens a short menu (Settings, updates, Quit); a left click still opens the
+/// A right click on the menu bar item opens a short menu (Connect when the hooks need it, Settings, updates, Quit); a left click still opens the
 /// panel. SwiftUI's `MenuBarExtra` has no context menu, so a local monitor takes right clicks on the item's own
 /// window and lets every other event through untouched.
 @MainActor
@@ -8,6 +8,8 @@ final class StatusItemMenu: NSObject {
     /// Set by a SwiftUI view, since only a view can open the Settings scene.
     var openSettings: (() -> Void)?
     var updates: SoftwareUpdate?
+    var claudeCode: ClaudeCodeViewModel?
+    var connectHooks: (() -> Void)?
     private var monitor: Any?
 
     func start() {
@@ -28,6 +30,10 @@ final class StatusItemMenu: NSObject {
 
     private func show(under button: NSView) {
         let menu = NSMenu()
+        if claudeCode?.needsConnect.isEmpty == false, connectHooks != nil {
+            menu.addItem(item(String(localized: "Connect Claude Code"), action: #selector(connect)))
+            menu.addItem(.separator())
+        }
         if openSettings != nil {
             menu.addItem(item(String(localized: "Settings…"), action: #selector(settings), key: ","))
         }
@@ -48,6 +54,10 @@ final class StatusItemMenu: NSObject {
 
     @objc private func settings() {
         openSettings?()
+    }
+
+    @objc private func connect() {
+        connectHooks?()
     }
 
     @objc private func checkForUpdates() {

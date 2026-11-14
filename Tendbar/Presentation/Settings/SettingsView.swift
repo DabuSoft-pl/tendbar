@@ -174,7 +174,7 @@ private struct ClaudeCodeSettings: View {
                     switch model.connection {
                     case .connected:
                         Button("Disconnect") { actions.disconnect() }
-                    case .outdated:
+                    case .outdated, .otherCopy, .helperGone:
                         HStack {
                             Button("Disconnect") { actions.disconnect() }
                             Button("Update") { actions.connect() }
@@ -213,6 +213,8 @@ private struct ClaudeCodeSettings: View {
         switch model.connection {
         case .connected: String(localized: "Connected to Claude Code")
         case .outdated: String(localized: "Connection needs an update")
+        case .otherCopy: String(localized: "Connected to another copy of Tendbar")
+        case .helperGone: String(localized: "The hooks run a missing tendbar-hook")
         case .disconnected: String(localized: "Not connected")
         case nil: String(localized: "tendbar-hook missing")
         }

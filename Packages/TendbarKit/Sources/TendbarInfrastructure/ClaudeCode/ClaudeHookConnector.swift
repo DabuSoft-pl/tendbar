@@ -14,6 +14,8 @@ public final class ClaudeHookConnector: HookConnecting {
         switch try installer(configDirectory).status() {
         case .connected: .connected
         case .outdated: .outdated
+        case .otherCopy: .otherCopy
+        case .helperGone: .helperGone
         case .disconnected: .disconnected
         }
     }

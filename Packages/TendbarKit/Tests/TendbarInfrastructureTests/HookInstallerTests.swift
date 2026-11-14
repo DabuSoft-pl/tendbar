@@ -68,9 +68,10 @@ import TendbarDomain
     }
 
     @Test func reconnectReplacesAnOldPath() throws {
-        try HookInstaller(settingsURL: settings, hookPath: "/old/Tendbar.app/Contents/MacOS/tendbar-hook").connect(now: now)
-        let installer = HookInstaller(settingsURL: settings, hookPath: hookPath)
-        #expect(try installer.status() == .outdated)
+        let old = "/old/Tendbar.app/Contents/MacOS/tendbar-hook"
+        try HookInstaller(settingsURL: settings, hookPath: old).connect(now: now)
+        let installer = HookInstaller(settingsURL: settings, hookPath: hookPath, fileExists: { _ in true })
+        #expect(try installer.status() == .otherCopy)
 
         try installer.connect(now: now.addingTimeInterval(1))
 
@@ -179,5 +180,21 @@ import TendbarDomain
         try JSONSerialization.data(withJSONObject: object).write(to: settings)
 
         #expect(try installer.status() == .outdated)
+    }
+
+    @Test func hooksOfAnotherCopyThatIsGoneStopEveryEvent() throws {
+        let gone = "/Users/me/build/release/Tendbar.app/Contents/MacOS/tendbar-hook"
+        try HookInstaller(settingsURL: settings, hookPath: gone).connect(now: now)
+        let installer = HookInstaller(settingsURL: settings, hookPath: hookPath, fileExists: { $0 != gone })
+
+        #expect(try installer.status() == .helperGone)
+    }
+
+    @Test func readsTheHelperPathBackFromAQuotedCommand() {
+        let path = "/Users/o'brien/Tendbar.app/Contents/MacOS/tendbar-hook"
+
+        #expect(HookInstaller.helperPath(in: HookInstaller.command(for: path)) == path)
+        #expect(HookInstaller.helperPath(in: HookInstaller.statusLineCommand(hookPath: path, next: "x")) == path)
+        #expect(HookInstaller.helperPath(in: "/usr/local/bin/tendbar-hook --statusline") == "/usr/local/bin/tendbar-hook")
     }
 }

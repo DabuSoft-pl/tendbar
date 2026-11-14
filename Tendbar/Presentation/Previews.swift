@@ -1,11 +1,16 @@
 #if DEBUG
 import SwiftUI
+import TendbarApplication
 import TendbarDomain
 
 @MainActor
 enum PreviewData {
-    static func container(sessions: [Session] = PreviewData.sessions, accounts: [AccountUsage] = PreviewData.accounts) -> AppContainer {
-        let container = AppContainer.preview(sessions: sessions, accounts: accounts)
+    static func container(
+        sessions: [Session] = PreviewData.sessions,
+        accounts: [AccountUsage] = PreviewData.accounts,
+        hooks: [String?: HookConnection] = [:]
+    ) -> AppContainer {
+        let container = AppContainer.preview(sessions: sessions, accounts: accounts, hooks: hooks)
         if !sessions.isEmpty { container.activity.show(activity) }
         return container
     }

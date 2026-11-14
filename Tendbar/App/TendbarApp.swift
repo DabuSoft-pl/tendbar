@@ -16,7 +16,13 @@ struct TendbarApp: App {
         MenuBarExtra {
             MenuContent(container: container)
         } label: {
-            MenuBarLabel(sessions: container.sessions, usage: container.usage, preferences: container.preferences, statusMenu: container.statusMenu)
+            MenuBarLabel(
+                sessions: container.sessions,
+                usage: container.usage,
+                claudeCode: container.claudeCode,
+                preferences: container.preferences,
+                statusMenu: container.statusMenu
+            )
         }
         .menuBarExtraStyle(.window)
 
@@ -29,6 +35,7 @@ struct TendbarApp: App {
 private struct MenuBarLabel: View {
     let sessions: SessionsViewModel
     let usage: UsageViewModel
+    let claudeCode: ClaudeCodeViewModel
     let preferences: Preferences
     let statusMenu: StatusItemMenu
     @Environment(\.openSettings) private var openSettings
@@ -45,6 +52,15 @@ private struct MenuBarLabel: View {
         let waiting = sessions.needsYouCount
         let failed = sessions.sessions.filter { $0.state == .failed && $0.unread }.count
         let bird = waiting > 0 || failed > 0
+        if !claudeCode.needsConnect.isEmpty {
+            StatusImage(filled: true, label: String(localized: "Tendbar's hooks need a click on Connect"), trailingSymbol: "exclamationmark.triangle")
+        } else {
+            styled(bird: bird, waiting: waiting, failed: failed, limit: limit)
+        }
+    }
+
+    @ViewBuilder
+    private func styled(bird: Bool, waiting: Int, failed: Int, limit: Int) -> some View {
         switch preferences.menuBarStyle {
         case .bird:
             StatusImage(filled: bird, label: summary(waiting: waiting, failed: failed))

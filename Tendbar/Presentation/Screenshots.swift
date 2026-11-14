@@ -23,6 +23,8 @@ enum Screenshots {
             }
             let empty = PreviewData.container(sessions: [], accounts: [])
             render(panel(empty), size: CGSize(width: 400, height: 640), appearance: .darkAqua, to: folder.appendingPathComponent("panel-empty.png"))
+            let unhooked = PreviewData.container(hooks: [nil: .helperGone, "/Users/me/.claude-work": .otherCopy])
+            render(panel(unhooked), size: CGSize(width: 400, height: 640), appearance: .darkAqua, to: folder.appendingPathComponent("panel-hooks.png"))
         }
         render(notch(container, expanded: true), size: CGSize(width: 520, height: 280), appearance: .darkAqua, to: folder.appendingPathComponent("notch-expanded.png"))
         exit(0)

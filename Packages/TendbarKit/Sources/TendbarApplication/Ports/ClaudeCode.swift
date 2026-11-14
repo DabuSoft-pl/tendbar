@@ -2,8 +2,16 @@ import TendbarDomain
 
 public enum HookConnection: Sendable, Equatable {
     case connected
+    /// This app's hooks, but some events, timeouts or the statusLine wrapper are missing or old.
     case outdated
+    /// The hooks run the helper of another Tendbar copy, so events reach whichever copy listens.
+    case otherCopy
+    /// The hooks run a helper that no longer exists, so no events arrive at all.
+    case helperGone
     case disconnected
+
+    /// Every state but `.connected` asks for a click on Connect.
+    public var needsConnect: Bool { self != .connected }
 }
 
 /// Adds or removes Tendbar's hooks in a Claude Code profile's settings.

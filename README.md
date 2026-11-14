@@ -128,6 +128,8 @@ Such a build is signed ad hoc, so it runs on the Mac that built it.
 - **Not on shared screens.** The pill and the glow stay out of screen sharing and recordings (Settings → General).
 - **Your settings, your call.** `~/.claude/settings.json` changes only when you press Connect or Disconnect, never at
   launch. Each change is backed up first (the last five are kept), and Disconnect removes only Tendbar's entries.
+  When a profile's hooks stop matching this copy of Tendbar (another copy, a deleted build, missing events), the
+  menu bar item shows a warning triangle and the panel says which `settings.json` needs Connect.
 
 Everything Tendbar keeps lives in `~/Library/Application Support/Tendbar` (folder 0700, files 0600):
 

@@ -58,7 +58,7 @@ import TendbarDomain
         try write(#"{"statusLine":{"type":"command","command":"~/.claude/statusline.sh"}}"#)
         try HookInstaller(settingsURL: settings, hookPath: "/old/tendbar-hook").connect(now: now)
         let installer = HookInstaller(settingsURL: settings, hookPath: hookPath)
-        #expect(try installer.status() == .outdated)
+        #expect(try installer.status() == .helperGone)
 
         try installer.connect(now: now.addingTimeInterval(1))
 
