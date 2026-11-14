@@ -68,12 +68,9 @@ struct MenuContent: View {
                     Image(systemName: "info.circle").foregroundStyle(.secondary)
                     Text(message).font(.callout).fixedSize(horizontal: false, vertical: true)
                     Spacer()
-                    Button {
-                        actions.dismissJumpMessage()
-                    } label: {
-                        Image(systemName: "xmark")
-                    }
-                    .buttonStyle(.borderless)
+                    Button("Dismiss", systemImage: "xmark") { actions.dismissJumpMessage() }
+                        .labelStyle(.iconOnly)
+                        .buttonStyle(.borderless)
                 }
             }
             Divider()
@@ -182,17 +179,16 @@ struct MenuContent: View {
                 Button("Mark all as read") { actions.markAllAsRead() }
             }
             Spacer()
-            Button {
+            Button("Settings", systemImage: "gearshape") {
                 dismiss()
-                NSApp.activate(ignoringOtherApps: true)
+                NSApp.activate()
                 openSettings()
                 DispatchQueue.main.async {
                     NSApp.windows.first { $0.identifier?.rawValue.contains("Settings") == true }?
                         .makeKeyAndOrderFront(nil)
                 }
-            } label: {
-                Image(systemName: "gearshape")
             }
+            .labelStyle(.iconOnly)
             .buttonStyle(.borderless)
             .help("Settings (⌘,)")
             Menu {
@@ -200,7 +196,8 @@ struct MenuContent: View {
                 Divider()
                 Button("Quit Tendbar") { NSApplication.shared.terminate(nil) }
             } label: {
-                Image(systemName: "ellipsis.circle")
+                Label("More", systemImage: "ellipsis.circle")
+                    .labelStyle(.iconOnly)
             }
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
@@ -343,6 +340,7 @@ struct StateMark: View {
 struct EmptySessions: View {
     let connection: HookConnection?
     @State private var copied = false
+    @State private var copies = 0
 
     var body: some View {
         VStack(spacing: 12) {
@@ -361,10 +359,7 @@ struct EmptySessions: View {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString("claude", forType: .string)
                 copied = true
-                Task {
-                    try? await Task.sleep(for: .seconds(1.5))
-                    copied = false
-                }
+                copies += 1
             } label: {
                 HStack(spacing: 8) {
                     Text(verbatim: "claude").font(.system(.callout, design: .monospaced))
@@ -396,6 +391,11 @@ struct EmptySessions: View {
         .font(.callout)
         .frame(maxWidth: .infinity)
         .padding(.vertical, 16)
+        // A new copy restarts the countdown, so a quick second click keeps the checkmark its full time.
+        .task(id: copies) {
+            guard copies > 0, (try? await Task.sleep(for: .seconds(1.5))) != nil else { return }
+            copied = false
+        }
     }
 }
 

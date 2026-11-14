@@ -48,7 +48,13 @@ private struct AccountLimits: View {
     let account: AccountUsage
 
     var body: some View {
-        let now = Date()
+        // "read … ago", the pace tick and a reset come with time, not with a new reading.
+        TimelineView(.periodic(from: .now, by: 30)) { context in
+            limits(now: context.date)
+        }
+    }
+
+    private func limits(now: Date) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline) {
                 Text(account.displayName).fontWeight(.medium).lineLimit(1).truncationMode(.middle)
@@ -132,7 +138,12 @@ struct CompactLimits: View {
     var barWidth: CGFloat = 44
 
     var body: some View {
-        let now = Date()
+        TimelineView(.periodic(from: .now, by: 30)) { context in
+            line(now: context.date)
+        }
+    }
+
+    private func line(now: Date) -> some View {
         HStack(spacing: 12) {
             Text(account.shortName)
                 .fontWeight(active ? .medium : .regular)

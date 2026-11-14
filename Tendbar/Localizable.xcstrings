@@ -711,6 +711,16 @@
         }
       }
     },
+    "Dismiss": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zamknij"
+          }
+        }
+      }
+    },
     "Done": {
       "localizations": {
         "pl": {
@@ -1037,6 +1047,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nie ma takiego modelu"
+          }
+        }
+      }
+    },
+    "More": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Więcej"
           }
         }
       }
@@ -1427,6 +1447,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sesje czekające na Ciebie"
+          }
+        }
+      }
+    },
+    "Settings": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ustawienia"
           }
         }
       }

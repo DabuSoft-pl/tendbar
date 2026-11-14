@@ -111,6 +111,7 @@ final class AppContainer {
                 self?.endGoneSessions.execute()
                 self?.checkAttention.execute()
                 self?.checkWarnings.checkResets()
+                self?.usage.tick()
             }
         }
         timer.tolerance = 5

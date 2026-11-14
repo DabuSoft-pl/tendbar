@@ -400,6 +400,7 @@ private struct GeneralSettings: View {
     let diagnostics: () -> String
     @State private var language = AppLanguage.current
     @State private var copied = false
+    @State private var copies = 0
     @State private var asksRestart = false
 
     var body: some View {
@@ -447,10 +448,7 @@ private struct GeneralSettings: View {
                         NSPasteboard.general.clearContents()
                         NSPasteboard.general.setString(diagnostics(), forType: .string)
                         copied = true
-                        Task {
-                            try? await Task.sleep(for: .seconds(2))
-                            copied = false
-                        }
+                        copies += 1
                     }
                 } label: {
                     VStack(alignment: .leading, spacing: 2) {
@@ -479,6 +477,10 @@ private struct GeneralSettings: View {
             }
         }
         .formStyle(.grouped)
+        .task(id: copies) {
+            guard copies > 0, (try? await Task.sleep(for: .seconds(2))) != nil else { return }
+            copied = false
+        }
         .alert("Restart Tendbar now?", isPresented: $asksRestart) {
             Button("Restart") { AppLanguage.relaunch() }
             Button("Later", role: .cancel) {}

@@ -235,11 +235,13 @@ struct NotchView: View {
             if expanded {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(active.prefix(6)) { session in
-                        NotchRow(session: session)
-                            .onTapGesture {
-                                expanded = false
-                                onSelect(session)
-                            }
+                        Button {
+                            expanded = false
+                            onSelect(session)
+                        } label: {
+                            NotchRow(session: session)
+                        }
+                        .buttonStyle(.plain)
                     }
                     let accounts = usage.accounts
                     if !accounts.isEmpty {
@@ -328,10 +330,12 @@ private struct NotchRow: View {
             Text(session.displayName).fontWeight(.medium).lineLimit(1)
             Text(session.state.label).foregroundStyle(.secondary).lineLimit(1).fixedSize()
             Spacer()
-            Text(session.timeText())
-                .foregroundStyle(.tertiary)
-                .monospacedDigit()
-                .fixedSize()
+            TimelineView(.periodic(from: .now, by: 30)) { context in
+                Text(session.timeText(now: context.date))
+                    .foregroundStyle(.tertiary)
+                    .monospacedDigit()
+                    .fixedSize()
+            }
         }
         .font(.system(size: 12))
         .foregroundStyle(.white)
