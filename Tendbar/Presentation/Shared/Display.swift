@@ -145,13 +145,6 @@ enum LimitWindowName {
     }
 }
 
-/// The percentage to color a window by: its own share, or at least the warning level when, at the pace of the last
-/// reading, it runs out before it resets.
-func limitTone(_ window: LimitWindow, readAt: Date, now: Date, length: TimeInterval) -> Double {
-    let percentage = window.percentage(at: now)
-    return window.runsOut(readAt: readAt, now: now, length: length) == nil ? percentage : max(percentage, 70)
-}
-
 func limitColor(_ percentage: Double) -> Color {
     switch percentage {
     case ..<70: .primary.opacity(0.55)
@@ -166,15 +159,13 @@ struct LimitBar: View {
     let percentage: Double
     var height: CGFloat = 6
     var pace: Double?
-    /// The percentage whose color the bar takes, when it should warn earlier than its own share would.
-    var tone: Double?
 
     var body: some View {
         GeometryReader { proxy in
             ZStack(alignment: .leading) {
                 Capsule().fill(Color.primary.opacity(0.12))
                 Capsule()
-                    .fill(limitColor(tone ?? percentage))
+                    .fill(limitColor(percentage))
                     .frame(width: proxy.size.width * min(max(percentage, 0), 100) / 100)
                 if let pace {
                     RoundedRectangle(cornerRadius: 1)
