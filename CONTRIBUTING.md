@@ -21,3 +21,15 @@ make run    # generate the Xcode project, build and open a Debug build
 - UI strings are English. Add the Polish translation of every new string to `Tendbar/Localizable.xcstrings`, or say in
   the pull request that it is missing.
 - Nothing may leave the Mac or reach the app that the README's Privacy section rules out.
+
+## Releasing
+
+Maintainers only. Release builds run under the hardened runtime, so `make install` already behaves like a notarized
+build. A release needs the "Developer ID Application" certificate of the team in the keychain.
+
+1. Raise `MARKETING_VERSION` (and `CURRENT_PROJECT_VERSION`) in `project.yml`.
+2. Locally: `TEAM_ID=… NOTARY_PROFILE=… make release` signs, notarizes and staples the app and a DMG in
+   `build/release` (save the profile once with `xcrun notarytool store-credentials`). `SIGN_IDENTITY=- SKIP_NOTARIZE=1`
+   tries the whole script without a certificate.
+3. Or push a tag `v<version>`: `.github/workflows/release.yml` does the same and attaches the DMG to a draft GitHub
+   release. It needs the `TEAM_ID` variable and the secrets listed at the top of the workflow.

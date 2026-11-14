@@ -16,6 +16,11 @@ settings:
     DEVELOPMENT_TEAM: ""
     ENABLE_HARDENED_RUNTIME: NO
     ENABLE_USER_SCRIPT_SANDBOXING: YES
+  configs:
+    # Release builds run under the hardened runtime, as notarization requires, so `make install` already shows
+    # what a notarized build can and cannot do. `make release` adds the Developer ID signature.
+    Release:
+      ENABLE_HARDENED_RUNTIME: YES
 packages:
   TendbarKit:
     path: Packages/TendbarKit
@@ -41,6 +46,7 @@ targets:
       base:
         PRODUCT_NAME: Tendbar
         PRODUCT_BUNDLE_IDENTIFIER: pl.dabusoft.tendbar
+        CODE_SIGN_ENTITLEMENTS: Tendbar/Tendbar.entitlements
         SWIFT_EMIT_LOC_STRINGS: YES
         LOCALIZATION_PREFERS_STRING_CATALOGS: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -66,6 +72,9 @@ targets:
         PRODUCT_NAME: tendbar-hook
         PRODUCT_BUNDLE_IDENTIFIER: pl.dabusoft.tendbar.hook
         SKIP_INSTALL: YES
+        # An Info.plist inside the binary gives the helper a stable signing identifier.
+        GENERATE_INFOPLIST_FILE: YES
+        CREATE_INFOPLIST_SECTION_IN_BINARY: YES
     dependencies:
       - package: TendbarKit
         product: TendbarDomain

@@ -66,6 +66,7 @@ make test       # Domain, Application and Infrastructure tests
 make build      # xcodegen + xcodebuild (Debug, ad-hoc signed) into build/
 make run        # build and open the app
 make install    # Release build into /Applications (then "Connect" in the app)
+make release    # Developer ID signed, notarized DMG in build/release (scripts/release.sh lists what it needs)
 ```
 
 Plan: https://claude.ai/artifact/5KoBQbPYDmyNbsJrpXraj8
