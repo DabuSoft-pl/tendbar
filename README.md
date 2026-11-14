@@ -83,6 +83,14 @@ Download `Tendbar-<version>.dmg` from the [latest release](https://github.com/Da
 (macOS 26+) and drag Tendbar to Applications. It is signed with a Developer ID and notarized by Apple, and keeps
 itself up to date through Sparkle.
 
+Or with [Homebrew](https://brew.sh):
+
+```bash
+brew tap dabusoft-pl/tap
+brew trust dabusoft-pl/tap
+brew install --cask tendbar
+```
+
 Then open Settings (the gear in the panel, or ⌘,) → Claude Code and press **Connect**. Keep the app in
 `/Applications`, since the hooks point at the helper inside it. Settings → General → **Open at login** keeps it
 running after a restart.
