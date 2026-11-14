@@ -58,3 +58,28 @@ import TendbarDomain
         #expect(try CheckHookConnection(connector: nil).execute() == nil)
     }
 }
+
+@Suite struct HookAttentionTests {
+    private func profile(_ directory: String?, _ connection: HookConnection?) -> ProfileSummary {
+        ProfileSummary(directory: directory, email: nil, connection: connection)
+    }
+
+    @Test func connectedProfilesAndUnknownOnesNeedNothing() {
+        let profiles = [profile(nil, .connected), profile("/a", nil)]
+
+        #expect(HookAttention.profilesNeedingConnect(profiles).isEmpty)
+        #expect(HookAttention.worst(of: profiles) == nil)
+    }
+
+    @Test func listsEveryProfileThatNeedsConnectInOrder() {
+        let profiles = [profile(nil, .otherCopy), profile("/a", .connected), profile("/b", .disconnected)]
+
+        #expect(HookAttention.profilesNeedingConnect(profiles).map(\.directory) == [nil, "/b"])
+    }
+
+    @Test func namesTheStateThatLosesTheMostEvents() {
+        #expect(HookAttention.worst(of: [profile(nil, .outdated), profile("/a", .otherCopy)]) == .otherCopy)
+        #expect(HookAttention.worst(of: [profile(nil, .otherCopy), profile("/a", .disconnected)]) == .disconnected)
+        #expect(HookAttention.worst(of: [profile(nil, .disconnected), profile("/a", .helperGone)]) == .helperGone)
+    }
+}

@@ -118,27 +118,33 @@ REPO=https://github.com/DabuSoft-pl/tendbar
 
 # Delta updates from the last published releases: a copy installed from one of them downloads only the
 # difference (a few hundred kB instead of the whole DMG), and Sparkle falls back to the DMG when a delta does
-# not apply. Each Tendbar<build>-<old build>.delta goes up with the release.
+# not apply. Each Tendbar<build>-<old build>.delta goes up with the release. A delta that fails only warns: the
+# release is notarized by now and works without it.
+make_delta() {
+    local tag=$1 dir="$OUT/previous/$1"
+    gh release download "$tag" --repo DabuSoft-pl/tendbar --pattern '*.dmg' --dir "$dir" || return 1
+    mkdir -p "$dir/mount"
+    diskutil image attach --nobrowse --readOnly --mountPoint "$dir/mount" "$dir"/*.dmg > /dev/null || return 1
+    ditto "$dir/mount/Tendbar.app" "$dir/Tendbar.app"
+    diskutil eject "$dir/mount" > /dev/null || return 1
+    local old_build
+    old_build=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$dir/Tendbar.app/Contents/Info.plist") || return 1
+    [[ "$old_build" != "$BUILD" ]] || return 0
+    local delta="$OUT/Tendbar$BUILD-$old_build.delta" signature
+    "$SPARKLE_BIN/BinaryDelta" create "$dir/Tendbar.app" "$APP" "$delta" || return 1
+    signature=$(sign_update "$delta") || return 1
+    DELTAS+="
+        <enclosure url=\"$REPO/releases/download/v$VERSION/$(basename "$delta")\" sparkle:deltaFrom=\"$old_build\" type=\"application/octet-stream\" $signature/>"
+    echo "Delta from $tag (build $old_build): $(stat -f %z "$delta") bytes"
+}
+
 DELTAS=""
-if (( ${DELTA_COUNT:-2} > 0 )) && command -v gh >/dev/null; then
-    PREVIOUS="$OUT/previous"
-    mkdir -p "$PREVIOUS"
+if (( ${DELTA_COUNT:-2} > 0 )) && command -v gh > /dev/null; then
     for TAG in $(gh release list --repo DabuSoft-pl/tendbar --exclude-drafts --exclude-pre-releases \
         --limit "${DELTA_COUNT:-2}" --json tagName --jq '.[].tagName' || true); do
-        gh release download "$TAG" --repo DabuSoft-pl/tendbar --pattern '*.dmg' --dir "$PREVIOUS/$TAG" || continue
-        MOUNT=$(hdiutil attach -nobrowse -readonly -noautoopen "$PREVIOUS/$TAG"/*.dmg 2>/dev/null | awk -F'\t' '/\/Volumes\//{print $NF}')
-        [[ -n "$MOUNT" ]] || continue
-        ditto "$MOUNT/Tendbar.app" "$PREVIOUS/$TAG/Tendbar.app"
-        hdiutil detach -quiet "$MOUNT"
-        OLD_BUILD=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PREVIOUS/$TAG/Tendbar.app/Contents/Info.plist")
-        [[ "$OLD_BUILD" != "$BUILD" ]] || continue
-        DELTA="$OUT/Tendbar$BUILD-$OLD_BUILD.delta"
-        "$SPARKLE_BIN/BinaryDelta" create "$PREVIOUS/$TAG/Tendbar.app" "$APP" "$DELTA"
-        DELTAS+="
-        <enclosure url=\"$REPO/releases/download/v$VERSION/$(basename "$DELTA")\" sparkle:deltaFrom=\"$OLD_BUILD\" type=\"application/octet-stream\" $(sign_update "$DELTA")/>"
-        echo "Delta from $TAG (build $OLD_BUILD): $(stat -f %z "$DELTA") bytes"
+        make_delta "$TAG" || echo "warning: no delta from $TAG" >&2
     done
-    rm -rf "$PREVIOUS"
+    rm -rf "$OUT/previous"
 fi
 [[ -n "$DELTAS" ]] && DELTAS="
       <sparkle:deltas>$DELTAS

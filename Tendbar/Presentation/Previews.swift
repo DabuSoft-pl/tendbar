@@ -95,6 +95,7 @@ private struct NotchPreview: View {
             hover: NotchHover(expanded: expanded),
             sessions: container.sessions,
             usage: container.usage,
+            claudeCode: container.claudeCode,
             preferences: container.preferences,
             onSelect: { container.sessionActions.select($0) },
             notchWidth: 180,

@@ -217,7 +217,7 @@ struct ConnectionBanner: View {
             banner(Text("Could not change the Claude Code settings: \(error)"), color: Palette.vermilion)
         } else if !model.helperAvailable {
             banner(Text("The tendbar-hook helper is missing from the app"), color: Palette.vermilion)
-        } else if let worst = Self.worst(of: model.needsConnect) {
+        } else if let worst = HookAttention.worst(of: model.needsConnect) {
             banner(
                 message(for: worst),
                 detail: model.needsConnect.map { Self.settingsPath(for: $0.directory) }.joined(separator: ", "),
@@ -225,13 +225,6 @@ struct ConnectionBanner: View {
                 connect: true
             )
         }
-    }
-
-    /// With several profiles in different states, the banner names the one that loses the most events.
-    private static func worst(of profiles: [ProfileSummary]) -> HookConnection? {
-        let order: [HookConnection] = [.helperGone, .disconnected, .otherCopy, .outdated]
-        let states = profiles.compactMap(\.connection)
-        return order.first(where: states.contains)
     }
 
     private func message(for connection: HookConnection) -> Text {

@@ -215,7 +215,7 @@ final class AppContainer {
 
     private func showNotch() {
         let notch = NotchController(
-            sessions: sessions, sessionActions: sessionActions, usage: usage, preferences: preferences
+            sessions: sessions, sessionActions: sessionActions, usage: usage, claudeCode: claudeCode, preferences: preferences
         )
         preferences.onNotchViewChange = { [weak notch] in notch?.update() }
         preferences.onLogEventsChange = { enabled in if !enabled { EventLog.remove() } }

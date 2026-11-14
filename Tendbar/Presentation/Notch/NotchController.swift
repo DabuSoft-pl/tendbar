@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import TendbarApplication
 import TendbarDomain
 
 struct NotchGeometry: Equatable {
@@ -52,6 +53,7 @@ final class NotchController {
     private let sessions: SessionsViewModel
     private let sessionActions: SessionsController
     private let usage: UsageViewModel
+    private let claudeCode: ClaudeCodeViewModel
     private let preferences: Preferences
     private var panel: NSPanel?
     private var geometry: NotchGeometry?
@@ -59,10 +61,17 @@ final class NotchController {
     private let hover = NotchHover()
     private var poll: Timer?
 
-    init(sessions: SessionsViewModel, sessionActions: SessionsController, usage: UsageViewModel, preferences: Preferences) {
+    init(
+        sessions: SessionsViewModel,
+        sessionActions: SessionsController,
+        usage: UsageViewModel,
+        claudeCode: ClaudeCodeViewModel,
+        preferences: Preferences
+    ) {
         self.sessions = sessions
         self.sessionActions = sessionActions
         self.usage = usage
+        self.claudeCode = claudeCode
         self.preferences = preferences
         observer = NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification,
@@ -161,6 +170,7 @@ final class NotchController {
             hover: hover,
             sessions: sessions,
             usage: usage,
+            claudeCode: claudeCode,
             preferences: preferences,
             onSelect: { [sessionActions] in sessionActions.select($0) },
             notchWidth: geometry.notchWidth,
@@ -197,6 +207,7 @@ final class NotchHover {
 struct NotchView: View {
     let sessions: SessionsViewModel
     let usage: UsageViewModel
+    let claudeCode: ClaudeCodeViewModel
     let preferences: Preferences
     let onSelect: (Session) -> Void
     let notchWidth: CGFloat
@@ -212,6 +223,7 @@ struct NotchView: View {
         hover: NotchHover,
         sessions: SessionsViewModel,
         usage: UsageViewModel,
+        claudeCode: ClaudeCodeViewModel,
         preferences: Preferences,
         onSelect: @escaping (Session) -> Void,
         notchWidth: CGFloat,
@@ -219,6 +231,7 @@ struct NotchView: View {
     ) {
         self.sessions = sessions
         self.usage = usage
+        self.claudeCode = claudeCode
         self.preferences = preferences
         self.onSelect = onSelect
         self.notchWidth = notchWidth
@@ -247,8 +260,15 @@ struct NotchView: View {
         return count > 0 ? (count, lead) : nil
     }
 
+    /// The worst hook state of any profile that needs Connect: sessions may stop arriving, so the pill shows it in
+    /// every visibility setting and keeps it until the hooks are connected again.
+    private var hookProblem: HookConnection? {
+        HookAttention.worst(of: claudeCode.needsConnect)
+    }
+
     private var showsPill: Bool {
-        switch preferences.pillVisibility {
+        if hookProblem != nil { return true }
+        return switch preferences.pillVisibility {
         case .always: true
         case .activity: lead != nil || highestLimit >= 80
         case .needsYou: lead == .needsYou
@@ -287,7 +307,13 @@ struct NotchView: View {
                 .frame(width: wing)
                 Spacer(minLength: max(notchWidth, 4))
                 Group {
-                    if let badge {
+                    if let hookProblem {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 12))
+                            .foregroundStyle(hookProblem == .helperGone ? Palette.vermilion : Palette.amber)
+                            .accessibilityLabel(Text("Tendbar's hooks need a click on Connect"))
+                            .help(Text("Tendbar's hooks need a click on Connect"))
+                    } else if let badge {
                         Text("\(badge.count)")
                             .font(.system(size: 13, weight: .semibold).monospacedDigit())
                             .foregroundStyle(badge.state.color)
