@@ -32,7 +32,7 @@ Domain  <-  Application  <-  Infrastructure
   builds the same container on in-memory adapters for SwiftUI previews.
 - `Tendbar/Platform` — adapters that need macOS UI frameworks: `UserNotificationsAdapter` (plays the bird calls itself
   with `NSSound`: Notification Center on macOS 27 swaps a named app sound for a built-in one), `EdgeGlow`,
-  `AppleScriptTerminalNavigator`, `GlobalShortcut` (Carbon hot key, no Accessibility permission), `LaunchAtLoginService`, `Preferences` (UserDefaults, also `AlertSettingsProviding`).
+  `AppleScriptTerminalNavigator`, `GlobalShortcut` (Carbon hot key, no Accessibility permission), `SoftwareUpdate` (Sparkle), `LaunchAtLoginService`, `Preferences` (UserDefaults, also `AlertSettingsProviding`).
 - `Tendbar/Presentation` — per feature a view model (observable state; implements the output port where there is one),
   a controller (user intent → use case) and the views. Views import Domain and Application, never Infrastructure.
 - `TendbarHook` — `tendbar-hook`, embedded in `Tendbar.app/Contents/MacOS`, uses only Domain and Infrastructure. It
@@ -55,7 +55,8 @@ Tests: `TendbarDomainTests` (rules), `TendbarApplicationTests` (use cases on fak
 - Changing `settings.json` of a Claude profile: back it up first, write atomically, touch only our own hooks and our
   `statusLine` wrapper (the previous command stays base64-encoded after `--next` and is restored on disconnect).
   Only on an explicit user action, never automatically at launch.
-- Nothing leaves the Mac: no network calls, no analytics.
+- Nothing leaves the Mac: no analytics, no network calls except Sparkle reading the appcast on GitHub (no system
+  profile, can be turned off).
 - User-facing strings are English literals (SwiftUI `Text` / `String(localized:)`); add the Polish translation of
   every new or changed string to `Localizable.xcstrings` (xcodebuild does not sync the catalog, Xcode does).
 

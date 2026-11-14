@@ -134,6 +134,7 @@ struct SettingsView: View {
                 preferences: container.preferences,
                 system: container.system,
                 systemActions: container.systemActions,
+                updates: container.updates,
                 diagnostics: { [container] in Diagnostics.report(container) }
             )
         }
@@ -411,6 +412,7 @@ private struct GeneralSettings: View {
     @Bindable var preferences: Preferences
     let system: SystemViewModel
     let systemActions: SystemController
+    @Bindable var updates: SoftwareUpdate
     let diagnostics: () -> String
     @State private var language = AppLanguage.current
     @State private var copied = false
@@ -453,7 +455,7 @@ private struct GeneralSettings: View {
                 } else if let error = system.loginItemError {
                     Text(error).foregroundStyle(Palette.vermilion)
                 } else {
-                    Text("Everything stays on this Mac. Tendbar sends nothing over the network")
+                    Text("Everything stays on this Mac. Only the update check reaches the network")
                 }
             }
             Section {
@@ -491,6 +493,19 @@ private struct GeneralSettings: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+                }
+            }
+            if updates.isAvailable {
+                Section {
+                    LabeledContent {
+                        Button("Check Now") { updates.checkNow() }
+                    } label: {
+                        Toggle("Check for updates automatically", isOn: $updates.checksAutomatically)
+                    }
+                } header: {
+                    Text("Updates")
+                } footer: {
+                    Text("Once a day Tendbar reads the list of releases on GitHub. Nothing about you or your sessions is sent")
                 }
             }
             Section {

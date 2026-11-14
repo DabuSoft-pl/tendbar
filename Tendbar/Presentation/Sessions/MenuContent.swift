@@ -196,6 +196,9 @@ struct MenuContent: View {
             Menu {
                 Button("Remove ended sessions") { actions.removeEndedSessions() }
                 Divider()
+                if container.updates.isAvailable {
+                    Button("Check for Updates…") { container.updates.checkNow() }
+                }
                 Button("Quit Tendbar") { NSApplication.shared.terminate(nil) }
             } label: {
                 Label("More", systemImage: "ellipsis.circle")

@@ -18,7 +18,8 @@ run: build
 	open $(APP)
 
 install: generate
-	xcodebuild -project Tendbar.xcodeproj -scheme Tendbar -configuration Release -derivedDataPath $(DERIVED) -quiet build
+	xcodebuild -project Tendbar.xcodeproj -scheme Tendbar -configuration Release -derivedDataPath $(DERIVED) -quiet build \
+		CODE_SIGN_ENTITLEMENTS=Tendbar/Tendbar.local.entitlements
 	pkill -x Tendbar || true
 	rm -rf $(INSTALL_DIR)/Tendbar.app
 	ditto $(RELEASE_APP) $(INSTALL_DIR)/Tendbar.app

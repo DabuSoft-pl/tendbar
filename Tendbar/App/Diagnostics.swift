@@ -36,7 +36,8 @@ enum Diagnostics {
             "Settings: menu bar \(preferences.menuBarStyle.rawValue), pill \(preferences.notchView ? preferences.pillVisibility.rawValue : "off"), "
                 + "usage \(preferences.usageStyle.rawValue), glow \(preferences.edgeGlow), hidden from capture \(preferences.hideFromCapture), "
                 + "muted folders \(preferences.mutedFolders.count), event log \(preferences.logEvents), "
-                + "desktop banners left to the app \(preferences.leaveDesktopBanners), shortcut \(preferences.nextSessionShortcut.rawValue)\(container.system.shortcutTaken ? " (taken)" : "")",
+                + "desktop banners left to the app \(preferences.leaveDesktopBanners), shortcut \(preferences.nextSessionShortcut.rawValue)\(container.system.shortcutTaken ? " (taken)" : ""), "
+                + "update checks \(container.updates.isAvailable ? String(container.updates.checksAutomatically) : "unavailable")",
         ].joined(separator: "\n")
     }
 

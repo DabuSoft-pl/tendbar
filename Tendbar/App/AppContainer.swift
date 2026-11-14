@@ -29,6 +29,7 @@ final class AppContainer {
     }
 
     let preferences: Preferences
+    let updates: SoftwareUpdate
     let sessions = SessionsViewModel()
     let usage = UsageViewModel()
     let activity = ActivityViewModel()
@@ -52,8 +53,9 @@ final class AppContainer {
     private var notch: NotchController?
     private var shortcut: GlobalShortcut?
 
-    init(preferences: Preferences, adapters a: Adapters, eventLog: URL, dataFolder: URL) {
+    init(preferences: Preferences, adapters a: Adapters, eventLog: URL, dataFolder: URL, updates: SoftwareUpdate = SoftwareUpdate(starting: false)) {
         self.preferences = preferences
+        self.updates = updates
         system = SystemViewModel(eventLog: eventLog, dataFolder: dataFolder)
 
         checkWarnings = CheckLimitWarnings(
@@ -150,7 +152,8 @@ final class AppContainer {
                 clock: SystemClock()
             ),
             eventLog: TendbarPaths.eventLog,
-            dataFolder: TendbarPaths.supportDirectory
+            dataFolder: TendbarPaths.supportDirectory,
+            updates: SoftwareUpdate(starting: true)
         )
         notifications.onOpen = { [weak container] id in container?.sessionActions.open(sessionID: id) }
         notifications.onAnswer = { [weak container] askID, sessionID, decision in

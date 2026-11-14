@@ -9,6 +9,9 @@
 #   NOTARY_KEY      path to the AuthKey_XXXXXXXXXX.p8 file
 #   NOTARY_KEY_ID   its key id
 #   NOTARY_ISSUER   its issuer id
+# and the Sparkle EdDSA key that signs updates: from the login keychain (account "tendbar", made with
+# `generate_keys --account tendbar`), or
+#   SPARKLE_KEY_FILE  a file with the private key (`generate_keys --account tendbar -x <file>` exports it)
 # Optional:
 #   KEYCHAIN        the keychain holding the certificate (CI uses a temporary one)
 #   SKIP_NOTARIZE=1 sign only, for checking the signature without waiting for Apple
@@ -67,8 +70,14 @@ xcodebuild -project Tendbar.xcodeproj -scheme Tendbar -configuration Release -de
     OTHER_CODE_SIGN_FLAGS="${KEYCHAIN:+--keychain $KEYCHAIN}"
 ditto "$ARCHIVE/Products/Applications/Tendbar.app" "$APP"
 
-# Signed again outside Xcode: the helper inside first, then the app around it, both with the hardened runtime and a
-# secure timestamp, which notarization requires.
+# Signed again outside Xcode, inside out, with the hardened runtime and a secure timestamp, which notarization
+# requires: Sparkle's helpers in the order its documentation gives, the hook helper, then the app around them.
+SPARKLE="$APP/Contents/Frameworks/Sparkle.framework"
+codesign "${SIGN_FLAGS[@]}" --options runtime "$SPARKLE/Versions/B/XPCServices/Installer.xpc"
+codesign "${SIGN_FLAGS[@]}" --options runtime --preserve-metadata=entitlements "$SPARKLE/Versions/B/XPCServices/Downloader.xpc"
+codesign "${SIGN_FLAGS[@]}" --options runtime "$SPARKLE/Versions/B/Autoupdate"
+codesign "${SIGN_FLAGS[@]}" --options runtime "$SPARKLE/Versions/B/Updater.app"
+codesign "${SIGN_FLAGS[@]}" --options runtime "$SPARKLE"
 codesign "${SIGN_FLAGS[@]}" --options runtime "$APP/Contents/MacOS/tendbar-hook"
 codesign "${SIGN_FLAGS[@]}" --options runtime --entitlements Tendbar/Tendbar.entitlements "$APP"
 codesign --verify --deep --strict --verbose=2 "$APP"
@@ -92,6 +101,35 @@ if [[ "${SKIP_NOTARIZE:-}" != 1 ]]; then
     spctl --assess --type execute --verbose=2 "$APP"
     spctl --assess --type open --context context:primary-signature --verbose=2 "$DMG"
 fi
+
+# The Sparkle feed for this release. It goes up with the DMG, and the app reads the copy on the latest published
+# release, so CURRENT_PROJECT_VERSION has to grow with every release.
+SIGN_UPDATE=build/SourcePackages/artifacts/sparkle/Sparkle/bin/sign_update
+if [[ -n "${SPARKLE_KEY_FILE:-}" ]]; then
+    ENCLOSURE=$("$SIGN_UPDATE" --ed-key-file "$SPARKLE_KEY_FILE" "$DMG")
+else
+    ENCLOSURE=$("$SIGN_UPDATE" --account tendbar "$DMG")
+fi
+REPO=https://github.com/DabuSoft-pl/tendbar
+MINIMUM=$(sed -n 's/^ *macOS: *"\(.*\)"/\1/p' project.yml)
+cat > "$OUT/appcast.xml" <<XML
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>Tendbar</title>
+    <link>$REPO</link>
+    <item>
+      <title>Tendbar $VERSION</title>
+      <pubDate>$(LC_ALL=C date -u "+%a, %d %b %Y %H:%M:%S +0000")</pubDate>
+      <sparkle:version>$BUILD</sparkle:version>
+      <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>$MINIMUM</sparkle:minimumSystemVersion>
+      <sparkle:fullReleaseNotesLink>$REPO/releases/tag/v$VERSION</sparkle:fullReleaseNotesLink>
+      <enclosure url="$REPO/releases/download/v$VERSION/$(basename "$DMG")" type="application/octet-stream" $ENCLOSURE/>
+    </item>
+  </channel>
+</rss>
+XML
 
 (cd "$OUT" && shasum -a 256 "$(basename "$DMG")" > "$(basename "$DMG").sha256")
 echo "Done: $DMG"

@@ -27,7 +27,7 @@ Run Claude Code in a few terminals and you end up checking tabs to see which one
 permission prompt. Tendbar tends those sessions for you, so your attention goes where Claude is waiting for it, and
 nowhere else.
 
-- **Nothing leaves your Mac.** No account, no network calls, no telemetry.
+- **Nothing leaves your Mac.** No account, no telemetry; the only network use is checking GitHub for updates.
 - **Your login stays yours.** Tendbar never reads OAuth tokens or the Keychain and never calls Anthropic's servers;
   limits come from what Claude Code itself hands its status line.
 - **Every account.** Separate `CLAUDE_CONFIG_DIR` profiles side by side, each with its own limits.
@@ -102,7 +102,9 @@ Builds are signed ad hoc, so they run on the Mac that built them.
 
 ## Privacy
 
-- **Nothing leaves your Mac.** Tendbar makes no network calls, has no analytics and never calls Anthropic.
+- **Nothing leaves your Mac.** Tendbar has no analytics and never calls Anthropic. Its only network use is the
+  update check ([Sparkle](https://sparkle-project.org)): once a day it reads the list of releases on GitHub, sending
+  no system profile. Turn it off in Settings → General → Updates.
 - **No secrets.** It never reads tokens or the Keychain and never switches or rotates accounts.
 - **Only what it needs.** The hook helper drops prompts, tool inputs and outputs, file contents and Claude's replies
   before anything reaches the app. The reply preview is read from the local transcript file. The one exception is a

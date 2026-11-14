@@ -491,6 +491,36 @@
         }
       }
     },
+    "Check Now": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprawdź teraz"
+          }
+        }
+      }
+    },
+    "Check for Updates…": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprawdź uaktualnienia…"
+          }
+        }
+      }
+    },
+    "Check for updates automatically": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprawdzaj uaktualnienia automatycznie"
+          }
+        }
+      }
+    },
     "Claude Code profiles": {
       "localizations": {
         "pl": {
@@ -781,12 +811,12 @@
         }
       }
     },
-    "Everything stays on this Mac. Tendbar sends nothing over the network": {
+    "Everything stays on this Mac. Only the update check reaches the network": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wszystko zostaje na tym Macu. Tendbar nie wysyła nic do sieci"
+            "value": "Wszystko zostaje na tym Macu. Do sieci łączy się tylko sprawdzanie uaktualnień"
           }
         }
       }
@@ -1257,6 +1287,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wyłączone"
+          }
+        }
+      }
+    },
+    "Once a day Tendbar reads the list of releases on GitHub. Nothing about you or your sessions is sent": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raz dziennie Tendbar czyta listę wydań na GitHubie. Nic o Tobie ani o Twoich sesjach nie jest wysyłane"
           }
         }
       }
@@ -1837,6 +1877,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zaktualizuj"
+          }
+        }
+      }
+    },
+    "Updates": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uaktualnienia"
           }
         }
       }
