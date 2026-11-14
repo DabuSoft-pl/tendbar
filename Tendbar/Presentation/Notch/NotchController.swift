@@ -277,11 +277,11 @@ struct NotchView: View {
             HStack(spacing: 0) {
                 Group {
                     if let lead {
-                        Image(systemName: "bird.fill")
+                        TendbarMark(filled: true, height: 14)
                             .foregroundStyle(lead.color)
                             .modifier(Breathing(active: lead == .working))
                     } else {
-                        Image(systemName: "bird").foregroundStyle(highestLimit >= 70 ? limitColor(highestLimit) : .secondary)
+                        TendbarMark(filled: false, height: 14).foregroundStyle(highestLimit >= 70 ? limitColor(highestLimit) : .secondary)
                     }
                 }
                 .frame(width: wing)

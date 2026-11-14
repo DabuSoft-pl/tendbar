@@ -164,6 +164,7 @@ final class Preferences: AlertSettingsProviding {
         settings.showsReplyPreview = showReplyPreview
         settings.mutedFolders = Set(mutedFolders)
         settings.leavesClaudeDesktopBanners = leaveDesktopBanners
+        settings.quietForFocus = defaults.bool(forKey: FocusFilter.quietKey)
         return settings
     }
 }

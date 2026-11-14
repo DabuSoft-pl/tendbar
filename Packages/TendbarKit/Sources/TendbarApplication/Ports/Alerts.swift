@@ -53,6 +53,9 @@ public struct AlertSettings: Sendable, Equatable {
     public var mutedFolders: Set<String> = []
     /// The Claude desktop app notifies about its own sessions, so Tendbar leaves their banners to it.
     public var leavesClaudeDesktopBanners = true
+    /// A Focus with Tendbar's filter is on: banners still go to Notification Center, which follows the Focus, but
+    /// Tendbar plays no sound of its own and the screen edge stays dark.
+    public var quietForFocus = false
 
     public init() {}
 
@@ -67,7 +70,13 @@ public struct AlertSettings: Sendable, Equatable {
     }
 
     public var alertSound: AlertSound {
-        sound ? (birdSounds ? .bird : .system) : .none
+        guard sound, !quietForFocus else { return .none }
+        return birdSounds ? .bird : .system
+    }
+
+    /// Whether the screen edge may glow at all.
+    public var glows: Bool {
+        flash && !quietForFocus
     }
 
     public func mutes(_ session: Session) -> Bool {
@@ -80,7 +89,7 @@ public struct AlertSettings: Sendable, Equatable {
     }
 
     public func flashes(_ kind: AlertKind) -> Bool {
-        flash && (kind != .done || flashOnDone)
+        glows && (kind != .done || flashOnDone)
     }
 }
 

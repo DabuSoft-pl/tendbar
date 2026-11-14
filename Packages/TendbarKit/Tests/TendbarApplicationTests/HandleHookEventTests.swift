@@ -172,6 +172,17 @@ import TendbarDomain
         #expect(alerts.presented.map(\.0) == [.done])
     }
 
+    @Test func aFocusKeepsTheBannerButSilencesTendbar() async {
+        settings.alertSettings.quietForFocus = true
+        let handle = useCase()
+
+        await handle.execute(event(.stop))
+
+        #expect(alerts.presented.map(\.0) == [.done])
+        #expect(alerts.sounds == [AlertSound.none])
+        #expect(flasher.tones.isEmpty)
+    }
+
     @Test func theBannerAnswersTheHookOnce() async {
         settings.alertSettings.answersPermissions = true
         let desk = PermissionDesk(alerts: alerts)

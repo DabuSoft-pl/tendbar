@@ -60,8 +60,12 @@ final class RecordingAlerts: AlertPresenting {
     private(set) var resets: [LimitReset] = []
     private(set) var dismissed: [String] = []
     private(set) var permissions: [PermissionAsk] = []
+    private(set) var sounds: [AlertSound] = []
 
-    func present(_ kind: AlertKind, for session: Session, sound: AlertSound) { presented.append((kind, session)) }
+    func present(_ kind: AlertKind, for session: Session, sound: AlertSound) {
+        presented.append((kind, session))
+        sounds.append(sound)
+    }
     func presentLimit(_ warning: LimitWarning, account: AccountUsage, sound: AlertSound) { limits.append(warning) }
     func presentLimitReset(_ reset: LimitReset, account: AccountUsage, sound: AlertSound) { resets.append(reset) }
     func presentPermission(_ ask: PermissionAsk, for session: Session, sound: AlertSound) { permissions.append(ask) }

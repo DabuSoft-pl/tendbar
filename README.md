@@ -44,6 +44,8 @@ nowhere else.
   Tendbar's own short bird calls (or the system sound). Optionally the screen edge glows in the state's color.
   Right-click a session to mute its folder. Sessions in the Claude desktop app keep the app's own notifications
   and permission prompts, with Tendbar adding only the glow and reminders (switchable).
+- **Quiet during a Focus.** Add Tendbar's filter to a Focus (System Settings → Focus → App Filters) and its sounds
+  and glow stay off while that Focus is on. The banners follow the Focus as usual.
 - **Follow-ups.** One reminder when a session has waited for you longer than you set (5 minutes by default), and a
   warning when a working session goes quiet for 15 minutes, since it may hang on a command or a dropped connection.
 - **Answer from the notification.** Opt in, and a permission banner shows the whole command or file with Allow and

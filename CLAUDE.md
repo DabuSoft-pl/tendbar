@@ -32,9 +32,10 @@ Domain  <-  Application  <-  Infrastructure
   builds the same container on in-memory adapters for SwiftUI previews.
 - `Tendbar/Platform` — adapters that need macOS UI frameworks: `UserNotificationsAdapter` (plays the bird calls itself
   with `NSSound`: Notification Center on macOS 27 swaps a named app sound for a built-in one), `EdgeGlow`,
-  `AppleScriptTerminalNavigator`, `GlobalShortcut` (Carbon hot key, no Accessibility permission), `SoftwareUpdate` (Sparkle), `StatusItemMenu` (right click on the menu bar item), `LaunchAtLoginService`, `Preferences` (UserDefaults, also `AlertSettingsProviding`).
+  `AppleScriptTerminalNavigator`, `GlobalShortcut` (Carbon hot key, no Accessibility permission), `SoftwareUpdate` (Sparkle), `StatusItemMenu` (right click on the menu bar item), `FocusFilter` (a Focus filter intent that sets `focus.quiet`: no sounds or glow), `LaunchAtLoginService`, `Preferences` (UserDefaults, also `AlertSettingsProviding`).
 - `Tendbar/Presentation` — per feature a view model (observable state; implements the output port where there is one),
-  a controller (user intent → use case) and the views. Views import Domain and Application, never Infrastructure.
+  a controller (user intent → use case) and the views. Views import Domain and Application, never Infrastructure. `Shared/TendbarMark`
+  draws the menu bar and pill mark from the icon's shapes (outlined, filled when something needs you).
 - `TendbarHook` — `tendbar-hook`, embedded in `Tendbar.app/Contents/MacOS`, uses only Domain and Infrastructure. It
   must never print (SessionStart and UserPromptSubmit stdout becomes Claude's context), never block and never fail.
   The one exception is PermissionRequest: it sends a `PermissionRecord` and waits on the same connection

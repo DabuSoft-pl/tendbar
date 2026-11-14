@@ -44,25 +44,25 @@ private struct MenuBarLabel: View {
         let limit = Int(usage.currentLimit.rounded())
         let waiting = sessions.needsYouCount
         let failed = sessions.sessions.filter { $0.state == .failed && $0.unread }.count
-        let bird = waiting > 0 || failed > 0 ? "bird.fill" : "bird"
+        let bird = waiting > 0 || failed > 0
         switch preferences.menuBarStyle {
         case .bird:
-            StatusImage(symbol: bird, label: summary(waiting: waiting, failed: failed))
+            StatusImage(filled: bird, label: summary(waiting: waiting, failed: failed))
         case .waiting:
             if waiting > 0 {
-                StatusImage(symbol: bird, label: String(localized: "\(waiting) waiting"), text: "\(waiting)")
+                StatusImage(filled: bird, label: String(localized: "\(waiting) waiting"), text: "\(waiting)")
             } else if failed > 0 {
-                StatusImage(symbol: bird, label: String(localized: "\(failed) with an error"), trailingSymbol: "exclamationmark")
+                StatusImage(filled: bird, label: String(localized: "\(failed) with an error"), trailingSymbol: "exclamationmark")
             } else if limit >= 90 {
-                StatusImage(symbol: bird, label: String(localized: "\(limit)% of the limit used"), text: "\(limit)%")
+                StatusImage(filled: bird, label: String(localized: "\(limit)% of the limit used"), text: "\(limit)%")
             } else {
-                StatusImage(symbol: bird, label: "Tendbar")
+                StatusImage(filled: bird, label: "Tendbar")
             }
         case .limit:
             if usage.isEmpty {
-                StatusImage(symbol: bird, label: summary(waiting: waiting, failed: failed))
+                StatusImage(filled: bird, label: summary(waiting: waiting, failed: failed))
             } else {
-                StatusImage(symbol: bird, label: String(localized: "\(limit)% of the limit used"), text: "\(limit)%")
+                StatusImage(filled: bird, label: String(localized: "\(limit)% of the limit used"), text: "\(limit)%")
             }
         }
     }
@@ -78,7 +78,7 @@ private struct MenuBarLabel: View {
 /// The bird and its figure drawn into one template image. A symbol interpolated into `Text` can drop out of the
 /// status item and leave the figure alone, so the menu bar gets a single picture it always shows whole.
 private struct StatusImage: View {
-    let symbol: String
+    let filled: Bool
     /// Already localized: says what the figure counts, which the picture alone does not.
     let label: String
     var text: String?
@@ -94,7 +94,7 @@ private struct StatusImage: View {
     @MainActor
     private var rendered: NSImage {
         let content = HStack(spacing: 3) {
-            Image(systemName: symbol)
+            TendbarMark(filled: filled)
             if let trailingSymbol { Image(systemName: trailingSymbol) }
             if let text { Text(text).monospacedDigit() }
         }
@@ -103,7 +103,7 @@ private struct StatusImage: View {
         .fixedSize()
         let renderer = ImageRenderer(content: content)
         renderer.scale = displayScale
-        let image = renderer.nsImage ?? NSImage(systemSymbolName: symbol, accessibilityDescription: nil) ?? NSImage()
+        let image = renderer.nsImage ?? TendbarMark.image(filled: filled)
         image.isTemplate = true
         return image
     }

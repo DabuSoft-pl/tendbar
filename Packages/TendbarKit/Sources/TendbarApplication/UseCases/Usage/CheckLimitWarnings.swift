@@ -46,7 +46,7 @@ public final class CheckLimitWarnings {
         for (account, warning) in warnings {
             alerts.presentLimit(warning, account: account, sound: settings.alertSound)
         }
-        if settings.flash, warnings.contains(where: { $0.1.threshold >= 90 }) {
+        if settings.glows, warnings.contains(where: { $0.1.threshold >= 90 }) {
             flasher.flash(.attention)
         }
     }

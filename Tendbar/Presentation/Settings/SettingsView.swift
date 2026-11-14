@@ -223,6 +223,7 @@ private struct NotificationSettings: View {
     @Bindable var preferences: Preferences
     let model: SystemViewModel
     let actions: SystemController
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         Form {
@@ -277,6 +278,18 @@ private struct NotificationSettings: View {
                 Toggle("Glow when a session finishes too", isOn: $preferences.glowOnDone)
                     .disabled(!preferences.edgeGlow)
                     .padding(.leading, 16)
+                LabeledContent {
+                    Button("Focus Settings…") {
+                        if let url = URL(string: "x-apple.systempreferences:com.apple.Focus-Settings.extension") { openURL(url) }
+                    }
+                } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("During a Focus")
+                        Text("Add Tendbar's filter to a Focus to turn off its sounds and glow while the Focus is on")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
                 LabeledContent {
                     HStack {
                         Button("Preview glow") { actions.showFlash() }
