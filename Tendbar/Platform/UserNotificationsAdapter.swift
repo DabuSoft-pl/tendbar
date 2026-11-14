@@ -26,6 +26,28 @@ final class UserNotificationsAdapter: NSObject, UNUserNotificationCenterDelegate
         center.setNotificationCategories([
             UNNotificationCategory(identifier: Self.permissionCategory, actions: [allow, deny], intentIdentifiers: []),
         ])
+        installSounds()
+    }
+
+    /// Notification Center looks a named sound up in the bundle of whichever copy of the app Launch Services finds
+    /// first for our bundle id. An old build without the bird calls (in DerivedData, say) makes every banner
+    /// silent, so the calls also go to ~/Library/Sounds, which is searched whatever copy it picks.
+    private func installSounds() {
+        let files = FileManager.default
+        guard let library = files.urls(for: .libraryDirectory, in: .userDomainMask).first else { return }
+        let folder = library.appendingPathComponent("Sounds", isDirectory: true)
+        for call in ["tendbar-waiting", "tendbar-done", "tendbar-error"] {
+            guard let source = Bundle.main.url(forResource: call, withExtension: "wav") else { continue }
+            let target = folder.appendingPathComponent("\(call).wav")
+            do {
+                let data = try Data(contentsOf: source)
+                if (try? Data(contentsOf: target)) == data { continue }
+                try files.createDirectory(at: folder, withIntermediateDirectories: true)
+                try data.write(to: target, options: .atomic)
+            } catch {
+                log.error("sound install failed: \(error, privacy: .public)")
+            }
+        }
     }
 
     func permission() async -> NotificationPermission {
