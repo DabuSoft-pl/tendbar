@@ -72,6 +72,7 @@ nowhere else.
 | kitty | Focuses the session's window (needs `allow_remote_control` and `listen_on` in `kitty.conf`) |
 | tmux | Selects the pane, then the tab running tmux in Terminal or iTerm2 |
 | VS Code, Cursor and other forks | Opens the window of the session's folder |
+| Claude desktop app (Code tab, local sessions) | Brings the app forward |
 | Ghostty, Warp, others | Brings the app forward |
 
 ## Install

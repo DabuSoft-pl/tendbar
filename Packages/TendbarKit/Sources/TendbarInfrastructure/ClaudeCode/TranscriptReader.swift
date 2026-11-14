@@ -18,20 +18,31 @@ public enum TranscriptReader {
     }
 
     /// Claude Code writes `{"type":"ai-title","aiTitle":"…"}` again and again as the conversation goes on, so the
-    /// latest one sits near the end. Lines without the marker are skipped before any JSON is parsed.
+    /// latest one sits near the end. A `{"type":"custom-title","customTitle":"…"}` (a `/rename`, or the title the
+    /// Claude desktop app gives a session) wins over it. Lines without either marker are skipped before any JSON is
+    /// parsed.
     public static func lastTitle(at url: URL, tailBytes: Int = tailBytes) -> String? {
         guard let data = tail(of: url, bytes: tailBytes) else { return nil }
-        let marker = Data(#""ai-title""#.utf8)
+        let marker = Data(#"-title""#.utf8)
+        var generated: String?
 
         for line in data.split(separator: UInt8(ascii: "\n")).reversed() where line.range(of: marker) != nil {
-            guard let object = try? JSONSerialization.jsonObject(with: Data(line)) as? [String: Any],
-                  object["type"] as? String == "ai-title",
-                  let title = (object["aiTitle"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines),
-                  !title.isEmpty
-            else { continue }
-            return title
+            guard let object = try? JSONSerialization.jsonObject(with: Data(line)) as? [String: Any] else { continue }
+            switch object["type"] as? String {
+            case "custom-title":
+                if let title = trimmed(object["customTitle"]) { return title }
+            case "ai-title":
+                if generated == nil { generated = trimmed(object["aiTitle"]) }
+            default:
+                continue
+            }
         }
-        return nil
+        return generated
+    }
+
+    private static func trimmed(_ value: Any?) -> String? {
+        guard let text = (value as? String)?.trimmingCharacters(in: .whitespacesAndNewlines), !text.isEmpty else { return nil }
+        return text
     }
 
     private static func tail(of url: URL, bytes: Int) -> Data? {

@@ -33,6 +33,16 @@ import TendbarDomain
         #expect(TranscriptReader.lastTitle(at: url) == "Diff warstwy UI")
     }
 
+    @Test func aCustomTitleWinsOverAGeneratedOne() throws {
+        let url = try transcript([
+            #"{"type":"custom-title","customTitle":"Czy to tylko tu działa?","sessionId":"s1"}"#,
+            #"{"type":"ai-title","aiTitle":"Later generated title","sessionId":"s1"}"#,
+            #"{"type":"assistant","message":{"content":"done"}}"#,
+        ])
+
+        #expect(TranscriptReader.lastTitle(at: url) == "Czy to tylko tu działa?")
+    }
+
     @Test func noTitleYet() throws {
         let url = try transcript([#"{"type":"user","message":{"content":"hi"}}"#])
 
