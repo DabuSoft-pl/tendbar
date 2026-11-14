@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 Tendbar — open-source (MIT) macOS menu bar app that watches Claude Code sessions through hooks. Swift 6 (strict
-concurrency), SwiftUI `MenuBarExtra`, macOS 14+. UI is English with a Polish translation
+concurrency), SwiftUI `MenuBarExtra`, macOS 26+. UI is English with a Polish translation
 (String Catalog `Tendbar/Localizable.xcstrings`, source language `en`); code, commits and docs are English. Claude Code only: no Codex, Cursor or others.
 
 ## Architecture (Clean Architecture)

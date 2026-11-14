@@ -496,18 +496,10 @@ struct StatusDot: View {
     }
 }
 
-/// The hidden title bar has nothing to separate, so the scroll edge effect of macOS 26 would only draw a band over
-/// the first section.
+/// The hidden title bar has nothing to separate, so the scroll edge effect would only draw a band over the first
+/// section.
 private struct NoTopScrollEdge: ViewModifier {
     func body(content: Content) -> some View {
-        #if compiler(>=6.2)
-        if #available(macOS 26, *) {
-            content.scrollEdgeEffectHidden(true, for: .top)
-        } else {
-            content
-        }
-        #else
-        content
-        #endif
+        content.scrollEdgeEffectHidden(true, for: .top)
     }
 }

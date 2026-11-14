@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="https://github.com/gruntz12/tendbar/actions/workflows/test.yml"><img src="https://github.com/gruntz12/tendbar/actions/workflows/test.yml/badge.svg" alt="Tests"></a>
-  <img src="https://img.shields.io/badge/macOS-14%2B-informational" alt="macOS 14+">
+  <img src="https://img.shields.io/badge/macOS-26%2B-informational" alt="macOS 26+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="MIT license"></a>
 </p>
@@ -68,7 +68,7 @@ permission prompt. Tendbar watches them for you. Everything stays on your Mac: n
 
 ## Install
 
-Tendbar is built from source for now (macOS 14+, Xcode 27+, [XcodeGen](https://github.com/yonaskolb/XcodeGen)):
+Tendbar is built from source for now (macOS 26+, Xcode 27+, [XcodeGen](https://github.com/yonaskolb/XcodeGen)):
 
 ```bash
 brew install xcodegen

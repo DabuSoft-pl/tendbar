@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.2
 import PackageDescription
 
 // Clean Architecture: dependencies point inwards only.
@@ -6,7 +6,7 @@ import PackageDescription
 // Application sees only Domain, and only Infrastructure (and the app's composition root) touches files and sockets.
 let package = Package(
     name: "TendbarKit",
-    platforms: [.macOS(.v14)],
+    platforms: [.macOS(.v26)],
     products: [
         .library(name: "TendbarDomain", targets: ["TendbarDomain"]),
         .library(name: "TendbarApplication", targets: ["TendbarApplication"]),

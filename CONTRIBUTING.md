@@ -5,7 +5,7 @@ paste the diagnostics from Settings → General.
 
 ## Building
 
-You need macOS 14+, Xcode 27+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`).
+You need macOS 26+, Xcode 27+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`).
 
 ```bash
 make test   # Domain, Application and Infrastructure tests
