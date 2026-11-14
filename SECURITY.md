@@ -2,7 +2,7 @@
 
 Tendbar changes `~/.claude/settings.json`, runs a helper on every Claude Code hook event and listens on a local Unix
 socket, so mistakes here matter. Please report a security problem privately through
-[GitHub's private vulnerability reporting](https://github.com/gruntz12/tendbar/security/advisories/new), not in a
+[GitHub's private vulnerability reporting](https://github.com/DabuSoft-pl/tendbar/security/advisories/new), not in a
 public issue.
 
 Useful to include: the Tendbar version, what an attacker needs (another local user, a malicious repository, a crafted

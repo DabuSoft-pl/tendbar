@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security problem
-    url: https://github.com/gruntz12/tendbar/security/advisories/new
+    url: https://github.com/DabuSoft-pl/tendbar/security/advisories/new
     about: Report it privately, not in a public issue.

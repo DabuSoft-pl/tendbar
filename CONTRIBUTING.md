@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for wanting to help. Bugs and ideas go in [issues](https://github.com/gruntz12/tendbar/issues); for a bug,
+Thanks for wanting to help. Bugs and ideas go in [issues](https://github.com/DabuSoft-pl/tendbar/issues); for a bug,
 paste the diagnostics from Settings → General.
 
 ## Building

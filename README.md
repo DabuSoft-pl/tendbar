@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/gruntz12/tendbar/actions/workflows/test.yml"><img src="https://github.com/gruntz12/tendbar/actions/workflows/test.yml/badge.svg" alt="Tests"></a>
+  <a href="https://github.com/DabuSoft-pl/tendbar/actions/workflows/test.yml"><img src="https://github.com/DabuSoft-pl/tendbar/actions/workflows/test.yml/badge.svg" alt="Tests"></a>
   <img src="https://img.shields.io/badge/macOS-26%2B-informational" alt="macOS 26+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="MIT license"></a>
@@ -72,7 +72,7 @@ Tendbar is built from source for now (macOS 26+, Xcode 27+, [XcodeGen](https://g
 
 ```bash
 brew install xcodegen
-git clone https://github.com/gruntz12/tendbar.git
+git clone https://github.com/DabuSoft-pl/tendbar.git
 cd tendbar
 make install   # Release build into /Applications/Tendbar.app
 ```
@@ -153,7 +153,7 @@ or licensed audio.
 
 ## Contributing
 
-Bugs and ideas are welcome in [issues](https://github.com/gruntz12/tendbar/issues); Settings → General → Diagnostics
+Bugs and ideas are welcome in [issues](https://github.com/DabuSoft-pl/tendbar/issues); Settings → General → Diagnostics
 copies what a bug report needs without anything private. See [CONTRIBUTING.md](CONTRIBUTING.md), and report security
 problems privately as described in [SECURITY.md](SECURITY.md).
 
