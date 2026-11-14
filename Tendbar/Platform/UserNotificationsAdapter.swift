@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import os
 import TendbarApplication
@@ -26,28 +27,6 @@ final class UserNotificationsAdapter: NSObject, UNUserNotificationCenterDelegate
         center.setNotificationCategories([
             UNNotificationCategory(identifier: Self.permissionCategory, actions: [allow, deny], intentIdentifiers: []),
         ])
-        installSounds()
-    }
-
-    /// Notification Center looks a named sound up in the bundle of whichever copy of the app Launch Services finds
-    /// first for our bundle id. An old build without the bird calls (in DerivedData, say) makes every banner
-    /// silent, so the calls also go to ~/Library/Sounds, which is searched whatever copy it picks.
-    private func installSounds() {
-        let files = FileManager.default
-        guard let library = files.urls(for: .libraryDirectory, in: .userDomainMask).first else { return }
-        let folder = library.appendingPathComponent("Sounds", isDirectory: true)
-        for call in ["tendbar-waiting", "tendbar-done", "tendbar-error"] {
-            guard let source = Bundle.main.url(forResource: call, withExtension: "wav") else { continue }
-            let target = folder.appendingPathComponent("\(call).wav")
-            do {
-                let data = try Data(contentsOf: source)
-                if (try? Data(contentsOf: target)) == data { continue }
-                try files.createDirectory(at: folder, withIntermediateDirectories: true)
-                try data.write(to: target, options: .atomic)
-            } catch {
-                log.error("sound install failed: \(error, privacy: .public)")
-            }
-        }
     }
 
     func permission() async -> NotificationPermission {
@@ -74,10 +53,11 @@ final class UserNotificationsAdapter: NSObject, UNUserNotificationCenterDelegate
         let content = UNMutableNotificationContent()
         content.title = "Tendbar"
         content.body = String(localized: "Notifications work.")
-        content.sound = Self.sound(sound, call: "tendbar-done")
+        content.sound = Self.sound(sound)
         let previous = await center.deliveredNotifications().map(\.request.identifier).filter { $0.hasPrefix("test-") }
         center.removeDeliveredNotifications(withIdentifiers: previous)
         try await center.add(UNNotificationRequest(identifier: "test-\(UUID().uuidString)", content: content, trigger: nil))
+        await playBirdCall(sound, call: "tendbar-done")
     }
 
     func present(_ kind: AlertKind, for session: Session, sound: AlertSound) {
@@ -87,8 +67,8 @@ final class UserNotificationsAdapter: NSObject, UNUserNotificationCenterDelegate
         content.body = session.alertBody(for: kind)
         content.threadIdentifier = session.id
         content.userInfo = ["sessionID": session.id]
-        content.sound = Self.sound(sound, call: Self.call(for: kind))
-        add(UNNotificationRequest(identifier: Self.identifier(session.id), content: content, trigger: nil))
+        content.sound = Self.sound(sound)
+        add(UNNotificationRequest(identifier: Self.identifier(session.id), content: content, trigger: nil), sound: sound, call: Self.call(for: kind))
     }
 
     /// The tool on the subtitle and the whole command in the body, so Allow never approves something unseen.
@@ -100,8 +80,8 @@ final class UserNotificationsAdapter: NSObject, UNUserNotificationCenterDelegate
         content.threadIdentifier = session.id
         content.categoryIdentifier = Self.permissionCategory
         content.userInfo = ["sessionID": session.id, "askID": ask.id]
-        content.sound = Self.sound(sound, call: "tendbar-waiting")
-        add(UNNotificationRequest(identifier: Self.identifier(session.id), content: content, trigger: nil))
+        content.sound = Self.sound(sound)
+        add(UNNotificationRequest(identifier: Self.identifier(session.id), content: content, trigger: nil), sound: sound, call: "tendbar-waiting")
     }
 
     func presentLimit(_ warning: LimitWarning, account: AccountUsage, sound: AlertSound) {
@@ -110,9 +90,9 @@ final class UserNotificationsAdapter: NSObject, UNUserNotificationCenterDelegate
         content.title = String(localized: "\(LimitWindowName.of(warning.window)) limit: \(Int(warning.percentage.rounded()))%")
         content.body = String(localized: "\(account.displayName), resets \(reset)")
         content.threadIdentifier = "limits"
-        content.sound = Self.sound(sound, call: warning.threshold >= 90 ? "tendbar-error" : "tendbar-waiting")
+        content.sound = Self.sound(sound)
         let key = LimitWarnings.key(accountID: warning.accountID, window: warning.window, resetsAt: warning.resetsAt, threshold: warning.threshold)
-        add(UNNotificationRequest(identifier: "limit-\(key)", content: content, trigger: nil))
+        add(UNNotificationRequest(identifier: "limit-\(key)", content: content, trigger: nil), sound: sound, call: warning.threshold >= 90 ? "tendbar-error" : "tendbar-waiting")
     }
 
     func presentLimitReset(_ reset: LimitReset, account: AccountUsage, sound: AlertSound) {
@@ -120,19 +100,37 @@ final class UserNotificationsAdapter: NSObject, UNUserNotificationCenterDelegate
         content.title = String(localized: "\(LimitWindowName.of(reset.window)) limit is available again")
         content.body = account.displayName
         content.threadIdentifier = "limits"
-        content.sound = Self.sound(sound, call: "tendbar-done")
+        content.sound = Self.sound(sound)
         let key = LimitWarnings.resetKey(accountID: reset.accountID, window: reset.window, resetsAt: reset.resetsAt)
-        add(UNNotificationRequest(identifier: "limit-\(key)", content: content, trigger: nil))
+        add(UNNotificationRequest(identifier: "limit-\(key)", content: content, trigger: nil), sound: sound, call: "tendbar-done")
     }
 
     func dismiss(sessionID: String) {
         center.removeDeliveredNotifications(withIdentifiers: [Self.identifier(sessionID)])
     }
 
-    private func add(_ request: UNNotificationRequest) {
-        center.add(request) { [log] error in
-            if let error { log.error("post failed: \(error, privacy: .public)") }
+    private func add(_ request: UNNotificationRequest, sound: AlertSound, call: String) {
+        Task {
+            do {
+                try await center.add(request)
+                await playBirdCall(sound, call: call)
+            } catch {
+                log.error("post failed: \(error, privacy: .public)")
+            }
         }
+    }
+
+    /// Notification Center on macOS 27 does not play a sound named from the app: it logs "Playing notification
+    /// sound { nam: tendbar-done.wav }" and the sound server plays a built-in one instead. So the bird calls play
+    /// here, once the banner is posted, and only while sound is on for Tendbar in System Settings → Notifications.
+    private func playBirdCall(_ sound: AlertSound, call: String) async {
+        guard sound == .bird, await center.notificationSettings().soundSetting == .enabled else { return }
+        guard let bird = NSSound(named: call) else {
+            log.error("bird call missing: \(call, privacy: .public)")
+            return
+        }
+        bird.stop()
+        bird.play()
     }
 
     /// Tendbar's bird call for each kind, from the bundled sounds that `tools/make-sounds.swift` synthesizes.
@@ -144,12 +142,9 @@ final class UserNotificationsAdapter: NSObject, UNUserNotificationCenterDelegate
         }
     }
 
-    private static func sound(_ sound: AlertSound, call: String) -> UNNotificationSound? {
-        switch sound {
-        case .none: nil
-        case .system: .default
-        case .bird: UNNotificationSound(named: UNNotificationSoundName("\(call).wav"))
-        }
+    /// The banner carries only the system sound; a bird call is played by `playBirdCall`.
+    private static func sound(_ sound: AlertSound) -> UNNotificationSound? {
+        sound == .system ? .default : nil
     }
 
     private static func identifier(_ sessionID: String) -> String {

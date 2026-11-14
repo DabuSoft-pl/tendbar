@@ -30,8 +30,8 @@ Domain  <-  Application  <-  Infrastructure
   without a shell, 2 s timeout), `ProcessTTY`.
 - `Tendbar/App` — `TendbarApp` and `AppContainer`, the only code that knows every layer; `PreviewAdapters.swift`
   builds the same container on in-memory adapters for SwiftUI previews.
-- `Tendbar/Platform` — adapters that need macOS UI frameworks: `UserNotificationsAdapter` (also copies the bird calls
-  to `~/Library/Sounds`, so a stale build with the same bundle id cannot silence them), `EdgeGlow`,
+- `Tendbar/Platform` — adapters that need macOS UI frameworks: `UserNotificationsAdapter` (plays the bird calls itself
+  with `NSSound`: Notification Center on macOS 27 swaps a named app sound for a built-in one), `EdgeGlow`,
   `AppleScriptTerminalNavigator`, `LaunchAtLoginService`, `Preferences` (UserDefaults, also `AlertSettingsProviding`).
 - `Tendbar/Presentation` — per feature a view model (observable state; implements the output port where there is one),
   a controller (user intent → use case) and the views. Views import Domain and Application, never Infrastructure.
