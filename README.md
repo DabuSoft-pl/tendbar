@@ -57,7 +57,8 @@ nowhere else.
   announces when it is available again.
 - **Your day in one line.** The panel counts today's turns, Claude's working time and how long it waited for you.
 - **Shown your way.** Settings → Appearance picks what sits next to the bird in the menu bar, when the pill shows up,
-  and how dense the panel is: with or without reply previews, full or one-line limits.
+  and how dense the panel is: with or without reply previews, full or one-line limits. Right-click the bird for
+  Settings, the update check and Quit.
 - **English and Polish.** Follows the macOS language, or pick one in Settings → General.
 
 <p align="center">

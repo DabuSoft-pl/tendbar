@@ -185,14 +185,7 @@ struct MenuContent: View {
             Spacer()
             Button("Settings", systemImage: "gearshape") {
                 dismiss()
-                // Deprecated, but the cooperative `activate()` leaves a menu bar app behind the frontmost app, so
-                // the settings window never shows up. Keep forcing it.
-                NSApp.activate(ignoringOtherApps: true)
-                openSettings()
-                DispatchQueue.main.async {
-                    NSApp.windows.first { $0.identifier?.rawValue.contains("Settings") == true }?
-                        .makeKeyAndOrderFront(nil)
-                }
+                SettingsWindow.open(with: openSettings)
             }
             .labelStyle(.iconOnly)
             .buttonStyle(.borderless)
@@ -412,5 +405,20 @@ private extension Session {
     /// Busy, waiting for you, or with something you have not read yet.
     var isCurrent: Bool {
         state == .working || state == .needsYou || unread
+    }
+}
+
+/// Opens Settings in front. Only a view gets `openSettings`, so the menu bar item's right-click menu borrows it.
+@MainActor
+enum SettingsWindow {
+    static func open(with openSettings: OpenSettingsAction) {
+        // Deprecated, but the cooperative `activate()` leaves a menu bar app behind the frontmost app, so the
+        // settings window never shows up. Keep forcing it.
+        NSApp.activate(ignoringOtherApps: true)
+        openSettings()
+        DispatchQueue.main.async {
+            NSApp.windows.first { $0.identifier?.rawValue.contains("Settings") == true }?
+                .makeKeyAndOrderFront(nil)
+        }
     }
 }

@@ -1541,6 +1541,16 @@
         }
       }
     },
+    "Settings…": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ustawienia…"
+          }
+        }
+      }
+    },
     "Shortcut to the next session": {
       "localizations": {
         "pl": {

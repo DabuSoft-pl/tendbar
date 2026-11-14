@@ -30,6 +30,7 @@ final class AppContainer {
 
     let preferences: Preferences
     let updates: SoftwareUpdate
+    let statusMenu = StatusItemMenu()
     let sessions = SessionsViewModel()
     let usage = UsageViewModel()
     let activity = ActivityViewModel()
@@ -163,6 +164,8 @@ final class AppContainer {
         container.systemActions.requestNotifications()
         container.showNotch()
         container.listenForShortcut()
+        container.statusMenu.updates = container.updates
+        container.statusMenu.start()
         container.startTimer()
         DispatchQueue.main.async { preferences.theme.apply() }
         return container

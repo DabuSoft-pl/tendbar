@@ -16,7 +16,7 @@ struct TendbarApp: App {
         MenuBarExtra {
             MenuContent(container: container)
         } label: {
-            MenuBarLabel(sessions: container.sessions, usage: container.usage, preferences: container.preferences)
+            MenuBarLabel(sessions: container.sessions, usage: container.usage, preferences: container.preferences, statusMenu: container.statusMenu)
         }
         .menuBarExtraStyle(.window)
 
@@ -30,8 +30,17 @@ private struct MenuBarLabel: View {
     let sessions: SessionsViewModel
     let usage: UsageViewModel
     let preferences: Preferences
+    let statusMenu: StatusItemMenu
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
+        label.onAppear { [openSettings] in
+            statusMenu.openSettings = { SettingsWindow.open(with: openSettings) }
+        }
+    }
+
+    @ViewBuilder
+    private var label: some View {
         let limit = Int(usage.currentLimit.rounded())
         let waiting = sessions.needsYouCount
         let failed = sessions.sessions.filter { $0.state == .failed && $0.unread }.count
