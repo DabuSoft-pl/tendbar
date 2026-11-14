@@ -35,7 +35,8 @@ enum Diagnostics {
             "Accounts with limits: \(container.usage.accounts.count)",
             "Settings: menu bar \(preferences.menuBarStyle.rawValue), pill \(preferences.notchView ? preferences.pillVisibility.rawValue : "off"), "
                 + "usage \(preferences.usageStyle.rawValue), glow \(preferences.edgeGlow), hidden from capture \(preferences.hideFromCapture), "
-                + "muted folders \(preferences.mutedFolders.count), event log \(preferences.logEvents)",
+                + "muted folders \(preferences.mutedFolders.count), event log \(preferences.logEvents), "
+                + "shortcut \(preferences.nextSessionShortcut.rawValue)\(container.system.shortcutTaken ? " (taken)" : "")",
         ].joined(separator: "\n")
     }
 
