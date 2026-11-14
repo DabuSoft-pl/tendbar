@@ -497,11 +497,8 @@ private struct GeneralSettings: View {
             }
             if updates.isAvailable {
                 Section {
-                    LabeledContent {
-                        Button("Check Now") { updates.checkNow() }
-                    } label: {
-                        Toggle("Check for updates automatically", isOn: $updates.checksAutomatically)
-                    }
+                    Toggle("Check for updates automatically", isOn: $updates.checksAutomatically)
+                    Button("Check Now") { updates.checkNow() }
                 } header: {
                     Text("Updates")
                 } footer: {

@@ -175,7 +175,11 @@ struct MenuContent: View {
 
     private var footer: some View {
         HStack {
-            if sessions.hasUnread {
+            if let version = container.updates.waitingVersion {
+                Button("Update to \(version)") { container.updates.checkNow() }
+                    .buttonStyle(.borderless)
+                    .foregroundStyle(.tint)
+            } else if sessions.hasUnread {
                 Button("Mark all as read") { actions.markAllAsRead() }
             }
             Spacer()
@@ -197,7 +201,7 @@ struct MenuContent: View {
                 Button("Remove ended sessions") { actions.removeEndedSessions() }
                 Divider()
                 if container.updates.isAvailable {
-                    Button("Check for Updates…") { container.updates.checkNow() }
+                    Button("Check for updates…") { container.updates.checkNow() }
                 }
                 Button("Quit Tendbar") { NSApplication.shared.terminate(nil) }
             } label: {

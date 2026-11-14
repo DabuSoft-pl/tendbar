@@ -78,7 +78,15 @@ nowhere else.
 
 ## Install
 
-Tendbar is built from source for now (macOS 26+, Xcode 27+, [XcodeGen](https://github.com/yonaskolb/XcodeGen)):
+Download `Tendbar-<version>.dmg` from the [latest release](https://github.com/DabuSoft-pl/tendbar/releases/latest)
+(macOS 26+) and drag Tendbar to Applications. It is signed with a Developer ID and notarized by Apple, and keeps
+itself up to date through Sparkle.
+
+Then open Settings (the gear in the panel, or ⌘,) → Claude Code and press **Connect**. Keep the app in
+`/Applications`, since the hooks point at the helper inside it. Settings → General → **Open at login** keeps it
+running after a restart.
+
+To build it yourself (Xcode 27+, [XcodeGen](https://github.com/yonaskolb/XcodeGen)):
 
 ```bash
 brew install xcodegen
@@ -87,11 +95,7 @@ cd tendbar
 make install   # Release build into /Applications/Tendbar.app
 ```
 
-Then open Settings (the gear in the panel, or ⌘,) → Claude Code and press **Connect**. Keep the app in
-`/Applications`, since the hooks point at the helper inside it. Settings → General → **Open at login** keeps it
-running after a restart.
-
-Builds are signed ad hoc, so they run on the Mac that built them.
+Such a build is signed ad hoc, so it runs on the Mac that built it.
 
 <p align="center">
   <picture>
@@ -176,7 +180,7 @@ Claude Code on the Mac has a lively set of companions, and one of them may suit 
 - [Claude Code Menu](https://github.com/PiXeL16/claudecode-macmenu) adds usage analytics and notifications.
 
 Tendbar's take is attention rather than usage: which session waits for you, for how long, and the shortest way back
-to its terminal, with limits read from Claude Code itself and nothing sent anywhere.
+to its terminal, with limits read from Claude Code itself and nothing about you sent anywhere.
 
 ## Contributing
 

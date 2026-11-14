@@ -501,22 +501,22 @@
         }
       }
     },
-    "Check for Updates…": {
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sprawdź uaktualnienia…"
-          }
-        }
-      }
-    },
     "Check for updates automatically": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
             "value": "Sprawdzaj uaktualnienia automatycznie"
+          }
+        }
+      }
+    },
+    "Check for updates…": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprawdź uaktualnienia…"
           }
         }
       }
@@ -1877,6 +1877,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zaktualizuj"
+          }
+        }
+      }
+    },
+    "Update to %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uaktualnij do %@"
           }
         }
       }
