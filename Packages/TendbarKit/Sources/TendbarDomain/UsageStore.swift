@@ -66,12 +66,21 @@ public struct AccountUsage: Sendable, Equatable, Identifiable {
 /// One status line reading: the limits of whichever account a Claude Code profile was signed in to.
 public struct UsageReading: Sendable, Equatable {
     public var configDirectory: String?
+    /// The Claude Code session whose status line sent it.
+    public var sessionID: String?
     public var fiveHour: LimitWindow?
     public var sevenDay: LimitWindow?
     public var readAt: Date
 
-    public init(configDirectory: String?, fiveHour: LimitWindow?, sevenDay: LimitWindow?, readAt: Date) {
+    public init(
+        configDirectory: String?,
+        sessionID: String? = nil,
+        fiveHour: LimitWindow?,
+        sevenDay: LimitWindow?,
+        readAt: Date
+    ) {
         self.configDirectory = configDirectory
+        self.sessionID = sessionID
         self.fiveHour = fiveHour
         self.sevenDay = sevenDay
         self.readAt = readAt
@@ -117,6 +126,23 @@ public struct UsageStore: Sendable, Equatable {
         let directory = accountKey(configDirectory: configDirectory)
         guard let email, !email.isEmpty else { return directory }
         return directory + "|" + email.lowercased()
+    }
+
+    /// The known account of the reading's profile whose weekly window, or else five-hour window, resets at the same
+    /// moment. Every account has its own reset times, so this tells accounts apart even when sessions signed in to
+    /// two of them run side by side, as after switching accounts while older sessions keep going.
+    public func account(matching reading: UsageReading) -> AccountUsage? {
+        let directory = Self.accountKey(configDirectory: reading.configDirectory)
+        let candidates = accounts.values.filter { Self.accountKey(configDirectory: $0.configDirectory) == directory }
+        if let resets = reading.sevenDay?.resetsAt,
+           let match = candidates.first(where: { $0.sevenDay?.resetsAt == resets }) {
+            return match
+        }
+        if let resets = reading.fiveHour?.resetsAt,
+           let match = candidates.first(where: { $0.fiveHour?.resetsAt == resets }) {
+            return match
+        }
+        return nil
     }
 
     /// Files a reading under the account signed in when it was taken. A missing window means it was reset.

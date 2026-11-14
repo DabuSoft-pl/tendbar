@@ -27,6 +27,50 @@ import TendbarDomain
         #expect(alerts.limits.map(\.threshold) == [80])
     }
 
+    @Test func afterAnAccountSwitchOlderSessionsKeepFilingUnderTheirOwnAccount() {
+        let usage = InMemoryUsage()
+        let emails = StubEmails()
+        let check = CheckLimitWarnings(usage: usage, fired: InMemoryFiredWarnings(), alerts: RecordingAlerts(), flasher: RecordingFlasher(), settings: StubSettings(), clock: FixedClock(date: now))
+        let record = RecordUsageReading(repository: usage, output: usage, emails: emails, checkWarnings: check)
+        let resetsA = now.addingTimeInterval(3 * 86400)
+        let resetsB = now.addingTimeInterval(5 * 86400)
+        func reading(_ session: String, five: Double, week: Double, resets: Date, at seconds: TimeInterval) -> UsageReading {
+            UsageReading(
+                configDirectory: nil,
+                sessionID: session,
+                fiveHour: LimitWindow(usedPercentage: five, resetsAt: now.addingTimeInterval(3600 + seconds)),
+                sevenDay: LimitWindow(usedPercentage: week, resetsAt: resets),
+                readAt: now.addingTimeInterval(seconds)
+            )
+        }
+
+        emails.emails[nil] = "a@example.com"
+        record.execute(reading("old", five: 91, week: 22, resets: resetsA, at: 0))
+        emails.emails[nil] = "b@example.com"
+        record.execute(reading("new", five: 87, week: 35, resets: resetsB, at: 10))
+        record.execute(reading("old", five: 92, week: 22, resets: resetsA, at: 20))
+        record.execute(reading("new", five: 88, week: 35, resets: resetsB, at: 30))
+
+        let byEmail = Dictionary(uniqueKeysWithValues: usage.store.accounts.values.map { ($0.email, $0) })
+        #expect(byEmail["a@example.com"]?.fiveHour?.usedPercentage == 92)
+        #expect(byEmail["b@example.com"]?.fiveHour?.usedPercentage == 88)
+        #expect(usage.store.accounts.count == 2)
+    }
+
+    @Test func aSessionKeepsItsAccountWhenItsWindowsReset() {
+        let usage = InMemoryUsage()
+        let emails = StubEmails()
+        let check = CheckLimitWarnings(usage: usage, fired: InMemoryFiredWarnings(), alerts: RecordingAlerts(), flasher: RecordingFlasher(), settings: StubSettings(), clock: FixedClock(date: now))
+        let record = RecordUsageReading(repository: usage, output: usage, emails: emails, checkWarnings: check)
+
+        emails.emails[nil] = "a@example.com"
+        record.execute(UsageReading(configDirectory: nil, sessionID: "old", fiveHour: LimitWindow(usedPercentage: 99, resetsAt: now.addingTimeInterval(60)), sevenDay: nil, readAt: now))
+        emails.emails[nil] = "b@example.com"
+        record.execute(UsageReading(configDirectory: nil, sessionID: "old", fiveHour: LimitWindow(usedPercentage: 1, resetsAt: now.addingTimeInterval(5 * 3600)), sevenDay: nil, readAt: now.addingTimeInterval(120)))
+
+        #expect(usage.store.accounts.values.map(\.email) == ["a@example.com"])
+    }
+
     @Test func addingAProfileRemembersItsDirectoryOnce() throws {
         let profiles = InMemoryProfiles()
         let add = AddProfile(repository: profiles, directories: StubDirectories())

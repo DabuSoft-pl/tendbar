@@ -94,6 +94,7 @@ import TendbarDomain
 
         #expect(envelope(raw, configDirectory: "/Users/me/.claude-work").message() == .usage(UsageReading(
             configDirectory: "/Users/me/.claude-work",
+            sessionID: "s1",
             fiveHour: LimitWindow(usedPercentage: 23.5, resetsAt: Date(timeIntervalSince1970: 1_800_003_600)),
             sevenDay: LimitWindow(usedPercentage: 41, resetsAt: Date(timeIntervalSince1970: 1_800_300_000)),
             readAt: Date(timeIntervalSince1970: 1_800_000_000)

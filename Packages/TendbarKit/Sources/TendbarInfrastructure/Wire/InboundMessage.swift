@@ -16,6 +16,7 @@ extension HookEnvelope {
             else { return nil }
             return .usage(UsageReading(
                 configDirectory: terminal.configDirectory,
+                sessionID: input.sessionID,
                 fiveHour: limits.fiveHour?.window,
                 sevenDay: limits.sevenDay?.window,
                 readAt: sentAt
@@ -62,9 +63,11 @@ struct StatusLineInput: Decodable {
         }
     }
 
+    let sessionID: String?
     let rateLimits: Limits?
 
     enum CodingKeys: String, CodingKey {
+        case sessionID = "session_id"
         case rateLimits = "rate_limits"
     }
 }
