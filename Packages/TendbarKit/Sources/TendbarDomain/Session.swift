@@ -84,6 +84,8 @@ public struct Session: Sendable, Identifiable, Equatable {
     public var unread: Bool
     public var message: String?
     public var preview: String?
+    /// The name Claude Code gave the conversation (the terminal tab shows the same), once it has one.
+    public var title: String?
 
     public init(
         id: String,
@@ -101,7 +103,8 @@ public struct Session: Sendable, Identifiable, Equatable {
         waitingAgent: String? = nil,
         unread: Bool = false,
         message: String? = nil,
-        preview: String? = nil
+        preview: String? = nil,
+        title: String? = nil
     ) {
         self.id = id
         self.cwd = cwd
@@ -119,10 +122,16 @@ public struct Session: Sendable, Identifiable, Equatable {
         self.unread = unread
         self.message = message
         self.preview = preview
+        self.title = title
     }
 
     public var folderName: String {
         cwd.map { URL(fileURLWithPath: $0).lastPathComponent } ?? String(id.prefix(8))
+    }
+
+    /// What the session is called on screen: Claude Code's title for it, or its folder until there is one.
+    public var displayName: String {
+        title ?? folderName
     }
 
     public var configDirectory: String? {

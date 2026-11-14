@@ -120,6 +120,10 @@ public struct SessionStore: Sendable, Equatable {
         sessions[id]?.preview = preview
     }
 
+    public mutating func setTitle(_ title: String, for id: String) {
+        sessions[id]?.title = title
+    }
+
     public mutating func markSeen(_ id: String) {
         sessions[id]?.unread = false
     }

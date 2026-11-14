@@ -4,11 +4,7 @@ public enum TranscriptReader {
     public static let tailBytes = 512 * 1024
 
     public static func lastAssistantText(at url: URL, tailBytes: Int = tailBytes) -> String? {
-        guard let handle = try? FileHandle(forReadingFrom: url) else { return nil }
-        defer { try? handle.close() }
-        guard let size = try? handle.seekToEnd() else { return nil }
-        let start = size > UInt64(tailBytes) ? size - UInt64(tailBytes) : 0
-        guard (try? handle.seek(toOffset: start)) != nil, let data = try? handle.readToEnd() else { return nil }
+        guard let data = tail(of: url, bytes: tailBytes) else { return nil }
 
         for line in data.split(separator: UInt8(ascii: "\n")).reversed() {
             guard let object = try? JSONSerialization.jsonObject(with: Data(line)) as? [String: Any],
@@ -19,6 +15,32 @@ public enum TranscriptReader {
             if !text.isEmpty { return text }
         }
         return nil
+    }
+
+    /// Claude Code writes `{"type":"ai-title","aiTitle":"…"}` again and again as the conversation goes on, so the
+    /// latest one sits near the end. Lines without the marker are skipped before any JSON is parsed.
+    public static func lastTitle(at url: URL, tailBytes: Int = tailBytes) -> String? {
+        guard let data = tail(of: url, bytes: tailBytes) else { return nil }
+        let marker = Data(#""ai-title""#.utf8)
+
+        for line in data.split(separator: UInt8(ascii: "\n")).reversed() where line.range(of: marker) != nil {
+            guard let object = try? JSONSerialization.jsonObject(with: Data(line)) as? [String: Any],
+                  object["type"] as? String == "ai-title",
+                  let title = (object["aiTitle"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines),
+                  !title.isEmpty
+            else { continue }
+            return title
+        }
+        return nil
+    }
+
+    private static func tail(of url: URL, bytes: Int) -> Data? {
+        guard let handle = try? FileHandle(forReadingFrom: url) else { return nil }
+        defer { try? handle.close() }
+        guard let size = try? handle.seekToEnd() else { return nil }
+        let start = size > UInt64(bytes) ? size - UInt64(bytes) : 0
+        guard (try? handle.seek(toOffset: start)) != nil else { return nil }
+        return try? handle.readToEnd()
     }
 
     public static func preview(of text: String, limit: Int = 200) -> String {

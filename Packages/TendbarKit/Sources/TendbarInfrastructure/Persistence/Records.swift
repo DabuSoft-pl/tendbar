@@ -33,6 +33,7 @@ struct SessionRecord: Codable {
     var unread: Bool
     var message: String?
     var preview: String?
+    var title: String?
 
     init(_ session: Session) {
         id = session.id
@@ -51,6 +52,7 @@ struct SessionRecord: Codable {
         unread = session.unread
         message = session.message
         preview = session.preview
+        title = session.title
     }
 
     var session: Session {
@@ -70,7 +72,8 @@ struct SessionRecord: Codable {
             waitingAgent: waitingAgent,
             unread: unread,
             message: message,
-            preview: preview
+            preview: preview,
+            title: title
         )
     }
 }

@@ -325,7 +325,7 @@ private struct NotchRow: View {
     var body: some View {
         HStack(spacing: 8) {
             StateMark(state: session.state, unread: session.unread)
-            Text(session.folderName).fontWeight(.medium).lineLimit(1)
+            Text(session.displayName).fontWeight(.medium).lineLimit(1)
             Text(session.state.label).foregroundStyle(.secondary).lineLimit(1)
             Spacer()
             Text(session.timeText())

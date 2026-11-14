@@ -118,7 +118,9 @@ final class StubDirectories: ProfileDirectories {
 
 struct StubTranscripts: TranscriptReading {
     var preview: String?
+    var title: String?
     func lastReplyPreview(at path: String) async -> String? { preview }
+    func title(at path: String) async -> String? { title }
 }
 
 struct FixedClock: Clock {

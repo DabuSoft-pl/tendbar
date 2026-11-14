@@ -255,7 +255,8 @@ struct SessionRow: View {
                     .padding(.top, 4)
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(alignment: .firstTextBaseline) {
-                        Text(session.folderName).fontWeight(.medium).lineLimit(1)
+                        Text(session.displayName).fontWeight(.medium).lineLimit(1)
+                            .help(session.cwd ?? session.folderName)
                         Text(session.state.label).foregroundStyle(.secondary)
                         Spacer()
                         if muted {

@@ -1,7 +1,7 @@
 import Foundation
 import TendbarDomain
 
-/// Applies one hook event, reads the reply preview when a turn ends and tells the user when a session needs them.
+/// Applies one hook event, reads the session's title and, when a turn ends, the reply preview and tells the user when a session needs them.
 @MainActor
 public final class HandleHookEvent {
     private let repository: SessionRepository
@@ -57,13 +57,25 @@ public final class HandleHookEvent {
         }
         let alert = AlertPolicy.alert(from: previous, to: session.state)
 
-        if event.kind == .stop, let path = session.transcriptPath,
-           let preview = await transcripts.lastReplyPreview(at: path) {
-            var latest = repository.load()
-            latest.setPreview(preview, for: session.id)
-            commit(latest)
+        if let path = session.transcriptPath, Self.readsTranscript(after: event.kind) {
+            let title = await transcripts.title(at: path)
+            let preview = event.kind == .stop ? await transcripts.lastReplyPreview(at: path) : nil
+            if (title != nil && title != session.title) || preview != nil {
+                var latest = repository.load()
+                if let title { latest.setTitle(title, for: session.id) }
+                if let preview { latest.setPreview(preview, for: session.id) }
+                commit(latest)
+            }
         }
         if let alert { held = notify(alert, sessionID: session.id, permission: permission) }
+    }
+
+    /// The title is looked up where a turn starts or ends and before a banner, not after every tool call.
+    private static func readsTranscript(after kind: HookEvent.Kind) -> Bool {
+        switch kind {
+        case .sessionStart, .userPromptSubmit, .permissionRequest, .notification, .stop, .stopFailure: true
+        case .postToolUse, .sessionEnd, .other: false
+        }
     }
 
     /// Returns whether a permission prompt went to the banner and now waits there.

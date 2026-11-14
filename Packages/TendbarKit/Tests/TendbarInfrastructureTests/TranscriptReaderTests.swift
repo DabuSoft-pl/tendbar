@@ -22,6 +22,23 @@ import TendbarDomain
         #expect(TranscriptReader.lastAssistantText(at: url) == "All 42 tests pass.")
     }
 
+    @Test func findsTheLatestTitle() throws {
+        let url = try transcript([
+            #"{"type":"ai-title","aiTitle":"First idea","sessionId":"s1"}"#,
+            #"{"type":"user","message":{"content":"mentions \"ai-title\" in passing"}}"#,
+            #"{"type":"ai-title","aiTitle":"  Diff warstwy UI  ","sessionId":"s1"}"#,
+            #"{"type":"assistant","message":{"content":"done"}}"#,
+        ])
+
+        #expect(TranscriptReader.lastTitle(at: url) == "Diff warstwy UI")
+    }
+
+    @Test func noTitleYet() throws {
+        let url = try transcript([#"{"type":"user","message":{"content":"hi"}}"#])
+
+        #expect(TranscriptReader.lastTitle(at: url) == nil)
+    }
+
     @Test func skipsToolOnlyMessages() throws {
         let url = try transcript([
             #"{"type":"assistant","message":{"content":[{"type":"text","text":"First answer"}]}}"#,

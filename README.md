@@ -28,9 +28,9 @@ permission prompt. Tendbar watches them for you. Everything stays on your Mac: n
 
 ## Features
 
-- **Every session in one list.** Folder, state and the start of Claude's last reply. A ring while Claude works, amber
-  when it waits for you, vermilion after an error, sage green until you read a finished reply. Close a terminal tab
-  and its session ends there too.
+- **Every session in one list.** The name Claude Code gave the conversation (the folder until it has one), state
+  and the start of Claude's last reply. A ring while Claude works, amber when it waits for you, vermilion after an
+  error, sage green until you read a finished reply. Close a terminal tab and its session ends there too.
 - **Back to the right terminal.** Click a session, or pick it with the arrow keys and press Return, to jump to its
   tab or pane (see [Terminals](#terminals)).
 - **Notifications that matter.** A banner when a session needs you, finishes or fails, each one switchable, with
@@ -106,7 +106,7 @@ Everything Tendbar keeps lives in `~/Library/Application Support/Tendbar` (folde
 
 | File | Contents |
 |---|---|
-| `sessions.json` | Session id, folder, terminal ids, the Claude Code process id, state, the permission message and the first 200 characters of the last reply |
+| `sessions.json` | Session id, folder, the conversation's title from its transcript, terminal ids, the Claude Code process id, state, the permission message and the first 200 characters of the last reply |
 | `usage.json` | Limit readings per account, keyed by config directory and e-mail address |
 | `activity.json` | Per day for the last month: the number of turns and waits, their total time, and the longest wait and turn with their folder name |
 | `events.jsonl` | Only when Settings → General → Event log is on (off by default; turning it off deletes it). Hook events for troubleshooting: session id, event, folder, transcript path, message, notification type, the error of a failed turn, and limits when they change. Rotated at 5 MB |

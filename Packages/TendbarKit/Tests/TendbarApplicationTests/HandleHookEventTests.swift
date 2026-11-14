@@ -12,14 +12,14 @@ import TendbarDomain
     let activity = InMemoryActivity()
     let now = Date(timeIntervalSince1970: 1_800_000_000)
 
-    private func useCase(preview: String? = nil, desk: PermissionDesk? = nil) -> HandleHookEvent {
+    private func useCase(preview: String? = nil, title: String? = nil, desk: PermissionDesk? = nil) -> HandleHookEvent {
         HandleHookEvent(
             repository: sessions,
             output: sessions,
             alerts: alerts,
             flasher: flasher,
             settings: settings,
-            transcripts: StubTranscripts(preview: preview),
+            transcripts: StubTranscripts(preview: preview, title: title),
             activity: activity,
             activityOutput: activity,
             desk: desk
@@ -42,6 +42,19 @@ import TendbarDomain
         #expect(flasher.tones == [.success])
         #expect(sessions.store.sessions["s1"]?.state == .done)
         #expect(sessions.shown.last == sessions.store)
+    }
+
+    @Test func theBannerIsNamedAfterClaudesTitle() async {
+        await useCase(title: "Diff warstwy UI").execute(event(.stop))
+
+        #expect(sessions.store.sessions["s1"]?.title == "Diff warstwy UI")
+        #expect(alerts.presented.first?.1.displayName == "Diff warstwy UI")
+    }
+
+    @Test func withoutATitleTheFolderNamesTheSession() async {
+        await useCase().execute(event(.stop))
+
+        #expect(alerts.presented.first?.1.displayName == "app")
     }
 
     @Test func aDoneBannerLeavesTheReplyOutByDefault() async {

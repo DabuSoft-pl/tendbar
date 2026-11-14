@@ -71,6 +71,7 @@ private struct UnknownProcesses: SessionProcessChecking {
 
 private struct NoTranscripts: TranscriptReading {
     func lastReplyPreview(at path: String) async -> String? { nil }
+    func title(at path: String) async -> String? { nil }
 }
 
 extension AppContainer {

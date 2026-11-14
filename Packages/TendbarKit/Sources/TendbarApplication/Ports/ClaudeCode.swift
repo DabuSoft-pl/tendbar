@@ -33,4 +33,6 @@ public protocol AccountEmailResolving: AnyObject {
 public protocol TranscriptReading: Sendable {
     /// The start of Claude's last reply in a session transcript.
     func lastReplyPreview(at path: String) async -> String?
+    /// The latest title Claude Code gave the conversation in its transcript.
+    func title(at path: String) async -> String?
 }

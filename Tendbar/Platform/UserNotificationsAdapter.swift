@@ -62,7 +62,7 @@ final class UserNotificationsAdapter: NSObject, UNUserNotificationCenterDelegate
 
     func present(_ kind: AlertKind, for session: Session, sound: AlertSound) {
         let content = UNMutableNotificationContent()
-        content.title = session.folderName
+        content.title = session.displayName
         content.subtitle = session.alertSubtitle(for: kind)
         content.body = session.alertBody(for: kind)
         content.threadIdentifier = session.id
@@ -74,7 +74,7 @@ final class UserNotificationsAdapter: NSObject, UNUserNotificationCenterDelegate
     /// The tool on the subtitle and the whole command in the body, so Allow never approves something unseen.
     func presentPermission(_ ask: PermissionAsk, for session: Session, sound: AlertSound) {
         let content = UNMutableNotificationContent()
-        content.title = session.folderName
+        content.title = session.displayName
         content.subtitle = String(localized: "Allow \(ask.tool)?")
         content.body = ask.detail ?? session.message ?? session.state.hint
         content.threadIdentifier = session.id

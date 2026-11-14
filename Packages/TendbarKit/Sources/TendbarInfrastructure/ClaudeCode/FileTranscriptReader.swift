@@ -1,7 +1,7 @@
 import Foundation
 import TendbarApplication
 
-/// Reads reply previews only from Claude Code transcripts. The path arrives over the socket, so anything else
+/// Reads reply previews and titles only from Claude Code transcripts. The path arrives over the socket, so anything else
 /// (a file in Documents, a symlink out of `projects/`) is refused instead of read on the sender's behalf.
 public struct FileTranscriptReader: TranscriptReading {
     private let home: URL
@@ -14,6 +14,13 @@ public struct FileTranscriptReader: TranscriptReading {
         guard let url = Self.transcriptURL(path, home: home) else { return nil }
         return await Task.detached(priority: .utility) {
             TranscriptReader.lastAssistantText(at: url).map { TranscriptReader.preview(of: $0) }
+        }.value
+    }
+
+    public func title(at path: String) async -> String? {
+        guard let url = Self.transcriptURL(path, home: home) else { return nil }
+        return await Task.detached(priority: .utility) {
+            TranscriptReader.lastTitle(at: url).map { TranscriptReader.preview(of: $0, limit: 80) }
         }.value
     }
 
