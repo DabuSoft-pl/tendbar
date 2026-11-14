@@ -155,8 +155,12 @@ make_delta() {
 
 DELTAS=""
 if (( ${DELTA_COUNT:-2} > 0 )) && command -v gh > /dev/null; then
-    for PREVIOUS in $(gh release list --repo DabuSoft-pl/tendbar --exclude-drafts --exclude-pre-releases \
-        --limit "${DELTA_COUNT:-2}" --json tagName --jq '.[].tagName' || true); do
+    # The last releases, plus the newest beta, so whoever tested it gets a delta too.
+    PREVIOUS_TAGS=$( (gh release list --repo DabuSoft-pl/tendbar --exclude-drafts --exclude-pre-releases \
+        --limit "${DELTA_COUNT:-2}" --json tagName --jq '.[].tagName'
+        gh release list --repo DabuSoft-pl/tendbar --exclude-drafts --limit 20 --json tagName,isPrerelease \
+            --jq '[.[] | select(.isPrerelease)][0].tagName // empty') || true)
+    for PREVIOUS in $PREVIOUS_TAGS; do
         make_delta "$PREVIOUS" || echo "warning: no delta from $PREVIOUS" >&2
     done
     rm -rf "$OUT/previous"
