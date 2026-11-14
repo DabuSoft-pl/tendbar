@@ -24,7 +24,13 @@
 </p>
 
 Run Claude Code in a few terminals and you end up checking tabs to see which one is done and which one is stuck on a
-permission prompt. Tendbar watches them for you. Everything stays on your Mac: no account, no network, no telemetry.
+permission prompt. Tendbar tends those sessions for you, so your attention goes where Claude is waiting for it, and
+nowhere else.
+
+- **Nothing leaves your Mac.** No account, no network calls, no telemetry.
+- **Your login stays yours.** Tendbar never reads OAuth tokens or the Keychain and never calls Anthropic's servers;
+  limits come from what Claude Code itself hands its status line.
+- **Every account.** Separate `CLAUDE_CONFIG_DIR` profiles side by side, each with its own limits.
 
 ## Features
 
@@ -150,6 +156,21 @@ The code follows Clean Architecture: a domain package, use cases and adapters, d
 UI strings are English, with the Polish translation in `Tendbar/Localizable.xcstrings`. The app icon is drawn by
 `tools/make-icon.swift` and the bird calls are synthesized by `tools/make-sounds.swift`, so the app ships no recorded
 or licensed audio.
+
+## Similar projects
+
+Claude Code on the Mac has a lively set of companions, and one of them may suit you better:
+
+- [Vibe Notch](https://github.com/farouqaldori/vibe-notch) puts sessions in a notch island with approve and deny
+  controls.
+- [Nudge](https://github.com/ZachDeLong/nudge) and [Checkpoint](https://github.com/DouweBos/Checkpoint) focus on
+  answering permission prompts from the menu bar.
+- [Clabar](https://github.com/Magir/clabar), [claude-code-usage](https://github.com/pedroprates/claude-code-usage)
+  and [CodexBar](https://github.com/steipete/CodexBar) show usage limits, CodexBar for several providers.
+- [Claude Code Menu](https://github.com/PiXeL16/claudecode-macmenu) adds usage analytics and notifications.
+
+Tendbar's take is attention rather than usage: which session waits for you, for how long, and the shortest way back
+to its terminal, with limits read from Claude Code itself and nothing sent anywhere.
 
 ## Contributing
 
