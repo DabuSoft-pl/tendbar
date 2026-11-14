@@ -82,7 +82,7 @@ mkdir -p "$OUT"
 xcodegen generate --quiet
 xcodebuild -project Tendbar.xcodeproj -scheme Tendbar -configuration Release -derivedDataPath build \
     -destination "generic/platform=macOS" -archivePath "$ARCHIVE" -quiet archive \
-    DEVELOPMENT_TEAM="$TEAM_ID" CODE_SIGN_IDENTITY="$IDENTITY" CODE_SIGN_STYLE=Manual \
+    DEVELOPMENT_TEAM="$TEAM_ID" CODE_SIGN_IDENTITY="$IDENTITY" CODE_SIGN_STYLE=Manual TENDBAR_BETA="$BETA" \
     OTHER_CODE_SIGN_FLAGS="${KEYCHAIN:+--keychain $KEYCHAIN}"
 ditto "$ARCHIVE/Products/Applications/Tendbar.app" "$APP"
 

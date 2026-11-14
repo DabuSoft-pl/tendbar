@@ -11,6 +11,8 @@ settings:
     SWIFT_STRICT_CONCURRENCY: complete
     MARKETING_VERSION: "1.1.4"
     CURRENT_PROJECT_VERSION: "8"
+    # Set by `BETA=<n> make release`; empty for a release.
+    TENDBAR_BETA: ""
     CODE_SIGN_IDENTITY: "-"
     CODE_SIGN_STYLE: Manual
     DEVELOPMENT_TEAM: ""
@@ -40,6 +42,7 @@ targets:
         CFBundleDisplayName: Tendbar
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        TendbarBeta: "$(TENDBAR_BETA)"
         CFBundleDevelopmentRegion: en
         CFBundleLocalizations: [en, pl]
         LSUIElement: true

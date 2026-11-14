@@ -11,6 +11,16 @@
         }
       }
     },
+    "%@ beta %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ beta %2$@"
+          }
+        }
+      }
+    },
     "%@ limit is available again": {
       "localizations": {
         "pl": {

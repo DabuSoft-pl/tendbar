@@ -8,9 +8,8 @@ import TendbarDomain
 @MainActor
 enum Diagnostics {
     static func report(_ container: AppContainer) -> String {
-        let info = Bundle.main.infoDictionary
-        let version = info?["CFBundleShortVersionString"] as? String ?? "?"
-        let build = info?["CFBundleVersion"] as? String ?? "?"
+        let version = AppVersion.label
+        let build = AppVersion.build
         let sessions = container.sessions.sessions
         let states = SessionState.allCases
             .map { state in "\(state.rawValue) \(sessions.filter { $0.state == state }.count)" }
