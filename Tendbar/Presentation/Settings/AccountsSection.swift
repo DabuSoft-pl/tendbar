@@ -25,10 +25,12 @@ struct AccountsSection: View {
                         .focused($nameFocused)
                         .onSubmit(add)
                     Button("Cancel") { stopAdding() }
+                        .keyboardShortcut(.cancelAction)
                     Button("Add", action: add)
                         .disabled(slug.isEmpty)
                         .keyboardShortcut(.defaultAction)
                 }
+                .focusedSceneValue(\.editingInPlace, true)
             } else {
                 Button {
                     adding = true

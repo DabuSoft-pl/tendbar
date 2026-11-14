@@ -26,9 +26,22 @@ enum SettingsPage: String, CaseIterable, Identifiable {
     }
 }
 
+/// Set while a settings page edits text in place, so Esc cancels that edit rather than closing the window.
+struct EditingInPlaceKey: FocusedValueKey {
+    typealias Value = Bool
+}
+
+extension FocusedValues {
+    var editingInPlace: Bool? {
+        get { self[EditingInPlaceKey.self] }
+        set { self[EditingInPlaceKey.self] = newValue }
+    }
+}
+
 struct SettingsView: View {
     let container: AppContainer
     @State private var page: SettingsPage
+    @FocusedValue(\.editingInPlace) private var editingInPlace
 
     init(container: AppContainer, page: SettingsPage = .claudeCode) {
         self.container = container
@@ -50,10 +63,12 @@ struct SettingsView: View {
         .onAppear(perform: refresh)
     }
 
-    /// Esc closes the window, as in most macOS settings windows. An open picker menu still takes Esc first.
+    /// Esc closes the window as well as ⌘W. An open picker menu takes Esc first, and while a page edits text in
+    /// place (a new profile name) Esc belongs to that page's Cancel.
     private var closeOnEscape: some View {
         Button("Close") { NSApp.keyWindow?.performClose(nil) }
             .keyboardShortcut(.cancelAction)
+            .disabled(editingInPlace == true)
             .opacity(0)
             .frame(width: 0, height: 0)
             .accessibilityHidden(true)

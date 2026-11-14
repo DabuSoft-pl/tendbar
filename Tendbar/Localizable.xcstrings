@@ -51,6 +51,16 @@
         }
       }
     },
+    "%lld%% of the limit used": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wykorzystano %lld%% limitu"
+          }
+        }
+      }
+    },
     "%lld min": {
       "localizations": {
         "pl": {

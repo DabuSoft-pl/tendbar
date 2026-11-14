@@ -79,6 +79,19 @@ extension ProcessTTY {
         size = list.count * MemoryLayout<kinfo_proc>.stride
         guard sysctl(&mib, u_int(mib.count), &list, &size, nil, 0) == 0 else { return nil }
         let count = size / MemoryLayout<kinfo_proc>.stride
-        return list.prefix(count).contains { ["claude", "node"].contains(name($0)) }
+        return list.prefix(count).contains { isClaude(name: name($0), path: executablePath($0.kp_proc.p_pid)) }
+    }
+
+    /// npm installs run as `claude` or `node`; the native install runs a binary named after its version, as in
+    /// `~/.local/share/claude/versions/2.1.325`, so its path tells it apart.
+    static func isClaude(name: String, path: String?) -> Bool {
+        if ["claude", "node"].contains(name) { return true }
+        return path?.contains("/claude/versions/") == true
+    }
+
+    static func executablePath(_ pid: pid_t) -> String? {
+        var buffer = [CChar](repeating: 0, count: 4 * Int(MAXPATHLEN))
+        guard proc_pidpath(pid, &buffer, UInt32(buffer.count)) > 0 else { return nil }
+        return String(cString: buffer)
     }
 }

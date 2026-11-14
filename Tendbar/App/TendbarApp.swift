@@ -38,25 +38,31 @@ private struct MenuBarLabel: View {
         let bird = waiting > 0 || failed > 0 ? "bird.fill" : "bird"
         switch preferences.menuBarStyle {
         case .bird:
-            StatusImage(symbol: bird)
+            StatusImage(symbol: bird, label: summary(waiting: waiting, failed: failed))
         case .waiting:
             if waiting > 0 {
-                StatusImage(symbol: bird, text: "\(waiting)")
+                StatusImage(symbol: bird, label: String(localized: "\(waiting) waiting"), text: "\(waiting)")
             } else if failed > 0 {
-                StatusImage(symbol: bird, trailingSymbol: "exclamationmark")
-                    .accessibilityLabel(String(localized: "\(failed) with an error"))
+                StatusImage(symbol: bird, label: String(localized: "\(failed) with an error"), trailingSymbol: "exclamationmark")
             } else if limit >= 90 {
-                StatusImage(symbol: bird, text: "\(limit)%")
+                StatusImage(symbol: bird, label: String(localized: "\(limit)% of the limit used"), text: "\(limit)%")
             } else {
-                StatusImage(symbol: bird)
+                StatusImage(symbol: bird, label: "Tendbar")
             }
         case .limit:
             if usage.isEmpty {
-                StatusImage(symbol: bird)
+                StatusImage(symbol: bird, label: summary(waiting: waiting, failed: failed))
             } else {
-                StatusImage(symbol: bird, text: "\(limit)%")
+                StatusImage(symbol: bird, label: String(localized: "\(limit)% of the limit used"), text: "\(limit)%")
             }
         }
+    }
+
+    /// What the filled bird stands for, for VoiceOver.
+    private func summary(waiting: Int, failed: Int) -> String {
+        if waiting > 0 { return String(localized: "\(waiting) waiting") }
+        if failed > 0 { return String(localized: "\(failed) with an error") }
+        return "Tendbar"
     }
 }
 
@@ -64,12 +70,14 @@ private struct MenuBarLabel: View {
 /// status item and leave the figure alone, so the menu bar gets a single picture it always shows whole.
 private struct StatusImage: View {
     let symbol: String
+    /// Already localized: says what the figure counts, which the picture alone does not.
+    let label: String
     var text: String?
     var trailingSymbol: String?
 
     var body: some View {
         Image(nsImage: rendered)
-            .accessibilityLabel(Text(text.map { "Tendbar \($0)" } ?? "Tendbar"))
+            .accessibilityLabel(Text(verbatim: label))
     }
 
     @MainActor
@@ -83,7 +91,9 @@ private struct StatusImage: View {
         .foregroundStyle(.black)
         .fixedSize()
         let renderer = ImageRenderer(content: content)
-        renderer.scale = NSScreen.main?.backingScaleFactor ?? 2
+        // The sharpest screen, not the main one: the menu bar may sit on a Retina display while another screen is
+        // main, and the image is not drawn again when screens change.
+        renderer.scale = NSScreen.screens.map(\.backingScaleFactor).max() ?? 2
         let image = renderer.nsImage ?? NSImage(systemSymbolName: symbol, accessibilityDescription: nil) ?? NSImage()
         image.isTemplate = true
         return image
