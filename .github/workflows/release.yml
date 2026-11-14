@@ -18,7 +18,7 @@ on:
     tags: ["v*"]
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: release-${{ github.ref }}
@@ -29,13 +29,15 @@ jobs:
     # The same Xcode as local builds and the test workflow.
     runs-on: xcode-27
     timeout-minutes: 60
+    permissions:
+      contents: write
     env:
       DEVELOPER_DIR: /Applications/Xcode_27.2.app/Contents/Developer
       TEAM_ID: ${{ vars.TEAM_ID }}
       NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
       NOTARY_ISSUER: ${{ secrets.NOTARY_ISSUER }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Tests
         run: make test

@@ -44,12 +44,18 @@ jobs:
             runner: ubuntu-latest
             build-mode: none
     steps:
-      - uses: actions/checkout@v4
-      # Before CodeQL starts tracing: under its tracer Homebrew runs as Rosetta and refuses to install.
-      - name: XcodeGen
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      # Before CodeQL starts tracing: under its tracer Homebrew and SwiftPM's manifest loading run as Rosetta and
+      # fail, so the project and its packages are prepared first.
+      - name: Project and packages
         if: matrix.build-mode == 'manual'
-        run: brew install xcodegen
-      - uses: github/codeql-action/init@v4
+        env:
+          DEVELOPER_DIR: /Applications/Xcode_27.2.app/Contents/Developer
+        run: |
+          brew install xcodegen
+          xcodegen generate --quiet
+          xcodebuild -project Tendbar.xcodeproj -scheme Tendbar -derivedDataPath build -resolvePackageDependencies
+      - uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
@@ -58,9 +64,8 @@ jobs:
         env:
           DEVELOPER_DIR: /Applications/Xcode_27.2.app/Contents/Developer
         run: |
-          xcodegen generate --quiet
           xcodebuild -project Tendbar.xcodeproj -scheme Tendbar -configuration Debug -derivedDataPath build \
-            CODE_SIGNING_ALLOWED=NO -quiet build
-      - uses: github/codeql-action/analyze@v4
+            -disableAutomaticPackageResolution CODE_SIGNING_ALLOWED=NO -quiet build
+      - uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
         with:
           category: /language:${{ matrix.language }}
