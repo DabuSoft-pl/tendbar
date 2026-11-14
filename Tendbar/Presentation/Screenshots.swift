@@ -1,6 +1,7 @@
 #if DEBUG
 import AppKit
 import SwiftUI
+import TendbarDomain
 
 /// `Tendbar -screenshots <folder>` (Debug builds) renders the README images from sample data and quits.
 /// `-screenshots-extra` adds the other settings pages and an empty panel, for checking the layout.
@@ -23,6 +24,13 @@ enum Screenshots {
             }
             let empty = PreviewData.container(sessions: [], accounts: [])
             render(panel(empty), size: CGSize(width: 400, height: 640), appearance: .darkAqua, to: folder.appendingPathComponent("panel-empty.png"))
+            let read = PreviewData.sessions.map { session -> Session in
+                var session = session
+                session.unread = false
+                if session.state == .working || session.state == .needsYou { session.state = .done }
+                return session
+            }
+            render(panel(PreviewData.container(sessions: read)), size: CGSize(width: 400, height: 640), appearance: .darkAqua, to: folder.appendingPathComponent("panel-read.png"))
             let unhooked = PreviewData.container(hooks: [nil: .helperGone, "/Users/me/.claude-work": .otherCopy])
             render(panel(unhooked), size: CGSize(width: 400, height: 640), appearance: .darkAqua, to: folder.appendingPathComponent("panel-hooks.png"))
             render(

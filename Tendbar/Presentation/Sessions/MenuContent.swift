@@ -31,13 +31,23 @@ struct MenuContent: View {
         .fitsWindow()
     }
 
-    private var current: [Session] { sessions.sessions.filter(\.isCurrent) }
-    private var earlier: [Session] { sessions.sessions.filter { !$0.isCurrent } }
-    private var showsAllEarlier: Bool { showsEarlier || current.isEmpty }
+    /// With nothing busy, waiting or unread, this many of the latest sessions stay on top, so the panel is not empty
+    /// and "Mark all as read" does not unfold the whole day.
+    private static let latestWhenIdle = 3
+
+    private var current: [Session] {
+        let current = sessions.sessions.filter(\.isCurrent)
+        return current.isEmpty ? Array(sessions.sessions.prefix(Self.latestWhenIdle)) : current
+    }
+
+    private var earlier: [Session] {
+        let shown = Set(current.map(\.id))
+        return sessions.sessions.filter { !shown.contains($0.id) }
+    }
 
     /// The rows on screen, top to bottom, which the arrow keys walk through.
     private var visible: [Session] {
-        current + (showsAllEarlier ? earlier : [])
+        current + (showsEarlier ? earlier : [])
     }
 
     private func move(by step: Int) -> KeyPress.Result {
@@ -97,31 +107,29 @@ struct MenuContent: View {
     private var sessionList: some View {
         let current = current
         let earlier = earlier
-        let expanded = showsAllEarlier
+        let expanded = showsEarlier
         return ScrollViewReader { proxy in
         ScrollView {
             VStack(alignment: .leading, spacing: 4) {
                 ForEach(current) { row($0) }
                 if !earlier.isEmpty {
-                    if !current.isEmpty {
-                        Button {
-                            withAnimation(.easeOut(duration: 0.2)) { showsEarlier.toggle() }
-                        } label: {
-                            HStack(spacing: 6) {
-                                Image(systemName: "chevron.right")
-                                    .font(.caption2.weight(.semibold))
-                                    .rotationEffect(.degrees(expanded ? 90 : 0))
-                                Text("Earlier (\(earlier.count))")
-                                Spacer()
-                            }
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 6)
-                            .contentShape(Rectangle())
+                    Button {
+                        withAnimation(.easeOut(duration: 0.2)) { showsEarlier.toggle() }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "chevron.right")
+                                .font(.caption2.weight(.semibold))
+                                .rotationEffect(.degrees(expanded ? 90 : 0))
+                            Text("Earlier (\(earlier.count))")
+                            Spacer()
                         }
-                        .buttonStyle(.plain)
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 6)
+                        .contentShape(Rectangle())
                     }
+                    .buttonStyle(.plain)
                     if expanded {
                         ForEach(earlier) { row($0) }
                             .transition(.opacity)
