@@ -173,6 +173,7 @@ final class NotchController {
             claudeCode: claudeCode,
             preferences: preferences,
             onSelect: { [sessionActions] in sessionActions.select($0) },
+            onAnswer: { [sessionActions] in sessionActions.answer($0, $1) },
             notchWidth: geometry.notchWidth,
             notchHeight: geometry.notchHeight
         ))
@@ -210,6 +211,7 @@ struct NotchView: View {
     let claudeCode: ClaudeCodeViewModel
     let preferences: Preferences
     let onSelect: (Session) -> Void
+    let onAnswer: (PermissionAsk, PermissionDecision) -> Void
     let notchWidth: CGFloat
     let notchHeight: CGFloat
     let hover: NotchHover
@@ -226,6 +228,7 @@ struct NotchView: View {
         claudeCode: ClaudeCodeViewModel,
         preferences: Preferences,
         onSelect: @escaping (Session) -> Void,
+        onAnswer: @escaping (PermissionAsk, PermissionDecision) -> Void = { _, _ in },
         notchWidth: CGFloat,
         notchHeight: CGFloat
     ) {
@@ -234,6 +237,7 @@ struct NotchView: View {
         self.claudeCode = claudeCode
         self.preferences = preferences
         self.onSelect = onSelect
+        self.onAnswer = onAnswer
         self.notchWidth = notchWidth
         self.notchHeight = notchHeight
         self.hover = hover
@@ -336,14 +340,23 @@ struct NotchView: View {
             if expanded {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(active.prefix(6)) { session in
-                        Button {
-                            expanded = false
-                            hover.closedByClick = true
-                            onSelect(session)
-                        } label: {
-                            NotchRow(session: session)
+                        VStack(alignment: .leading, spacing: 0) {
+                            Button {
+                                expanded = false
+                                hover.closedByClick = true
+                                onSelect(session)
+                            } label: {
+                                NotchRow(session: session)
+                            }
+                            .buttonStyle(.plain)
+                            if let ask = sessions.ask(for: session) {
+                                PermissionPrompt(ask: ask, lineLimit: 3) { onAnswer(ask, $0) }
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(.white)
+                                    .padding(.leading, 24)
+                                    .padding([.trailing, .bottom], 8)
+                            }
                         }
-                        .buttonStyle(.plain)
                     }
                     let accounts = usage.accounts
                     if !accounts.isEmpty {

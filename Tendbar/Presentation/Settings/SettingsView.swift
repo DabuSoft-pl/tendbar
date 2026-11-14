@@ -231,7 +231,7 @@ private struct NotificationSettings: View {
         Form {
             Section {
                 Toggle("A session waits for you", isOn: $preferences.notifyNeedsYou)
-                Toggle("Allow and Deny on permission notifications", isOn: $preferences.permissionActions)
+                Toggle("Allow and Deny for permission prompts", isOn: $preferences.permissionActions)
                     .disabled(!preferences.notifyNeedsYou)
                     .padding(.leading, 16)
                 Toggle("A session finishes", isOn: $preferences.notifyDone)
@@ -250,7 +250,7 @@ private struct NotificationSettings: View {
             } header: {
                 Text("Notify when")
             } footer: {
-                Text("With Allow and Deny the notification shows the whole command or file. The terminal prompt keeps working, and whichever you answer first decides. Your deny rules still apply")
+                Text("Allow and Deny appear on the notification, in the panel and in the pill, under the whole command or file. The terminal prompt keeps working, and whichever you answer first decides. Your deny rules still apply")
             }
             Section {
                 Picker("Remind about a wait after", selection: $preferences.remindAfterMinutes) {

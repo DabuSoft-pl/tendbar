@@ -147,14 +147,23 @@ struct MenuContent: View {
 
     private func row(_ session: Session) -> some View {
         let preferences = container.preferences
-        return SessionRow(
-            session: session,
-            showsDetail: preferences.panelPreviews,
-            highlighted: selection == session.id,
-            muted: preferences.isMuted(session.cwd),
-            onHover: { if $0 { selection = session.id } },
-            onToggleMute: { folder in preferences.setMuted(!preferences.isMuted(folder), folder: folder) }
-        ) { actions.select(session) }
+        let ask = sessions.ask(for: session)
+        return VStack(alignment: .leading, spacing: 0) {
+            SessionRow(
+                session: session,
+                showsDetail: preferences.panelPreviews && ask == nil,
+                highlighted: selection == session.id,
+                muted: preferences.isMuted(session.cwd),
+                onHover: { if $0 { selection = session.id } },
+                onToggleMute: { folder in preferences.setMuted(!preferences.isMuted(folder), folder: folder) }
+            ) { actions.select(session) }
+            if let ask {
+                PermissionPrompt(ask: ask) { actions.answer(ask, $0) }
+                    .font(.callout)
+                    .padding(.leading, 26)
+                    .padding([.trailing, .bottom], 8)
+            }
+        }
         .id(session.id)
     }
 

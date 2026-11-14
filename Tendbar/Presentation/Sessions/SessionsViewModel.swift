@@ -3,11 +3,13 @@ import Observation
 import TendbarApplication
 import TendbarDomain
 
-/// What the session list and the notch show. Use cases push new state here through `SessionsOutput`.
+/// What the session list and the notch show. Use cases push new state here through `SessionsOutput`, and the
+/// permission prompts waiting for Allow or Deny through `PermissionsOutput`.
 @MainActor
 @Observable
-final class SessionsViewModel: SessionsOutput {
+final class SessionsViewModel: SessionsOutput, PermissionsOutput {
     private(set) var store = SessionStore()
+    private(set) var asks: [String: PermissionAsk] = [:]
     var jumpMessage: String?
     var listenerError: String?
 
@@ -24,7 +26,16 @@ final class SessionsViewModel: SessionsOutput {
         store.count(of: state)
     }
 
+    /// The prompt this session waits on, when Tendbar may answer it.
+    func ask(for session: Session) -> PermissionAsk? {
+        session.state == .needsYou ? asks[session.id] : nil
+    }
+
     func show(_ sessions: SessionStore) {
         store = sessions
+    }
+
+    func show(_ asks: [PermissionAsk]) {
+        self.asks = Dictionary(asks.map { ($0.sessionID, $0) }, uniquingKeysWith: { _, last in last })
     }
 }

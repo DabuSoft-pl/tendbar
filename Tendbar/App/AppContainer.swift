@@ -62,7 +62,7 @@ final class AppContainer {
         checkWarnings = CheckLimitWarnings(
             usage: a.usage, fired: a.firedWarnings, alerts: a.alerts, flasher: a.flasher, settings: preferences, clock: a.clock
         )
-        permissionDesk = PermissionDesk(alerts: a.alerts)
+        permissionDesk = PermissionDesk(alerts: a.alerts, output: sessions)
         startSessions = StartSessions(repository: a.sessions, output: sessions, clock: a.clock)
         startUsage = StartUsage(repository: a.usage, output: usage, checkWarnings: checkWarnings)
         handleHookEvent = HandleHookEvent(
@@ -82,7 +82,8 @@ final class AppContainer {
             repository: a.sessions,
             openSession: OpenSession(repository: a.sessions, output: sessions, alerts: a.alerts, navigator: a.navigator),
             markAllSeen: MarkAllSessionsSeen(repository: a.sessions, output: sessions, alerts: a.alerts),
-            removeEnded: RemoveEndedSessions(repository: a.sessions, output: sessions)
+            removeEnded: RemoveEndedSessions(repository: a.sessions, output: sessions),
+            desk: permissionDesk
         )
         usageActions = UsageController(forgetAccount: ForgetAccount(repository: a.usage, output: usage))
         claudeCodeActions = ClaudeCodeController(

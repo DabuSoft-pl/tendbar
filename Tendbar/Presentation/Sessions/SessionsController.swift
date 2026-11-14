@@ -10,9 +10,18 @@ final class SessionsController {
     private let openNext: OpenNextSession
     private let markAllSeen: MarkAllSessionsSeen
     private let removeEnded: RemoveEndedSessions
+    private let desk: PermissionDesk?
 
-    init(model: SessionsViewModel, repository: SessionRepository, openSession: OpenSession, markAllSeen: MarkAllSessionsSeen, removeEnded: RemoveEndedSessions) {
+    init(
+        model: SessionsViewModel,
+        repository: SessionRepository,
+        openSession: OpenSession,
+        markAllSeen: MarkAllSessionsSeen,
+        removeEnded: RemoveEndedSessions,
+        desk: PermissionDesk? = nil
+    ) {
         self.model = model
+        self.desk = desk
         self.openSession = openSession
         openNext = OpenNextSession(repository: repository, openSession: openSession)
         self.markAllSeen = markAllSeen
@@ -34,6 +43,11 @@ final class SessionsController {
         guard let outcome = openNext.execute() else { return false }
         model.jumpMessage = Self.message(for: outcome)
         return true
+    }
+
+    /// Allow or Deny from the panel or the pill. A prompt already answered in the terminal is simply gone.
+    func answer(_ ask: PermissionAsk, _ decision: PermissionDecision) {
+        desk?.answer(askID: ask.id, sessionID: ask.sessionID, decision: decision)
     }
 
     func markAllAsRead() {

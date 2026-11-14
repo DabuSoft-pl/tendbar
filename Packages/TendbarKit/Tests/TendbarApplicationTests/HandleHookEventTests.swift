@@ -230,4 +230,32 @@ import TendbarDomain
         #expect(desk.isWaiting(sessionID: "s1"))
         #expect(reply.answers.isEmpty)
     }
+
+    @Test func aWaitingPromptShowsInThePanelUntilItIsAnswered() async {
+        settings.alertSettings.answersPermissions = true
+        let output = RecordingPermissions()
+        let desk = PermissionDesk(alerts: alerts, output: output)
+        let handle = useCase(desk: desk)
+        let ask = PermissionAsk(id: "a1", sessionID: "s1", tool: "Bash", detail: "touch test.txt")
+
+        await handle.execute(event(.permissionRequest), permission: (ask, RecordingReply()))
+        #expect(output.shown.last == [ask])
+        desk.answer(askID: "a1", sessionID: "s1", decision: .allow)
+
+        #expect(output.shown.last == [])
+        #expect(alerts.dismissed.contains("s1"))
+    }
+
+    @Test func aPromptAnsweredInTheTerminalLeavesThePanel() async {
+        settings.alertSettings.answersPermissions = true
+        let output = RecordingPermissions()
+        let desk = PermissionDesk(alerts: alerts, output: output)
+        let handle = useCase(desk: desk)
+
+        await handle.execute(event(.permissionRequest), permission: (PermissionAsk(id: "a1", sessionID: "s1", tool: "Bash"), RecordingReply()))
+        await handle.execute(event(.postToolUse, at: 9))
+        await handle.execute(event(.stop, at: 12))
+
+        #expect(output.shown.map(\.count) == [1, 0])
+    }
 }

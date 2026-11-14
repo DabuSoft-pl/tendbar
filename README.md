@@ -48,8 +48,9 @@ nowhere else.
   and glow stay off while that Focus is on. The banners follow the Focus as usual.
 - **Follow-ups.** One reminder when a session has waited for you longer than you set (5 minutes by default), and a
   warning when a working session goes quiet for 15 minutes, since it may hang on a command or a dropped connection.
-- **Answer from the notification.** Opt in, and a permission banner shows the whole command or file with Allow and
-  Deny. The terminal prompt keeps working, whichever you answer first decides, and your deny rules still apply.
+- **Answer without the terminal.** Opt in, and a permission prompt shows the whole command or file with Allow and
+  Deny in the panel, in the notch pill and on the banner. The terminal prompt keeps working, whichever you answer
+  first decides, and your deny rules still apply.
 - **A pill by the notch.** The lead state, a count and two thin lines for the five-hour and weekly limits. Hover it,
   or the notch while the pill is hidden, for the sessions and every account's limits; a click on a session closes it
   until the pointer leaves. On Macs without a notch it sits in the middle of the menu bar.
@@ -124,8 +125,8 @@ Such a build is signed ad hoc, so it runs on the Mac that built it.
 - **No secrets.** It never reads tokens or the Keychain and never switches or rotates accounts.
 - **Only what it needs.** The hook helper drops prompts, tool inputs and outputs, file contents and Claude's replies
   before anything reaches the app. The reply preview is read from the local transcript file. The one exception is a
-  permission prompt: its tool and command, file path or URL (up to 2,000 characters) reach the app for the Allow and
-  Deny banner, stay in memory only and never go to a file or the event log.
+  permission prompt: its tool and command, file path or URL (up to 2,000 characters) reach the app for Allow and
+  Deny, stay in memory only and never go to a file or the event log.
 - **Not on shared screens.** The pill and the glow stay out of screen sharing and recordings (Settings → General).
 - **Your settings, your call.** `~/.claude/settings.json` changes only when you press Connect or Disconnect, never at
   launch. Each change is backed up first (the last five are kept), and Disconnect removes only Tendbar's entries.
@@ -150,11 +151,11 @@ Claude Code process id and its start time, the Claude desktop app's session id),
 (`~/Library/Application Support/Tendbar/tendbar.sock`, mode 0600) and exits at once. It prints nothing and always
 exits 0, so Claude Code is never slowed down or blocked, even when Tendbar is not running.
 
-A permission prompt is the one place the helper waits. It asks the app whether to wait for Allow or Deny from a
-banner: with the setting off the app answers at once and the helper exits; with it on, the helper waits (up to 590
+A permission prompt is the one place the helper waits. It asks the app whether to wait for Allow or Deny from
+Tendbar: with the setting off the app answers at once and the helper exits; with it on, the helper waits (up to 590
 seconds, under a 600 second hook timeout) while Claude Code shows its usual prompt. Answering in the terminal goes
-ahead as normal, and the helper is released with no output as soon as the session moves on. Only Allow or Deny on
-the banner makes it print Claude Code's `PermissionRequest` decision.
+ahead as normal, and the helper is released with no output as soon as the session moves on. Only Allow or Deny in
+Tendbar (panel, pill or banner) makes it print Claude Code's `PermissionRequest` decision.
 
 A tab closed or a process killed sends no `SessionEnd`, so every 30 seconds the app checks that each session's
 Claude Code process still runs, and ends the session when it is gone.

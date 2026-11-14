@@ -17,3 +17,9 @@ public protocol ActivityOutput: AnyObject {
 public protocol UsageOutput: AnyObject {
     func show(_ usage: UsageStore)
 }
+
+/// Output boundary for permission prompts that wait for Allow or Deny from Tendbar, one per session at most.
+@MainActor
+public protocol PermissionsOutput: AnyObject {
+    func show(_ asks: [PermissionAsk])
+}

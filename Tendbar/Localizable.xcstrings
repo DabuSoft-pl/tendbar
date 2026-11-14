@@ -411,12 +411,22 @@
         }
       }
     },
-    "Allow and Deny on permission notifications": {
+    "Allow and Deny appear on the notification, in the panel and in the pill, under the whole command or file. The terminal prompt keeps working, and whichever you answer first decides. Your deny rules still apply": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Zezwól i Odmów w powiadomieniach o zgodę"
+            "value": "Zezwól i Odmów pojawiają się w powiadomieniu, w panelu i w pigułce, pod całym poleceniem albo plikiem. Pytanie w terminalu dalej działa i decyduje ta odpowiedź, której udzielisz pierwszą. Twoje reguły odmowy nadal obowiązują"
+          }
+        }
+      }
+    },
+    "Allow and Deny for permission prompts": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zezwól i Odmów przy prośbach o zgodę"
           }
         }
       }
@@ -2207,16 +2217,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gdy sesja pracuje lub czeka"
-          }
-        }
-      }
-    },
-    "With Allow and Deny the notification shows the whole command or file. The terminal prompt keeps working, and whichever you answer first decides. Your deny rules still apply": {
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Z przyciskami Zezwól i Odmów powiadomienie pokazuje całe polecenie albo plik. Pytanie w terminalu dalej działa i decyduje ta odpowiedź, której udzielisz pierwszą. Twoje reguły odmowy nadal obowiązują"
           }
         }
       }

@@ -78,6 +78,12 @@ final class RecordingReply: PermissionReply, @unchecked Sendable {
 }
 
 @MainActor
+final class RecordingPermissions: PermissionsOutput {
+    private(set) var shown: [[PermissionAsk]] = []
+    func show(_ asks: [PermissionAsk]) { shown.append(asks) }
+}
+
+@MainActor
 final class RecordingFlasher: ScreenFlashing {
     private(set) var tones: [FlashTone] = []
     func flash(_ tone: FlashTone) { tones.append(tone) }

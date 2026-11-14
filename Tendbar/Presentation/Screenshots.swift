@@ -37,6 +37,12 @@ enum Screenshots {
                 WeekSummary(days: container.activity.week()).padding(16).frame(width: 400).background(.background),
                 size: CGSize(width: 400, height: 200), appearance: .darkAqua, to: folder.appendingPathComponent("week.png")
             )
+            let asking = PreviewData.container()
+            if let waiting = PreviewData.sessions.first(where: { $0.state == .needsYou }) {
+                asking.sessions.show([PermissionAsk(id: "a1", sessionID: waiting.id, tool: "Bash", detail: "npm run test -- --coverage")])
+            }
+            render(panel(asking), size: CGSize(width: 400, height: 640), appearance: .darkAqua, to: folder.appendingPathComponent("panel-permission.png"))
+            render(notch(asking, expanded: true), size: CGSize(width: 520, height: 360), appearance: .darkAqua, to: folder.appendingPathComponent("notch-permission.png"))
             render(notch(unhooked, expanded: false), size: CGSize(width: 520, height: 64), appearance: .darkAqua, to: folder.appendingPathComponent("notch-hooks.png"))
         }
         render(notch(container, expanded: true), size: CGSize(width: 520, height: 280), appearance: .darkAqua, to: folder.appendingPathComponent("notch-expanded.png"))
