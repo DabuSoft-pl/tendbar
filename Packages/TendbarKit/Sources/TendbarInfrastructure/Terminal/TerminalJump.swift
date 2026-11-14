@@ -59,6 +59,8 @@ public enum JumpPlan: Equatable, Sendable {
     /// Open the session folder in the editor, which brings its window forward.
     case openFolder(String, bundleID: String)
     case tmux(TmuxTarget)
+    /// Open a link the app handles itself, such as the Claude desktop app's link to one of its sessions.
+    case openURL(String, bundleID: String)
     case unavailable
 }
 
@@ -89,6 +91,7 @@ public enum TerminalJump {
     public static let vsCode = "com.microsoft.VSCode"
     public static let kitty = "net.kovidgoyal.kitty"
     public static let wezTerm = "com.github.wez.wezterm"
+    public static let claudeDesktop = TerminalContext.claudeDesktopBundleID
     public static let found = "found"
 
     /// Used when the hook did not see `__CFBundleIdentifier`.
@@ -130,6 +133,10 @@ public enum TerminalJump {
         case terminal:
             guard let tty else { return .activate(bundleID: bundleID) }
             return .script(terminalScript(tty: tty), bundleID: bundleID)
+        case claudeDesktop:
+            // The app's own link to a Code session, the one its Spotlight and Dock entries use.
+            guard let session = desktopSession(context.hostSessionID) else { return .activate(bundleID: bundleID) }
+            return .openURL("claude://code/continue?session=\(session)", bundleID: bundleID)
         default:
             break
         }
@@ -152,6 +159,14 @@ public enum TerminalJump {
             return .openFolder(folder, bundleID: bundleID)
         }
         return .activate(bundleID: bundleID)
+    }
+
+    /// The Claude desktop app takes `local_` and up to 64 letters, digits and hyphens.
+    static func desktopSession(_ value: String?) -> String? {
+        guard let value, value.hasPrefix("local_") else { return nil }
+        let rest = value.dropFirst("local_".count)
+        guard (1...64).contains(rest.count), rest.allSatisfy({ $0.isASCII && ($0.isLetter || $0.isNumber || $0 == "-") }) else { return nil }
+        return value
     }
 
     /// A pane or window number, optionally after a prefix such as tmux's `%`.

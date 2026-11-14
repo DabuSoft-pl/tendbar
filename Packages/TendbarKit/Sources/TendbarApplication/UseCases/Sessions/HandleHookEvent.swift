@@ -82,6 +82,10 @@ public final class HandleHookEvent {
     private func notify(_ kind: AlertKind, sessionID: String, permission: (ask: PermissionAsk, reply: PermissionReply)?) -> Bool {
         let settings = settings.alertSettings
         guard settings.notifies(kind), var session = repository.load().sessions[sessionID], !settings.mutes(session) else { return false }
+        if settings.leavesBanners(of: session) {
+            if settings.flashes(kind) { flasher.flash(FlashTone(kind)) }
+            return false
+        }
         if kind == .done, !settings.showsReplyPreview { session.preview = nil }
         var held = false
         if kind == .needsYou, settings.answersPermissions, let permission, let desk {

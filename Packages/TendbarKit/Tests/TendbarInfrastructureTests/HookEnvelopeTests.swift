@@ -4,6 +4,17 @@ import TendbarDomain
 @testable import TendbarInfrastructure
 
 @Suite struct HookEnvelopeTests {
+    @Test func capturesTheClaudeDesktopSessionAndStoresIt() throws {
+        let context = TerminalContext.capture(
+            environment: ["__CFBundleIdentifier": "com.anthropic.claudefordesktop", "CLAUDE_CODE_HOST_SESSION_ID": "local_abc-123"],
+            tty: nil
+        )
+        let stored = try JSONDecoder().decode(TerminalRecord.self, from: JSONEncoder().encode(TerminalRecord(context)))
+
+        #expect(context.hostSessionID == "local_abc-123")
+        #expect(stored.context == context)
+    }
+
     @Test func decodesNotificationPayload() throws {
         let raw = """
         {"session_id":"abc-123","transcript_path":"/Users/me/.claude/projects/x/abc-123.jsonl","cwd":"/Users/me/code/app","hook_event_name":"Notification","message":"Claude needs your permission to use Bash","notification_type":"permission_prompt","permission_mode":"default"}

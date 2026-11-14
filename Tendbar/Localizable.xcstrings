@@ -991,6 +991,16 @@
         }
       }
     },
+    "Leave Claude app sessions to its notifications": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sesje z aplikacji Claude zostaw jej powiadomieniom"
+          }
+        }
+      }
+    },
     "Light": {
       "localizations": {
         "pl": {
@@ -1687,6 +1697,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ten limit znów jest dostępny"
+          }
+        }
+      }
+    },
+    "The Claude desktop app notifies and asks for permission itself. The screen edge still glows": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplikacja Claude sama powiadamia i pyta o zgodę. Krawędź ekranu nadal świeci"
           }
         }
       }

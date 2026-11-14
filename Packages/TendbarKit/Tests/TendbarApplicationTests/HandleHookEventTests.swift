@@ -138,6 +138,40 @@ import TendbarDomain
         #expect(alerts.permissions.isEmpty)
     }
 
+    private func desktop(_ kind: HookEvent.Kind, at offset: TimeInterval = 0) -> HookEvent {
+        HookEvent(
+            sessionID: "s1", kind: kind, cwd: "/Users/me/app", transcriptPath: "/tmp/s1.jsonl",
+            terminal: TerminalContext(hostBundleID: TerminalContext.claudeDesktopBundleID, hostSessionID: "local_1"),
+            sentAt: now.addingTimeInterval(offset)
+        )
+    }
+
+    @Test func aClaudeDesktopSessionLeavesBannersAndPromptsToTheApp() async {
+        settings.alertSettings.answersPermissions = true
+        let desk = PermissionDesk(alerts: alerts)
+        let handle = useCase(desk: desk)
+        let reply = RecordingReply()
+        let ask = PermissionAsk(id: "a1", sessionID: "s1", tool: "Bash", detail: "date")
+
+        await handle.execute(desktop(.permissionRequest), permission: (ask, reply))
+        await handle.execute(desktop(.stop, at: 1))
+
+        #expect(alerts.presented.isEmpty)
+        #expect(alerts.permissions.isEmpty)
+        #expect(reply.answers == [nil])
+        #expect(flasher.tones == [.attention, .success])
+        #expect(sessions.store.sessions["s1"]?.state == .done)
+    }
+
+    @Test func claudeDesktopBannersComeBackWhenTurnedOn() async {
+        settings.alertSettings.leavesClaudeDesktopBanners = false
+        let handle = useCase()
+
+        await handle.execute(desktop(.stop))
+
+        #expect(alerts.presented.map(\.0) == [.done])
+    }
+
     @Test func theBannerAnswersTheHookOnce() async {
         settings.alertSettings.answersPermissions = true
         let desk = PermissionDesk(alerts: alerts)

@@ -40,6 +40,21 @@ import TendbarDomain
         #expect(TerminalJump.plan(for: TerminalContext(program: "ghostty")) == .activate(bundleID: "com.mitchellh.ghostty"))
     }
 
+    @Test func claudeDesktopOpensItsSessionLink() {
+        let desktop = TerminalContext(hostBundleID: TerminalJump.claudeDesktop, hostSessionID: "local_35334b64-8d2a-46d2-b9e4-00192d0674d9")
+
+        #expect(TerminalJump.plan(for: desktop) == .openURL(
+            "claude://code/continue?session=local_35334b64-8d2a-46d2-b9e4-00192d0674d9", bundleID: TerminalJump.claudeDesktop
+        ))
+    }
+
+    @Test func claudeDesktopWithoutAValidSessionOnlyActivates() {
+        for id in [nil, "local_", "local_x&y=1", "session_abc", "local_" + String(repeating: "a", count: 65)] {
+            let plan = TerminalJump.plan(for: TerminalContext(hostBundleID: TerminalJump.claudeDesktop, hostSessionID: id))
+            #expect(plan == .activate(bundleID: TerminalJump.claudeDesktop))
+        }
+    }
+
     @Test func unknownTerminalIsUnavailable() {
         #expect(TerminalJump.plan(for: TerminalContext(program: "tmux", tty: "/dev/ttys002")) == .unavailable)
         #expect(TerminalJump.plan(for: TerminalContext()) == .unavailable)

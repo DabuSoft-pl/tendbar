@@ -17,6 +17,7 @@ public struct TerminalRecord: Codable, Sendable, Equatable {
     public var tmuxSocket: String?
     public var processID: Int32?
     public var processStartedAt: Double?
+    public var hostSessionID: String?
 
     public init(_ context: TerminalContext) {
         program = context.program
@@ -33,6 +34,7 @@ public struct TerminalRecord: Codable, Sendable, Equatable {
         tmuxSocket = context.tmuxSocket
         processID = context.processID
         processStartedAt = context.processStartedAt
+        hostSessionID = context.hostSessionID
     }
 
     public var context: TerminalContext {
@@ -50,7 +52,8 @@ public struct TerminalRecord: Codable, Sendable, Equatable {
             tmuxPane: tmuxPane,
             tmuxSocket: tmuxSocket,
             processID: processID,
-            processStartedAt: processStartedAt
+            processStartedAt: processStartedAt,
+            hostSessionID: hostSessionID
         )
     }
 }
@@ -71,7 +74,8 @@ extension TerminalContext {
             tmuxPane: environment["TMUX_PANE"],
             tmuxSocket: environment["TMUX"].flatMap { $0.split(separator: ",").first.map(String.init) },
             processID: process?.id,
-            processStartedAt: process?.startedAt
+            processStartedAt: process?.startedAt,
+            hostSessionID: environment["CLAUDE_CODE_HOST_SESSION_ID"]
         )
     }
 }

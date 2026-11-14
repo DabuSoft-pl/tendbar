@@ -42,7 +42,8 @@ nowhere else.
   from any app to the session waiting longest, then to unread replies.
 - **Notifications that matter.** A banner when a session needs you, finishes or fails, each one switchable, with
   Tendbar's own short bird calls (or the system sound). Optionally the screen edge glows in the state's color.
-  Right-click a session to mute its folder.
+  Right-click a session to mute its folder. Sessions in the Claude desktop app keep the app's own notifications
+  and permission prompts, with Tendbar adding only the glow and reminders (switchable).
 - **Follow-ups.** One reminder when a session has waited for you longer than you set (5 minutes by default), and a
   warning when a working session goes quiet for 15 minutes, since it may hang on a command or a dropped connection.
 - **Answer from the notification.** Opt in, and a permission banner shows the whole command or file with Allow and
@@ -72,7 +73,7 @@ nowhere else.
 | kitty | Focuses the session's window (needs `allow_remote_control` and `listen_on` in `kitty.conf`) |
 | tmux | Selects the pane, then the tab running tmux in Terminal or iTerm2 |
 | VS Code, Cursor and other forks | Opens the window of the session's folder |
-| Claude desktop app (Code tab, local sessions) | Brings the app forward |
+| Claude desktop app (Code tab, local sessions) | Opens the session in the app |
 | Ghostty, Warp, others | Brings the app forward |
 
 ## Install
@@ -125,7 +126,7 @@ Everything Tendbar keeps lives in `~/Library/Application Support/Tendbar` (folde
 Connecting adds Tendbar's hooks to Claude Code. On each hook event Claude Code runs `tendbar-hook`, a small helper
 inside the app bundle. It keeps only the fields Tendbar uses, adds the terminal context (`TERM_PROGRAM`, the host
 app, iTerm/Terminal session ids, WezTerm, kitty and tmux pane ids and sockets, the TTY, `CLAUDE_CONFIG_DIR`, the
-Claude Code process id and its start time), sends the event over a Unix socket
+Claude Code process id and its start time, the Claude desktop app's session id), sends the event over a Unix socket
 (`~/Library/Application Support/Tendbar/tendbar.sock`, mode 0600) and exits at once. It prints nothing and always
 exits 0, so Claude Code is never slowed down or blocked, even when Tendbar is not running.
 

@@ -4,7 +4,8 @@ import TendbarDomain
 import TendbarInfrastructure
 
 /// Carries out the plan from `TerminalJump` behind the `TerminalNavigating` port: AppleScript for iTerm2 and
-/// Terminal, the terminal's own command line for WezTerm, kitty and tmux, the session folder for VS Code.
+/// Terminal, the terminal's own command line for WezTerm, kitty and tmux, the session folder for VS Code, and the
+/// Claude desktop app's link to the session.
 @MainActor
 final class AppleScriptTerminalNavigator: TerminalNavigating {
     private let tools: TerminalTools
@@ -53,6 +54,10 @@ final class AppleScriptTerminalNavigator: TerminalNavigating {
             let configuration = NSWorkspace.OpenConfiguration()
             configuration.activates = true
             NSWorkspace.shared.open([URL(fileURLWithPath: folder, isDirectory: true)], withApplicationAt: appURL, configuration: configuration)
+            return .jumped
+        case let .openURL(link, bundleID):
+            guard running(bundleID) != nil, let url = URL(string: link) else { return .notRunning }
+            NSWorkspace.shared.open(url)
             return .jumped
         case let .tmux(target):
             let client = target.select(using: runner)

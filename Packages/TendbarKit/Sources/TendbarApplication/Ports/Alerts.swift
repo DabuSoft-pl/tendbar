@@ -51,6 +51,8 @@ public struct AlertSettings: Sendable, Equatable {
     public var showsReplyPreview = false
     /// Folders (session working directories) whose sessions stay quiet.
     public var mutedFolders: Set<String> = []
+    /// The Claude desktop app notifies about its own sessions, so Tendbar leaves their banners to it.
+    public var leavesClaudeDesktopBanners = true
 
     public init() {}
 
@@ -70,6 +72,11 @@ public struct AlertSettings: Sendable, Equatable {
 
     public func mutes(_ session: Session) -> Bool {
         session.cwd.map(mutedFolders.contains) ?? false
+    }
+
+    /// No banner, and no waiting permission prompt, for a session whose app already notifies; the glow stays.
+    public func leavesBanners(of session: Session) -> Bool {
+        leavesClaudeDesktopBanners && session.terminal.isClaudeDesktop
     }
 
     public func flashes(_ kind: AlertKind) -> Bool {

@@ -235,6 +235,14 @@ private struct NotificationSettings: View {
                     .disabled(!preferences.notifyDone)
                     .padding(.leading, 16)
                 Toggle("A turn fails", isOn: $preferences.notifyFailed)
+                Toggle(isOn: $preferences.leaveDesktopBanners) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Leave Claude app sessions to its notifications")
+                        Text("The Claude desktop app notifies and asks for permission itself. The screen edge still glows")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             } header: {
                 Text("Notify when")
             } footer: {

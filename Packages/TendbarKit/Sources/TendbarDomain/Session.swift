@@ -27,6 +27,15 @@ public struct TerminalContext: Sendable, Equatable {
     /// new process that got the same id.
     public var processID: Int32?
     public var processStartedAt: Double?
+    /// The session of the app hosting Claude Code, such as the Claude desktop app's `local_…` id.
+    public var hostSessionID: String?
+
+    public static let claudeDesktopBundleID = "com.anthropic.claudefordesktop"
+
+    /// The Claude desktop app runs this session and shows its own notifications and permission prompts.
+    public var isClaudeDesktop: Bool {
+        hostBundleID == Self.claudeDesktopBundleID
+    }
 
     public init(
         program: String? = nil,
@@ -42,7 +51,8 @@ public struct TerminalContext: Sendable, Equatable {
         tmuxPane: String? = nil,
         tmuxSocket: String? = nil,
         processID: Int32? = nil,
-        processStartedAt: Double? = nil
+        processStartedAt: Double? = nil,
+        hostSessionID: String? = nil
     ) {
         self.program = program
         self.hostBundleID = hostBundleID
@@ -58,6 +68,7 @@ public struct TerminalContext: Sendable, Equatable {
         self.tmuxSocket = tmuxSocket
         self.processID = processID
         self.processStartedAt = processStartedAt
+        self.hostSessionID = hostSessionID
     }
 }
 
