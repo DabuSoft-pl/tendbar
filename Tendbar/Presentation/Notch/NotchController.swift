@@ -106,8 +106,27 @@ final class NotchController {
         area.size.height = frame.maxY + 1 - area.minY
         let inside = area.contains(mouse)
         if !inside { hover.closedByClick = false }
-        let expanded = inside && !hover.closedByClick
+        let openedByAsk = followAsks(inside: inside)
+        let expanded = (inside || openedByAsk) && !hover.closedByClick
         if expanded != hover.expanded { hover.expanded = expanded }
+    }
+
+    /// Opens the pill when a new permission prompt waits for Allow or Deny, unless a Focus asked Tendbar to keep
+    /// quiet. Returns whether it should stay open for that prompt.
+    private func followAsks(inside: Bool) -> Bool {
+        let asks = Set(sessions.asks.values.map(\.id))
+        if let fresh = asks.subtracting(hover.seenAsks).first, !UserDefaults.standard.bool(forKey: FocusFilter.quietKey) {
+            hover.openedFor = fresh
+            hover.pointerVisited = inside
+        }
+        hover.seenAsks = asks
+        guard let opened = hover.openedFor else { return false }
+        if inside { hover.pointerVisited = true }
+        if !asks.contains(opened) || hover.closedByClick || (hover.pointerVisited && !inside) {
+            hover.openedFor = nil
+            return false
+        }
+        return true
     }
 
     static var hasNotch: Bool {
@@ -199,6 +218,12 @@ final class NotchHover {
     @ObservationIgnored var pill: CGRect?
     /// A click on a session closes the pill until the pointer leaves it.
     @ObservationIgnored var closedByClick = false
+    /// The permission prompt that opened the pill by itself. It stays open until that prompt is answered anywhere,
+    /// a session is clicked, or the pointer has been in the pill and left it.
+    @ObservationIgnored var openedFor: String?
+    @ObservationIgnored var pointerVisited = false
+    /// Prompts already seen, so each one opens the pill once.
+    @ObservationIgnored var seenAsks: Set<String> = []
 
     init(expanded: Bool = false) {
         self.expanded = expanded

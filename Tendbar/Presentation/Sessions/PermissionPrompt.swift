@@ -8,6 +8,8 @@ struct PermissionPrompt: View {
     /// Lines of the command shown before it is cut; the pill has less room than the panel.
     var lineLimit = 6
     let onAnswer: (PermissionDecision) -> Void
+    /// The pill can open under a moving pointer, so the buttons wait a moment before they take a click.
+    @State private var armed = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -32,6 +34,11 @@ struct PermissionPrompt: View {
                     .buttonStyle(.borderedProminent)
             }
             .controlSize(.small)
+            .disabled(!armed)
+        }
+        .task {
+            try? await Task.sleep(for: .milliseconds(500))
+            armed = true
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text("Allow \(ask.tool)?"))
