@@ -13,6 +13,7 @@
   <a href="https://github.com/DabuSoft-pl/tendbar/actions/workflows/test.yml"><img src="https://github.com/DabuSoft-pl/tendbar/actions/workflows/test.yml/badge.svg" alt="Tests"></a>
   <img src="https://img.shields.io/badge/macOS-26%2B-informational" alt="macOS 26+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
+  <a href="https://scorecard.dev/viewer/?uri=github.com/DabuSoft-pl/tendbar"><img src="https://api.scorecard.dev/projects/github.com/DabuSoft-pl/tendbar/badge" alt="OpenSSF Scorecard"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="MIT license"></a>
 </p>
 
