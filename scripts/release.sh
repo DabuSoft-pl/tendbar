@@ -155,9 +155,9 @@ make_delta() {
 
 DELTAS=""
 if (( ${DELTA_COUNT:-2} > 0 )) && command -v gh > /dev/null; then
-    for TAG in $(gh release list --repo DabuSoft-pl/tendbar --exclude-drafts --exclude-pre-releases \
+    for PREVIOUS in $(gh release list --repo DabuSoft-pl/tendbar --exclude-drafts --exclude-pre-releases \
         --limit "${DELTA_COUNT:-2}" --json tagName --jq '.[].tagName' || true); do
-        make_delta "$TAG" || echo "warning: no delta from $TAG" >&2
+        make_delta "$PREVIOUS" || echo "warning: no delta from $PREVIOUS" >&2
     done
     rm -rf "$OUT/previous"
 fi
