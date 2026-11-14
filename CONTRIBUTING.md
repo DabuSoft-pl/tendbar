@@ -40,6 +40,15 @@ build. A release needs the "Developer ID Application" certificate of the team in
 4. Check the draft and publish it. The app reads `appcast.xml` from the latest published release, so publishing is
    what offers the update.
 
+### Betas
+
+`BETA=<n>` builds beta n of the version in `project.yml` (raise `CURRENT_PROJECT_VERSION` for each beta, and again for
+the final release). It goes on a GitHub pre-release `v<version>-beta.<n>` with its DMG, `.sha256` and deltas, while
+its `appcast.xml` replaces the one on the latest release: that file keeps the release's own items and lists the beta
+on Sparkle's `beta` channel. Only copies with Settings → General → "Receive beta versions" on look at that channel;
+older copies and everyone else never see it, and Homebrew stays on the release. Copies from before betas existed
+have no such setting, so the first beta is installed from its DMG by hand.
+
 Updates are signed with the Sparkle EdDSA key in the maintainer's login keychain (account `tendbar`); its public half
 is `SUPublicEDKey` in `project.yml`. Without that private key no installed copy accepts another update, so keep an
 export (`generate_keys --account tendbar -x <file>`, the tool is in `build/SourcePackages/artifacts/sparkle/Sparkle/bin`)

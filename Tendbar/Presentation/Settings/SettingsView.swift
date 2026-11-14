@@ -513,11 +513,12 @@ private struct GeneralSettings: View {
             if updates.isAvailable {
                 Section {
                     Toggle("Check for updates automatically", isOn: $updates.checksAutomatically)
+                    Toggle("Receive beta versions", isOn: $updates.receivesBetas)
                     Button("Check Now") { updates.checkNow() }
                 } header: {
                     Text("Updates")
                 } footer: {
-                    Text("Once a day Tendbar reads the list of releases on GitHub. Nothing about you or your sessions is sent")
+                    Text("Once a day Tendbar reads the list of releases on GitHub. Nothing about you or your sessions is sent. Betas bring new features first and may have rough edges")
                 }
             }
             Section {

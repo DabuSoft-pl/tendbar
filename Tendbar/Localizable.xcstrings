@@ -1431,12 +1431,12 @@
         }
       }
     },
-    "Once a day Tendbar reads the list of releases on GitHub. Nothing about you or your sessions is sent": {
+    "Once a day Tendbar reads the list of releases on GitHub. Nothing about you or your sessions is sent. Betas bring new features first and may have rough edges": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Raz dziennie Tendbar czyta listę wydań na GitHubie. Nic o Tobie ani o Twoich sesjach nie jest wysyłane"
+            "value": "Raz dziennie Tendbar czyta listę wydań na GitHubie. Nic o Tobie ani o Twoich sesjach nie jest wysyłane. Wersje beta dają nowości wcześniej i mogą mieć niedoróbki"
           }
         }
       }
@@ -1557,6 +1557,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Limit zapytań"
+          }
+        }
+      }
+    },
+    "Receive beta versions": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otrzymuj wersje beta"
           }
         }
       }

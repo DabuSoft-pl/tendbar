@@ -17,6 +17,9 @@
 #   SKIP_NOTARIZE=1 sign only, for checking the signature without waiting for Apple
 #   SIGN_IDENTITY   another identity; "-" signs ad hoc, for trying the script without a certificate
 #   DELTA_COUNT     how many earlier releases get a Sparkle delta update (default 2, 0 for none); needs `gh`
+#   BETA=<n>        builds beta n of MARKETING_VERSION for the pre-release v<version>-beta.<n>: its appcast keeps the
+#                   items of the latest release and adds this one on the `beta` channel, which only copies with
+#                   "Receive beta versions" on look at. Needs `gh`. The end of the output says where each file goes.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -36,11 +39,23 @@ if [[ -n "${GITHUB_REF_NAME:-}" && "${GITHUB_REF_TYPE:-}" == tag && "$GITHUB_REF
     exit 1
 fi
 
+BETA="${BETA:-}"
+if [[ -n "$BETA" ]]; then
+    [[ "$BETA" =~ ^[0-9]+$ ]] || { echo "BETA must be a number" >&2; exit 1; }
+    TAG="v$VERSION-beta.$BETA"
+    LABEL="$VERSION beta $BETA"
+    FILE_VERSION="$VERSION-beta$BETA"
+else
+    TAG="v$VERSION"
+    LABEL="$VERSION"
+    FILE_VERSION="$VERSION"
+fi
+
 IDENTITY="${SIGN_IDENTITY:-Developer ID Application}"
 OUT=build/release
 ARCHIVE=build/Tendbar.xcarchive
 APP="$OUT/Tendbar.app"
-DMG="$OUT/Tendbar-$VERSION.dmg"
+DMG="$OUT/Tendbar-$FILE_VERSION.dmg"
 SIGN_FLAGS=(--force --sign "$IDENTITY")
 # Apple's timestamp server only signs real identities.
 [[ "$IDENTITY" != - ]] && SIGN_FLAGS+=(--timestamp)
@@ -60,7 +75,7 @@ notarize() {
     xcrun notarytool submit "$1" "${credentials[@]}" --wait --timeout 30m
 }
 
-echo "Tendbar $VERSION ($BUILD), team $TEAM_ID"
+echo "Tendbar $LABEL ($BUILD), team $TEAM_ID"
 rm -rf "$OUT" "$ARCHIVE"
 mkdir -p "$OUT"
 
@@ -93,7 +108,7 @@ STAGE="$OUT/dmg"
 mkdir -p "$STAGE"
 ditto "$APP" "$STAGE/Tendbar.app"
 ln -s /Applications "$STAGE/Applications"
-hdiutil create -quiet -volname "Tendbar $VERSION" -srcfolder "$STAGE" -fs HFS+ -format UDZO "$DMG"
+hdiutil create -quiet -volname "Tendbar $LABEL" -srcfolder "$STAGE" -fs HFS+ -format UDZO "$DMG"
 rm -rf "$STAGE"
 codesign "${SIGN_FLAGS[@]}" "$DMG"
 notarize "$DMG"
@@ -134,7 +149,7 @@ make_delta() {
     "$SPARKLE_BIN/BinaryDelta" create "$dir/Tendbar.app" "$APP" "$delta" || return 1
     signature=$(sign_update "$delta") || return 1
     DELTAS+="
-        <enclosure url=\"$REPO/releases/download/v$VERSION/$(basename "$delta")\" sparkle:deltaFrom=\"$old_build\" type=\"application/octet-stream\" $signature/>"
+        <enclosure url=\"$REPO/releases/download/$TAG/$(basename "$delta")\" sparkle:deltaFrom=\"$old_build\" type=\"application/octet-stream\" $signature/>"
     echo "Delta from $tag (build $old_build): $(stat -f %z "$delta") bytes"
 }
 
@@ -150,6 +165,21 @@ fi
       <sparkle:deltas>$DELTAS
       </sparkle:deltas>"
 MINIMUM=$(sed -n 's/^ *macOS: *"\(.*\)"/\1/p' project.yml)
+
+# Every copy reads the appcast of the latest published release, so a beta goes into that file: the release's own
+# items stay as they are, an older beta item is dropped, and this one is added on the beta channel.
+EARLIER=""
+CHANNEL=""
+if [[ -n "$BETA" ]]; then
+    LATEST=$(gh release view --repo DabuSoft-pl/tendbar --json tagName --jq .tagName)
+    gh release download "$LATEST" --repo DabuSoft-pl/tendbar --pattern appcast.xml --output "$OUT/latest-appcast.xml"
+    EARLIER=$'\n'$(awk '/<item>/ { item = ""; inside = 1 } inside { item = item $0 "\n" } /<\/item>/ {
+        inside = 0; if (item !~ /<sparkle:channel>/) printf "%s", item }' "$OUT/latest-appcast.xml")
+    rm "$OUT/latest-appcast.xml"
+    [[ "$EARLIER" == *"<item>"* ]] || { echo "No items in the appcast of $LATEST" >&2; exit 1; }
+    CHANNEL="
+      <sparkle:channel>beta</sparkle:channel>"
+fi
 cat > "$OUT/appcast.xml" <<XML
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
@@ -157,17 +187,23 @@ cat > "$OUT/appcast.xml" <<XML
     <title>Tendbar</title>
     <link>$REPO</link>
     <item>
-      <title>Tendbar $VERSION</title>
-      <pubDate>$(LC_ALL=C date -u "+%a, %d %b %Y %H:%M:%S +0000")</pubDate>
+      <title>Tendbar $LABEL</title>
+      <pubDate>$(LC_ALL=C date -u "+%a, %d %b %Y %H:%M:%S +0000")</pubDate>$CHANNEL
       <sparkle:version>$BUILD</sparkle:version>
-      <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
+      <sparkle:shortVersionString>$LABEL</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>$MINIMUM</sparkle:minimumSystemVersion>
-      <sparkle:fullReleaseNotesLink>$REPO/releases/tag/v$VERSION</sparkle:fullReleaseNotesLink>
-      <enclosure url="$REPO/releases/download/v$VERSION/$(basename "$DMG")" type="application/octet-stream" $ENCLOSURE/>$DELTAS
-    </item>
+      <sparkle:fullReleaseNotesLink>$REPO/releases/tag/$TAG</sparkle:fullReleaseNotesLink>
+      <enclosure url="$REPO/releases/download/$TAG/$(basename "$DMG")" type="application/octet-stream" $ENCLOSURE/>$DELTAS
+    </item>$EARLIER
   </channel>
 </rss>
 XML
 
 (cd "$OUT" && shasum -a 256 "$(basename "$DMG")" > "$(basename "$DMG").sha256")
 echo "Done: $DMG"
+if [[ -n "$BETA" ]]; then
+    echo "Publish: the DMG, .sha256 and .delta files on the pre-release $TAG (gh release create --prerelease),"
+    echo "then appcast.xml on $LATEST with gh release upload --clobber. Homebrew stays on $LATEST."
+else
+    echo "Publish: every file but Tendbar.app on the release $TAG, then the version and sha256 in the Homebrew cask."
+fi
