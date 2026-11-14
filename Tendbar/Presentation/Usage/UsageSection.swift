@@ -110,7 +110,7 @@ private struct WindowLimit: View {
             if let window {
                 HStack(spacing: 0) {
                     Text(resetText(window, short: runsOut != nil))
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(.secondary)
                     if let runsOut {
                         Text(" · ").foregroundStyle(.tertiary)
                         Text("at this pace out in \(Elapsed.until(runsOut, now: now))")
@@ -160,7 +160,7 @@ struct CompactLimits: View {
     private func gauge(_ title: String, _ window: LimitWindow?, length: TimeInterval, now: Date) -> some View {
         let percentage = window?.percentage(at: now) ?? 0
         return HStack(spacing: 6) {
-            Text(title).foregroundStyle(.tertiary).fixedSize()
+            Text(title).foregroundStyle(.secondary).fixedSize()
             LimitBar(percentage: percentage, height: 4, pace: window?.evenPace(at: now, length: length))
                 .frame(width: barWidth)
             Text(window == nil ? "–" : "\(Int(percentage.rounded()))%")

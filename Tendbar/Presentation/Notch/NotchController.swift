@@ -332,7 +332,7 @@ private struct NotchRow: View {
             Spacer()
             TimelineView(.periodic(from: .now, by: 30)) { context in
                 Text(session.timeText(now: context.date))
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.secondary)
                     .monospacedDigit()
                     .fixedSize()
             }
