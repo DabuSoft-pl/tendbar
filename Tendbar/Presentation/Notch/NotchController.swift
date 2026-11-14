@@ -56,6 +56,8 @@ final class NotchController {
     private var panel: NSPanel?
     private var geometry: NotchGeometry?
     private var observer: NSObjectProtocol?
+    private let hover = NotchHover()
+    private var poll: Timer?
 
     init(sessions: SessionsViewModel, sessionActions: SessionsController, usage: UsageViewModel, preferences: Preferences) {
         self.sessions = sessions
@@ -69,7 +71,43 @@ final class NotchController {
         ) { [weak self] _ in
             MainActor.assumeIsolated { self?.update() }
         }
+        // SwiftUI's hover misses an entry in a panel that is never key, and when the pill appears or changes width
+        // under a still cursor. Event monitors for mouse moves broke clicks in the menu bar panel, so the pointer is
+        // polled instead; with the notch view off a tick does nothing.
+        let poll = Timer(timeInterval: 0.1, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.checkMouse() }
+        }
+        poll.tolerance = 0.05
+        RunLoop.main.add(poll, forMode: .common)
+        self.poll = poll
         update()
+    }
+
+    private func checkMouse() {
+        guard let panel, panel.isVisible, let geometry else {
+            if hover.expanded { hover.expanded = false }
+            return
+        }
+        // A hidden pill still opens from the notch itself, where nothing else can be clicked. Not from the menu bar
+        // beside it, whose items it would cover, and not at all on Macs without a notch.
+        let notch = CGRect(
+            x: (NotchGeometry.panelWidth - geometry.notchWidth) / 2, y: 0, width: geometry.notchWidth, height: geometry.notchHeight
+        )
+        guard let pill = hover.pill ?? (geometry.hasNotch ? notch : nil) else {
+            if hover.expanded { hover.expanded = false }
+            return
+        }
+        let mouse = NSEvent.mouseLocation
+        // The pill in screen coordinates; SwiftUI measures from the panel's top left corner.
+        let frame = panel.frame
+        var area = CGRect(x: frame.minX + pill.minX, y: frame.maxY - pill.maxY, width: pill.width, height: pill.height)
+        // Reaching the top edge of the screen still counts, and a little slack keeps an open pill from flickering.
+        area = area.insetBy(dx: hover.expanded ? -4 : 0, dy: hover.expanded ? -4 : 0)
+        area.size.height = frame.maxY + 1 - area.minY
+        let inside = area.contains(mouse)
+        if !inside { hover.closedByClick = false }
+        let expanded = inside && !hover.closedByClick
+        if expanded != hover.expanded { hover.expanded = expanded }
     }
 
     static var hasNotch: Bool {
@@ -110,7 +148,9 @@ final class NotchController {
         panel.becomesKeyOnlyIfNeeded = true
         panel.level = NSWindow.Level(rawValue: NSWindow.Level.mainMenu.rawValue + 3)
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]
-        let view = NSHostingView(rootView: NotchView(
+        hover.expanded = false
+        let view = FirstClickHostingView(rootView: NotchView(
+            hover: hover,
             sessions: sessions,
             usage: usage,
             preferences: preferences,
@@ -125,6 +165,23 @@ final class NotchController {
     }
 }
 
+/// The panel never becomes key, so without this AppKit spends the first click on the window and a button in it
+/// never fires.
+private final class FirstClickHostingView<Content: View>: NSHostingView<Content> {
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+}
+
+/// Whether the pointer is over the pill, which the controller works out from mouse moves.
+@MainActor
+@Observable
+final class NotchHover {
+    var expanded = false
+    /// Where the pill sits in its panel, top left origin; nil while it is hidden.
+    @ObservationIgnored var pill: CGRect?
+    /// A click on a session closes the pill until the pointer leaves it.
+    @ObservationIgnored var closedByClick = false
+}
+
 struct NotchView: View {
     let sessions: SessionsViewModel
     let usage: UsageViewModel
@@ -132,9 +189,15 @@ struct NotchView: View {
     let onSelect: (Session) -> Void
     let notchWidth: CGFloat
     let notchHeight: CGFloat
-    @State private var expanded: Bool
+    let hover: NotchHover
+
+    private var expanded: Bool {
+        get { hover.expanded }
+        nonmutating set { hover.expanded = newValue }
+    }
 
     init(
+        hover: NotchHover = NotchHover(),
         sessions: SessionsViewModel,
         usage: UsageViewModel,
         preferences: Preferences,
@@ -149,7 +212,8 @@ struct NotchView: View {
         self.onSelect = onSelect
         self.notchWidth = notchWidth
         self.notchHeight = notchHeight
-        _expanded = State(initialValue: expanded)
+        self.hover = hover
+        if expanded { hover.expanded = true }
     }
 
     private let wing: CGFloat = 44
@@ -187,8 +251,9 @@ struct NotchView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if showsPill {
+            if showsPill || expanded {
                 pill(lead: lead)
+                    .onDisappear { hover.pill = nil }
             }
             Spacer(minLength: 0)
         }
@@ -237,6 +302,7 @@ struct NotchView: View {
                     ForEach(active.prefix(6)) { session in
                         Button {
                             expanded = false
+                            hover.closedByClick = true
                             onSelect(session)
                         } label: {
                             NotchRow(session: session)
@@ -267,7 +333,7 @@ struct NotchView: View {
                 .fill(.black)
         )
         .contentShape(UnevenRoundedRectangle(bottomLeadingRadius: radius, bottomTrailingRadius: radius))
-        .onHover { expanded = $0 }
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { hover.pill = $0 }
         .environment(\.colorScheme, .dark)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(accessibilityText(lead: lead))

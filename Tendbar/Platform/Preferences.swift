@@ -33,11 +33,13 @@ final class Preferences: AlertSettingsProviding {
         static let limitResets = "notify.limits.resets"
         static let today = "view.panel.today"
         static let permissionActions = "notify.permissionActions"
+        static let nextSessionShortcut = "shortcut.nextSession"
     }
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored var onNotchViewChange: (() -> Void)?
     @ObservationIgnored var onLogEventsChange: ((Bool) -> Void)?
+    @ObservationIgnored var onShortcutChange: ((NextSessionShortcut) -> Void)?
 
     var notifyNeedsYou: Bool { didSet { defaults.set(notifyNeedsYou, forKey: Key.needsYou) } }
     var notifyDone: Bool { didSet { defaults.set(notifyDone, forKey: Key.done) } }
@@ -72,6 +74,12 @@ final class Preferences: AlertSettingsProviding {
         didSet {
             defaults.set(hideFromCapture, forKey: Key.hideFromCapture)
             onNotchViewChange?()
+        }
+    }
+    var nextSessionShortcut: NextSessionShortcut {
+        didSet {
+            defaults.set(nextSessionShortcut.rawValue, forKey: Key.nextSessionShortcut)
+            onShortcutChange?(nextSessionShortcut)
         }
     }
     var theme: Theme {
@@ -120,6 +128,7 @@ final class Preferences: AlertSettingsProviding {
         hideFromCapture = defaults.bool(forKey: Key.hideFromCapture)
         mutedFolders = defaults.stringArray(forKey: Key.muted) ?? []
         theme = defaults.string(forKey: Key.theme).flatMap(Theme.init) ?? .system
+        nextSessionShortcut = defaults.string(forKey: Key.nextSessionShortcut).flatMap(NextSessionShortcut.init) ?? .off
     }
 
     func isMuted(_ folder: String?) -> Bool {

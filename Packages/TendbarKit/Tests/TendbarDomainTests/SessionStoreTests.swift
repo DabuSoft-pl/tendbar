@@ -134,4 +134,29 @@ import Testing
 
         #expect(Set(store.sessions.keys) == ["fresh"])
     }
+
+    @Test func nextForYouPrefersTheLongestWaitThenFailuresThenUnreadReplies() {
+        func session(_ id: String, _ state: SessionState, unread: Bool = false, at offset: TimeInterval, waiting: TimeInterval? = nil) -> Session {
+            Session(
+                id: id, state: state, startedAt: start, updatedAt: start.addingTimeInterval(offset),
+                waitingSince: waiting.map { start.addingTimeInterval($0) }, unread: unread
+            )
+        }
+        var store = SessionStore(sessions: [
+            session("done", .done, unread: true, at: 1),
+            session("failed", .failed, unread: true, at: 2),
+            session("read", .done, at: 0),
+            session("working", .working, at: 0),
+            session("newer-wait", .needsYou, unread: true, at: 9, waiting: 9),
+            session("older-wait", .needsYou, unread: true, at: 10, waiting: 3),
+        ])
+
+        #expect(store.nextForYou?.id == "older-wait")
+        store = SessionStore(sessions: store.sessions.values.filter { $0.state != .needsYou })
+        #expect(store.nextForYou?.id == "failed")
+        store.markSeen("failed")
+        #expect(store.nextForYou?.id == "done")
+        store.markSeen("done")
+        #expect(store.nextForYou == nil)
+    }
 }

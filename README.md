@@ -38,7 +38,8 @@ nowhere else.
   and the start of Claude's last reply. A ring while Claude works, amber when it waits for you, vermilion after an
   error, sage green until you read a finished reply. Close a terminal tab and its session ends there too.
 - **Back to the right terminal.** Click a session, or pick it with the arrow keys and press Return, to jump to its
-  tab or pane (see [Terminals](#terminals)).
+  tab or pane (see [Terminals](#terminals)). Or turn on a shortcut in Settings → General (⌃⌥J, for one) that goes
+  from any app to the session waiting longest, then to unread replies.
 - **Notifications that matter.** A banner when a session needs you, finishes or fails, each one switchable, with
   Tendbar's own short bird calls (or the system sound). Optionally the screen edge glows in the state's color.
   Right-click a session to mute its folder.
@@ -46,8 +47,9 @@ nowhere else.
   warning when a working session goes quiet for 15 minutes, since it may hang on a command or a dropped connection.
 - **Answer from the notification.** Opt in, and a permission banner shows the whole command or file with Allow and
   Deny. The terminal prompt keeps working, whichever you answer first decides, and your deny rules still apply.
-- **A pill by the notch.** The lead state, a count and two thin lines for the five-hour and weekly limits. Hover it
-  for the sessions and every account's limits. On Macs without a notch it sits in the middle of the menu bar.
+- **A pill by the notch.** The lead state, a count and two thin lines for the five-hour and weekly limits. Hover it,
+  or the notch while the pill is hidden, for the sessions and every account's limits; a click on a session closes it
+  until the pointer leaves. On Macs without a notch it sits in the middle of the menu bar.
 - **Usage limits per account.** Five-hour and weekly usage with a warning at 80% and 90%, for every account you use,
   including separate `CLAUDE_CONFIG_DIR` profiles. A tick on each bar marks the even pace, and when you run ahead of
   it Tendbar tells you when the limit would run out. Resets show as a clock time, and a limit that warned you

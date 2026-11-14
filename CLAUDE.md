@@ -19,7 +19,7 @@ Domain  <-  Application  <-  Infrastructure
   `LimitWarnings`, `ProfileName`, `Attention` (reminders, quiet sessions), `ActivityStats` (turns and waits per day),
   `PermissionAsk`.
 - `TendbarApplication` — use cases, one class each (`HandleHookEvent`, `OpenSession`, `RecordUsageReading`,
-  `CheckLimitWarnings`, `CheckAttention`, `EndGoneSessions`, `AddProfile`, …, plus `PermissionDesk` holding prompts
+  `CheckLimitWarnings`, `CheckAttention`, `OpenNextSession`, `EndGoneSessions`, `AddProfile`, …, plus `PermissionDesk` holding prompts
   that wait for a banner answer) and the ports they need: repositories, `AlertPresenting`, `ScreenFlashing`,
   `SessionProcessChecking`, `TerminalNavigating`, `HookConnecting`, `AlertSettingsProviding`, `Clock`, and the output ports `SessionsOutput`,
   `UsageOutput` and `ActivityOutput`; `PermissionReply` is the way back to a waiting hook. Use cases never import AppKit, SwiftUI or UserNotifications.
@@ -32,7 +32,7 @@ Domain  <-  Application  <-  Infrastructure
   builds the same container on in-memory adapters for SwiftUI previews.
 - `Tendbar/Platform` — adapters that need macOS UI frameworks: `UserNotificationsAdapter` (plays the bird calls itself
   with `NSSound`: Notification Center on macOS 27 swaps a named app sound for a built-in one), `EdgeGlow`,
-  `AppleScriptTerminalNavigator`, `LaunchAtLoginService`, `Preferences` (UserDefaults, also `AlertSettingsProviding`).
+  `AppleScriptTerminalNavigator`, `GlobalShortcut` (Carbon hot key, no Accessibility permission), `LaunchAtLoginService`, `Preferences` (UserDefaults, also `AlertSettingsProviding`).
 - `Tendbar/Presentation` — per feature a view model (observable state; implements the output port where there is one),
   a controller (user intent → use case) and the views. Views import Domain and Application, never Infrastructure.
 - `TendbarHook` — `tendbar-hook`, embedded in `Tendbar.app/Contents/MacOS`, uses only Domain and Infrastructure. It

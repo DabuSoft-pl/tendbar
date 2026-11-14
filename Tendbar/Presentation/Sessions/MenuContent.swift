@@ -181,7 +181,9 @@ struct MenuContent: View {
             Spacer()
             Button("Settings", systemImage: "gearshape") {
                 dismiss()
-                NSApp.activate()
+                // Deprecated, but the cooperative `activate()` leaves a menu bar app behind the frontmost app, so
+                // the settings window never shows up. Keep forcing it.
+                NSApp.activate(ignoringOtherApps: true)
                 openSettings()
                 DispatchQueue.main.async {
                     NSApp.windows.first { $0.identifier?.rawValue.contains("Settings") == true }?

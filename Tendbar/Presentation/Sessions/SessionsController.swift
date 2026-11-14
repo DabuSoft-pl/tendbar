@@ -7,12 +7,14 @@ import TendbarDomain
 final class SessionsController {
     private let model: SessionsViewModel
     private let openSession: OpenSession
+    private let openNext: OpenNextSession
     private let markAllSeen: MarkAllSessionsSeen
     private let removeEnded: RemoveEndedSessions
 
-    init(model: SessionsViewModel, openSession: OpenSession, markAllSeen: MarkAllSessionsSeen, removeEnded: RemoveEndedSessions) {
+    init(model: SessionsViewModel, repository: SessionRepository, openSession: OpenSession, markAllSeen: MarkAllSessionsSeen, removeEnded: RemoveEndedSessions) {
         self.model = model
         self.openSession = openSession
+        openNext = OpenNextSession(repository: repository, openSession: openSession)
         self.markAllSeen = markAllSeen
         self.removeEnded = removeEnded
     }
@@ -24,6 +26,14 @@ final class SessionsController {
     func open(sessionID: String) {
         guard let outcome = openSession.execute(sessionID: sessionID) else { return }
         model.jumpMessage = Self.message(for: outcome)
+    }
+
+    /// The global shortcut. Returns false when nothing needs you, so the caller can say so.
+    @discardableResult
+    func openNextSession() -> Bool {
+        guard let outcome = openNext.execute() else { return false }
+        model.jumpMessage = Self.message(for: outcome)
+        return true
     }
 
     func markAllAsRead() {

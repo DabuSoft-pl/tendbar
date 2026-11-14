@@ -831,6 +831,16 @@
         }
       }
     },
+    "From any app, to the session waiting longest, then to unread replies": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Z dowolnej aplikacji do sesji, która czeka najdłużej, potem do nieprzeczytanych odpowiedzi"
+          }
+        }
+      }
+    },
     "Full": {
       "localizations": {
         "pl": {
@@ -1471,6 +1481,16 @@
         }
       }
     },
+    "Shortcut to the next session": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skrót do następnej sesji"
+          }
+        }
+      }
+    },
     "Show": {
       "localizations": {
         "pl": {
@@ -1777,6 +1797,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wyłącz wyciszenie folderu"
+          }
+        }
+      }
+    },
+    "Update": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zaktualizuj"
           }
         }
       }

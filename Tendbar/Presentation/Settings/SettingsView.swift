@@ -171,8 +171,14 @@ private struct ClaudeCodeSettings: View {
             Section {
                 LabeledContent {
                     switch model.connection {
-                    case .connected, .outdated:
+                    case .connected:
                         Button("Disconnect") { actions.disconnect() }
+                    case .outdated:
+                        HStack {
+                            Button("Disconnect") { actions.disconnect() }
+                            Button("Update") { actions.connect() }
+                                .buttonStyle(.borderedProminent)
+                        }
                     case .disconnected:
                         Button("Connect") { actions.connect() }
                             .buttonStyle(.borderedProminent)
@@ -440,6 +446,21 @@ private struct GeneralSettings: View {
                     Text(error).foregroundStyle(Palette.vermilion)
                 } else {
                     Text("Everything stays on this Mac. Tendbar sends nothing over the network")
+                }
+            }
+            Section {
+                Picker(selection: $preferences.nextSessionShortcut) {
+                    Text("Off").tag(NextSessionShortcut.off)
+                    ForEach(NextSessionShortcut.allCases.filter { $0 != .off }) { shortcut in
+                        Text(verbatim: shortcut.symbols ?? "").tag(shortcut)
+                    }
+                } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Shortcut to the next session")
+                        Text("From any app, to the session waiting longest, then to unread replies")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
             Section {

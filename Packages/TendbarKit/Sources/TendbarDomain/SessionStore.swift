@@ -24,6 +24,28 @@ public struct SessionStore: Sendable, Equatable {
         sessions.values.contains { $0.unread }
     }
 
+    /// Where the shortcut goes next: the session that has waited for you longest, then a failed turn you have not
+    /// seen, then a finished reply you have not read, the oldest first within each.
+    public var nextForYou: Session? {
+        func rank(_ session: Session) -> Int? {
+            switch session.state {
+            case .needsYou: 0
+            case .failed where session.unread: 1
+            case .done where session.unread: 2
+            default: nil
+            }
+        }
+        return sessions.values
+            .compactMap { session in rank(session).map { (session, $0) } }
+            .min { a, b in
+                if a.1 != b.1 { return a.1 < b.1 }
+                let first = a.0.waitingSince ?? a.0.updatedAt
+                let second = b.0.waitingSince ?? b.0.updatedAt
+                return first == second ? a.0.id < b.0.id : first < second
+            }?
+            .0
+    }
+
     public func count(of state: SessionState) -> Int {
         sessions.values.filter { $0.state == state }.count
     }

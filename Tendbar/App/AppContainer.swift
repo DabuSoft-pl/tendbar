@@ -50,6 +50,7 @@ final class AppContainer {
     private var timer: Timer?
     private var listener: HookEventListener?
     private var notch: NotchController?
+    private var shortcut: GlobalShortcut?
 
     init(preferences: Preferences, adapters a: Adapters, eventLog: URL, dataFolder: URL) {
         self.preferences = preferences
@@ -75,6 +76,7 @@ final class AppContainer {
 
         sessionActions = SessionsController(
             model: sessions,
+            repository: a.sessions,
             openSession: OpenSession(repository: a.sessions, output: sessions, alerts: a.alerts, navigator: a.navigator),
             markAllSeen: MarkAllSessionsSeen(repository: a.sessions, output: sessions, alerts: a.alerts),
             removeEnded: RemoveEndedSessions(repository: a.sessions, output: sessions)
@@ -157,6 +159,7 @@ final class AppContainer {
         container.listen(on: TendbarPaths.socketPath(environment: ProcessInfo.processInfo.environment))
         container.systemActions.requestNotifications()
         container.showNotch()
+        container.listenForShortcut()
         container.startTimer()
         DispatchQueue.main.async { preferences.theme.apply() }
         return container
@@ -186,6 +189,15 @@ final class AppContainer {
         case let .usage(reading):
             recordUsage.execute(reading)
         }
+    }
+
+    private func listenForShortcut() {
+        let shortcut = GlobalShortcut { [weak self] in
+            if self?.sessionActions.openNextSession() != true { NSSound.beep() }
+        }
+        shortcut.register(preferences.nextSessionShortcut)
+        preferences.onShortcutChange = { [weak shortcut] in shortcut?.register($0) }
+        self.shortcut = shortcut
     }
 
     private func showNotch() {

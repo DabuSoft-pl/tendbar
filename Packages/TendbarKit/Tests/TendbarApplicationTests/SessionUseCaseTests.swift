@@ -33,6 +33,26 @@ import TendbarDomain
         #expect(navigator.jumps.isEmpty)
     }
 
+    @Test func theShortcutOpensTheSessionThatNeedsYou() {
+        let sessions = InMemorySessions([session("s1", state: .done, unread: true), session("s22", state: .needsYou, unread: true, age: 60)])
+        let navigator = StubNavigator()
+        navigator.outcome = .jumped
+        let open = OpenSession(repository: sessions, output: sessions, alerts: RecordingAlerts(), navigator: navigator)
+
+        #expect(OpenNextSession(repository: sessions, openSession: open).execute() == .jumped)
+        #expect(sessions.store.sessions["s22"]?.unread == false)
+        #expect(sessions.store.sessions["s1"]?.unread == true)
+    }
+
+    @Test func theShortcutDoesNothingWhenNothingNeedsYou() {
+        let sessions = InMemorySessions([session("s1", state: .working)])
+        let navigator = StubNavigator()
+        let open = OpenSession(repository: sessions, output: sessions, alerts: RecordingAlerts(), navigator: navigator)
+
+        #expect(OpenNextSession(repository: sessions, openSession: open).execute() == nil)
+        #expect(navigator.jumps.isEmpty)
+    }
+
     @Test func startingDropsStaleSessions() {
         let sessions = InMemorySessions([session("fresh", state: .done), session("old", state: .done, age: 8 * 24 * 3600)])
 
