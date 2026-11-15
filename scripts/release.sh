@@ -145,7 +145,10 @@ make_delta() {
     # A downloaded release is only diffed when it is still our signed build, so a replaced asset fails here loudly.
     codesign --verify --deep --strict "$dir/Tendbar.app" || return 1
     if [[ -n "${TEAM_ID:-}" ]]; then
-        codesign -dv "$dir/Tendbar.app" 2>&1 | grep -qx "TeamIdentifier=$TEAM_ID" || return 1
+        # Read it whole first: grep -q stops at the first match, and with pipefail the cut-off codesign fails the pipe.
+        local details
+        details=$(codesign -dv "$dir/Tendbar.app" 2>&1) || return 1
+        grep -qx "TeamIdentifier=$TEAM_ID" <<< "$details" || return 1
     fi
     local old_build
     old_build=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$dir/Tendbar.app/Contents/Info.plist") || return 1
