@@ -185,19 +185,24 @@ public enum HookRedaction {
 }
 
 /// What a permission prompt asks, taken from the hook input before redaction: the tool and the one field that says
-/// what it would do (a command, a file path, a URL), capped in length.
+/// what it would do (a command, a file path, a URL), capped in length, plus whether that field is the whole request.
 public struct PermissionRecord: Codable, Sendable, Equatable {
     public static let detailLimit = 2_000
+    static let toolLimit = 120
     static let detailKeys = ["command", "file_path", "notebook_path", "url", "path", "pattern", "query", "prompt"]
+    /// Fields that never change what a request runs or writes, so leaving them out of the prompt hides nothing.
+    static let incidentalKeys: Set<String> = ["description", "timeout", "run_in_background", "offset", "limit"]
 
     public var id: String
     public var tool: String
     public var detail: String?
+    public var shownInFull: Bool
 
-    public init(id: String = UUID().uuidString, tool: String, detail: String?) {
+    public init(id: String = UUID().uuidString, tool: String, detail: String?, shownInFull: Bool = false) {
         self.id = id
         self.tool = tool
         self.detail = detail
+        self.shownInFull = shownInFull
     }
 
     /// Nil for anything but a PermissionRequest.
@@ -207,12 +212,31 @@ public struct PermissionRecord: Codable, Sendable, Equatable {
               let tool = object["tool_name"] as? String
         else { return nil }
         let input = object["tool_input"] as? [String: Any] ?? [:]
-        let detail = Self.detailKeys.lazy.compactMap { input[$0] as? String }.first
-        self.init(id: id, tool: tool, detail: detail.map { String($0.prefix(Self.detailLimit)) })
+        let key = Self.detailKeys.first { input[$0] is String }
+        let detail = key.flatMap { input[$0] as? String }
+        let whole = key.map { key in
+            (detail?.count ?? 0) <= Self.detailLimit
+                && input.keys.allSatisfy { $0 == key || Self.incidentalKeys.contains($0) }
+        } ?? false
+        self.init(
+            id: id,
+            tool: String(tool.prefix(Self.toolLimit)),
+            detail: detail.map { String($0.prefix(Self.detailLimit)) },
+            shownInFull: whole && tool.count <= Self.toolLimit
+        )
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        tool = try container.decode(String.self, forKey: .tool)
+        detail = try container.decodeIfPresent(String.self, forKey: .detail)
+        // A hook from before this field existed cannot vouch for what it showed.
+        shownInFull = try container.decodeIfPresent(Bool.self, forKey: .shownInFull) ?? false
     }
 
     public func ask(sessionID: String) -> PermissionAsk {
-        PermissionAsk(id: id, sessionID: sessionID, tool: tool, detail: detail)
+        PermissionAsk(id: id, sessionID: sessionID, tool: tool, detail: detail, shownInFull: shownInFull)
     }
 }
 

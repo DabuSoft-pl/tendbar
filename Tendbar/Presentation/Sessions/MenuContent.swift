@@ -159,6 +159,7 @@ struct MenuContent: View {
             ) { actions.select(session) }
             if let ask {
                 PermissionPrompt(ask: ask) { actions.answer(ask, $0) }
+                    .id(ask.id)
                     .font(.callout)
                     .padding(.leading, 26)
                     .padding([.trailing, .bottom], 8)

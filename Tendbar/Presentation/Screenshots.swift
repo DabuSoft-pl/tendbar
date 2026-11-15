@@ -39,7 +39,7 @@ enum Screenshots {
             )
             let asking = PreviewData.container()
             if let waiting = PreviewData.sessions.first(where: { $0.state == .needsYou }) {
-                asking.sessions.show([PermissionAsk(id: "a1", sessionID: waiting.id, tool: "Bash", detail: "npm run test -- --coverage")])
+                asking.sessions.show([PermissionAsk(id: "a1", sessionID: waiting.id, tool: "Bash", detail: "npm run test -- --coverage", shownInFull: true)])
             }
             render(panel(asking), size: CGSize(width: 400, height: 640), appearance: .darkAqua, to: folder.appendingPathComponent("panel-permission.png"))
             render(notch(asking, expanded: true), size: CGSize(width: 520, height: 360), appearance: .darkAqua, to: folder.appendingPathComponent("notch-permission.png"))

@@ -31,11 +31,11 @@ public final class PermissionDesk {
         pending[sessionID] != nil
     }
 
-    /// Answers the prompt a banner, the panel or the pill showed. Returns false when that prompt is gone or another
-    /// one replaced it.
+    /// Answers the prompt a banner, the panel or the pill showed. Returns false when that prompt is gone, another one
+    /// replaced it, or it is an Allow for a request that was not shown whole.
     @discardableResult
     public func answer(askID: String, sessionID: String, decision: PermissionDecision) -> Bool {
-        guard let entry = pending[sessionID], entry.ask.id == askID else { return false }
+        guard let entry = pending[sessionID], entry.ask.id == askID, entry.ask.offers(decision) else { return false }
         pending.removeValue(forKey: sessionID)
         entry.reply.send(decision)
         alerts.dismiss(sessionID: sessionID)

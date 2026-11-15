@@ -247,7 +247,7 @@ private struct NotificationSettings: View {
             } header: {
                 Text("Notify when")
             } footer: {
-                Text("Allow and Deny appear on the notification, in the panel and in the pill, under the whole command or file. The terminal prompt keeps working, and whichever you answer first decides. Your deny rules still apply")
+                Text("Allow and Deny appear on the notification, in the panel and in the pill, under the whole command or file. A request that doesn't fit gets Deny only, and you allow it in the terminal. The terminal prompt keeps working, and whichever you answer first decides. Your deny rules still apply")
             }
             Section {
                 Picker("Remind about a wait after", selection: $preferences.remindAfterMinutes) {

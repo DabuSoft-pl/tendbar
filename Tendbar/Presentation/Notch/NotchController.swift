@@ -376,6 +376,7 @@ struct NotchView: View {
                             .buttonStyle(.plain)
                             if let ask = sessions.ask(for: session) {
                                 PermissionPrompt(ask: ask, lineLimit: 3) { onAnswer(ask, $0) }
+                                    .id(ask.id)
                                     .font(.system(size: 12))
                                     .foregroundStyle(.white)
                                     .padding(.leading, 24)

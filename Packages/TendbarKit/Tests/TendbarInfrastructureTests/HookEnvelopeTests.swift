@@ -149,7 +149,7 @@ import TendbarDomain
 
         let record = try #require(PermissionRecord(hookInput: input, id: "a1"))
 
-        #expect(record == PermissionRecord(id: "a1", tool: "Bash", detail: "rm -rf build"))
+        #expect(record == PermissionRecord(id: "a1", tool: "Bash", detail: "rm -rf build", shownInFull: true))
         #expect(PermissionRecord(hookInput: Data(#"{"hook_event_name":"Stop","session_id":"s1"}"#.utf8)) == nil)
     }
 
@@ -161,7 +161,39 @@ import TendbarDomain
         ])
 
         #expect(PermissionRecord(hookInput: edit)?.detail == "/Users/me/app/a.swift")
+        #expect(PermissionRecord(hookInput: edit)?.shownInFull == false)
         #expect(PermissionRecord(hookInput: long)?.detail?.count == PermissionRecord.detailLimit)
+        #expect(PermissionRecord(hookInput: long)?.shownInFull == false)
+    }
+
+    private func permission(_ tool: String, _ input: [String: Any]) throws -> PermissionRecord? {
+        PermissionRecord(hookInput: try JSONSerialization.data(withJSONObject: [
+            "hook_event_name": "PermissionRequest", "tool_name": tool, "tool_input": input,
+        ]))
+    }
+
+    @Test func onlyARequestShownWholeCanBeAllowed() throws {
+        let tail = String(repeating: "a", count: PermissionRecord.detailLimit) + "; echo MARKER"
+        let long = try #require(try permission("Bash", ["command": tail]))
+        #expect(long.detail?.contains("MARKER") == false)
+        #expect(!long.shownInFull)
+
+        #expect(try permission("Bash", ["command": "make test", "description": "Run tests", "timeout": 60])?.shownInFull == true)
+        #expect(try permission("Read", ["file_path": "/tmp/a", "offset": 1, "limit": 20])?.shownInFull == true)
+        #expect(try permission("Write", ["file_path": "/tmp/x", "content": "MARKER"])?.shownInFull == false)
+        #expect(try permission("Bash", ["command": "ls", "dangerouslyDisableSandbox": true])?.shownInFull == false)
+
+        let mcp = try #require(try permission("mcp__dummy__act", ["arg": "MARKER"]))
+        #expect(mcp.detail == nil)
+        #expect(!mcp.shownInFull)
+        #expect(!mcp.ask(sessionID: "s1").offers(.allow))
+        #expect(mcp.ask(sessionID: "s1").offers(.deny))
+    }
+
+    @Test func aRecordWithoutTheFlagCannotBeAllowed() throws {
+        let old = try JSONDecoder().decode(PermissionRecord.self, from: Data(#"{"id":"a1","tool":"Bash","detail":"ls"}"#.utf8))
+
+        #expect(!old.shownInFull)
     }
 
     @Test func answersBecomeHookOutput() throws {

@@ -2,7 +2,8 @@ import SwiftUI
 import TendbarDomain
 
 /// Allow and Deny for a prompt Claude Code shows in the terminal, with the whole command or file above them, so
-/// Allow never approves something unseen. The terminal prompt keeps working; whichever answers first decides.
+/// Allow never approves something unseen: a request too long, or with more than that one field, gets only Deny and
+/// a pointer to the terminal. The terminal prompt keeps working; whichever answers first decides.
 struct PermissionPrompt: View {
     let ask: PermissionAsk
     /// Lines of the command shown before it is cut; the pill has less room than the panel.
@@ -27,11 +28,19 @@ struct PermissionPrompt: View {
                     .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
                     .help(detail)
             }
+            if !ask.shownInFull {
+                Text("Not all of this request fits here. To allow it, answer in the terminal")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             HStack(spacing: 8) {
                 Spacer()
                 Button("Deny", role: .destructive) { onAnswer(.deny) }
-                Button("Allow") { onAnswer(.allow) }
-                    .buttonStyle(.borderedProminent)
+                if ask.offers(.allow) {
+                    Button("Allow") { onAnswer(.allow) }
+                        .buttonStyle(.borderedProminent)
+                }
             }
             .controlSize(.small)
             .disabled(!armed)

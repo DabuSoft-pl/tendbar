@@ -125,6 +125,21 @@ import TendbarDomain
         #expect(mode?.intValue == 0o600)
     }
 
+    @Test func backupsAndNewSettingsAreReadableByTheUserAlone() throws {
+        try write("{}")
+        try FileManager.default.setAttributes([.posixPermissions: 0o644], ofItemAtPath: settings.path)
+        let installer = HookInstaller(settingsURL: settings, hookPath: hookPath)
+
+        let backup = try #require(try installer.connect(now: now))
+        try FileManager.default.removeItem(at: settings)
+        try installer.connect(now: now.addingTimeInterval(1))
+
+        let mode = { (url: URL) in (try FileManager.default.attributesOfItem(atPath: url.path)[.posixPermissions] as? NSNumber)?.intValue }
+        #expect(try mode(backup) == 0o600)
+        #expect(try mode(settings) == 0o600)
+        #expect(try FileManager.default.contentsOfDirectory(atPath: directory.path).allSatisfy { !$0.contains(".tendbar-") || $0.contains("backup") })
+    }
+
     @Test func writesThroughSymlink() throws {
         let real = directory.appendingPathComponent("dotfiles-settings.json")
         try Data("{}".utf8).write(to: real)

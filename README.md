@@ -49,8 +49,9 @@ nowhere else.
 - **Follow-ups.** One reminder when a session has waited for you longer than you set (5 minutes by default), and a
   warning when a working session goes quiet for 15 minutes, since it may hang on a command or a dropped connection.
 - **Answer without the terminal.** Opt in, and a permission prompt shows the whole command or file with Allow and
-  Deny in the panel, in the notch pill and on the banner. The terminal prompt keeps working, whichever you answer
-  first decides, and your deny rules still apply.
+  Deny in the panel, in the notch pill and on the banner. A request that doesn't fit (over 2,000 characters, a file's
+  new content, an MCP tool's arguments) gets Deny only, so Allow never approves something you didn't see. The
+  terminal prompt keeps working, whichever you answer first decides, and your deny rules still apply.
 - **A pill by the notch.** The lead state, a count and two thin lines for the five-hour and weekly limits. Hover it,
   or the notch while the pill is hidden, for the sessions and every account's limits; a click on a session closes it
   until the pointer leaves. On Macs without a notch it sits in the middle of the menu bar.

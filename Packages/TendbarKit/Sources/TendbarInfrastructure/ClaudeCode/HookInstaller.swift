@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 
 public enum HookInstallerError: Error, Equatable {
@@ -269,8 +270,33 @@ public struct HookInstaller: Sendable {
             options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
         )
         try manager.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try (data + Data("\n".utf8)).write(to: url, options: .atomic)
-        try manager.setAttributes([.posixPermissions: permissions ?? NSNumber(value: 0o600)], ofItemAtPath: url.path)
+        try Self.replaceAtomically(url, with: data + Data("\n".utf8), mode: mode_t(permissions?.uint16Value ?? 0o600))
+    }
+
+    /// Writes a temporary file that has the final mode from the start, then renames it over the target, so the
+    /// settings (which can hold secrets in `env`) are never readable by others, not even for a moment.
+    static func replaceAtomically(_ url: URL, with data: Data, mode: mode_t) throws {
+        let temporary = url.deletingLastPathComponent()
+            .appendingPathComponent(".\(url.lastPathComponent).tendbar-\(UUID().uuidString)").path
+        let fd = open(temporary, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, mode & 0o600)
+        guard fd >= 0 else { throw CocoaError(.fileWriteNoPermission, userInfo: [NSFilePathErrorKey: temporary]) }
+        let written = data.withUnsafeBytes { buffer -> Bool in
+            guard let base = buffer.baseAddress else { return true }
+            var offset = 0
+            while offset < buffer.count {
+                let count = Darwin.write(fd, base + offset, buffer.count - offset)
+                if count < 0, errno == EINTR { continue }
+                guard count > 0 else { return false }
+                offset += count
+            }
+            return true
+        }
+        let finished = written && fchmod(fd, mode) == 0 && fsync(fd) == 0
+        close(fd)
+        guard finished, rename(temporary, url.path) == 0 else {
+            unlink(temporary)
+            throw CocoaError(.fileWriteUnknown, userInfo: [NSFilePathErrorKey: url.path])
+        }
     }
 
     func backupIfPresent(now: Date) throws -> URL? {
@@ -285,6 +311,8 @@ public struct HookInstaller: Sendable {
         let backup = directory.appendingPathComponent(prefix + formatter.string(from: now))
         if manager.fileExists(atPath: backup.path) { try manager.removeItem(at: backup) }
         try manager.copyItem(at: source, to: backup)
+        // A copy of settings that may hold secrets stays readable by the user alone.
+        try manager.setAttributes([.posixPermissions: 0o600], ofItemAtPath: backup.path)
         let old = try manager.contentsOfDirectory(atPath: directory.path)
             .filter { $0.hasPrefix(prefix) }
             .sorted(by: >)

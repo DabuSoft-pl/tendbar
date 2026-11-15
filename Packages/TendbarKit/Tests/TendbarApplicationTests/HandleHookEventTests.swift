@@ -200,6 +200,21 @@ import TendbarDomain
         #expect(reply.answers == [.deny])
     }
 
+    @Test func aRequestNotShownWholeCanOnlyBeDenied() async {
+        settings.alertSettings.answersPermissions = true
+        let desk = PermissionDesk(alerts: alerts)
+        let handle = useCase(desk: desk)
+        let reply = RecordingReply()
+        let ask = PermissionAsk(id: "a1", sessionID: "s1", tool: "Write", detail: "/tmp/x", shownInFull: false)
+
+        await handle.execute(event(.permissionRequest), permission: (ask, reply))
+
+        #expect(!desk.answer(askID: "a1", sessionID: "s1", decision: .allow))
+        #expect(desk.isWaiting(sessionID: "s1"))
+        #expect(desk.answer(askID: "a1", sessionID: "s1", decision: .deny))
+        #expect(reply.answers == [.deny])
+    }
+
     @Test func answeringInTheTerminalReleasesTheHook() async {
         settings.alertSettings.answersPermissions = true
         let desk = PermissionDesk(alerts: alerts)
@@ -236,7 +251,7 @@ import TendbarDomain
         let output = RecordingPermissions()
         let desk = PermissionDesk(alerts: alerts, output: output)
         let handle = useCase(desk: desk)
-        let ask = PermissionAsk(id: "a1", sessionID: "s1", tool: "Bash", detail: "touch test.txt")
+        let ask = PermissionAsk(id: "a1", sessionID: "s1", tool: "Bash", detail: "touch test.txt", shownInFull: true)
 
         await handle.execute(event(.permissionRequest), permission: (ask, RecordingReply()))
         #expect(output.shown.last == [ask])

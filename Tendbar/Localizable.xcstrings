@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@\n\nNot all of this request fits here. To allow it, answer in the terminal": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@\n\nNie cała prośba się tu mieści. Żeby zezwolić, odpowiedz w terminalu"
+          }
+        }
+      }
+    },
     "%@ ago": {
       "localizations": {
         "pl": {
@@ -421,12 +431,12 @@
         }
       }
     },
-    "Allow and Deny appear on the notification, in the panel and in the pill, under the whole command or file. The terminal prompt keeps working, and whichever you answer first decides. Your deny rules still apply": {
+    "Allow and Deny appear on the notification, in the panel and in the pill, under the whole command or file. A request that doesn't fit gets Deny only, and you allow it in the terminal. The terminal prompt keeps working, and whichever you answer first decides. Your deny rules still apply": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Zezwól i Odmów pojawiają się w powiadomieniu, w panelu i w pigułce, pod całym poleceniem albo plikiem. Pytanie w terminalu dalej działa i decyduje ta odpowiedź, której udzielisz pierwszą. Twoje reguły odmowy nadal obowiązują"
+            "value": "Zezwól i Odmów pojawiają się w powiadomieniu, w panelu i w pigułce, pod całym poleceniem albo plikiem. Prośba, która się nie mieści, ma tylko Odmów, a zezwalasz na nią w terminalu. Pytanie w terminalu dalej działa i decyduje ta odpowiedź, której udzielisz pierwszą. Twoje reguły odmowy nadal obowiązują"
           }
         }
       }
@@ -1357,6 +1367,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Brak sesji"
+          }
+        }
+      }
+    },
+    "Not all of this request fits here. To allow it, answer in the terminal": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie cała prośba się tu mieści. Żeby zezwolić, odpowiedz w terminalu"
           }
         }
       }

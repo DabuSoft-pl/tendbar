@@ -5,3 +5,11 @@ build/
 xcuserdata/
 .swiftpm/
 Tendbar/Info.plist
+
+# Signing material must never be committed
+*.p12
+*.p8
+*.pem
+*.key
+.env
+.env.*

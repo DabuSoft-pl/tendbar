@@ -16,6 +16,8 @@ final class UserNotificationsAdapter: NSObject, UNUserNotificationCenterDelegate
     var onAnswer: ((String, String, PermissionDecision) -> Void)?
 
     private static let permissionCategory = "permission"
+    /// A request not shown whole: only Deny, since Allow would approve what the banner leaves out.
+    private static let partialPermissionCategory = "permission-partial"
     private static let allowAction = "allow"
     private static let denyAction = "deny"
 
@@ -26,6 +28,7 @@ final class UserNotificationsAdapter: NSObject, UNUserNotificationCenterDelegate
         let deny = UNNotificationAction(identifier: Self.denyAction, title: String(localized: "Deny"), options: [.destructive])
         center.setNotificationCategories([
             UNNotificationCategory(identifier: Self.permissionCategory, actions: [allow, deny], intentIdentifiers: []),
+            UNNotificationCategory(identifier: Self.partialPermissionCategory, actions: [deny], intentIdentifiers: []),
         ])
     }
 
@@ -71,14 +74,16 @@ final class UserNotificationsAdapter: NSObject, UNUserNotificationCenterDelegate
         add(UNNotificationRequest(identifier: Self.identifier(session.id), content: content, trigger: nil), sound: sound, call: Self.call(for: kind))
     }
 
-    /// The tool on the subtitle and the whole command in the body, so Allow never approves something unseen.
+    /// The tool on the subtitle and the whole command in the body, so Allow never approves something unseen. A request
+    /// that does not fit gets Deny only and says so.
     func presentPermission(_ ask: PermissionAsk, for session: Session, sound: AlertSound) {
         let content = UNMutableNotificationContent()
         content.title = session.displayName
         content.subtitle = String(localized: "Allow \(ask.tool)?")
-        content.body = ask.detail ?? session.message ?? session.state.hint
+        let body = ask.detail ?? session.message ?? session.state.hint
+        content.body = ask.shownInFull ? body : String(localized: "\(body)\n\nNot all of this request fits here. To allow it, answer in the terminal")
         content.threadIdentifier = session.id
-        content.categoryIdentifier = Self.permissionCategory
+        content.categoryIdentifier = ask.shownInFull ? Self.permissionCategory : Self.partialPermissionCategory
         content.userInfo = ["sessionID": session.id, "askID": ask.id]
         content.sound = Self.sound(sound)
         add(UNNotificationRequest(identifier: Self.identifier(session.id), content: content, trigger: nil), sound: sound, call: "tendbar-waiting")

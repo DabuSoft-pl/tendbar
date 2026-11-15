@@ -38,6 +38,11 @@ enum SocketOptions {
         setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(MemoryLayout<Int32>.size))
     }
 
+    /// Keeps the descriptor out of any process Tendbar starts, so a child can never hold a waiting hook open.
+    static func closeOnExec(_ fd: Int32) {
+        _ = fcntl(fd, F_SETFD, FD_CLOEXEC)
+    }
+
     static func setBlocking(_ fd: Int32, _ blocking: Bool) {
         let flags = fcntl(fd, F_GETFL)
         _ = fcntl(fd, F_SETFL, blocking ? flags & ~O_NONBLOCK : flags | O_NONBLOCK)
@@ -65,6 +70,7 @@ public enum UnixSocketClient {
         var address = try SocketAddress.make(path: path)
         let fd = socket(AF_UNIX, SOCK_STREAM, 0)
         guard fd >= 0 else { throw SocketError.system("socket", errno) }
+        SocketOptions.closeOnExec(fd)
         SocketOptions.disableSigpipe(fd)
         SocketOptions.setTimeout(fd, option: SO_SNDTIMEO, seconds: timeout)
         let connected = SocketAddress.withSockaddr(&address) { connect(fd, $0, $1) }
@@ -72,6 +78,11 @@ public enum UnixSocketClient {
             let code = errno
             close(fd)
             throw SocketError.system("connect", code)
+        }
+        // The hook trusts an Allow only from a server run by the same user, wherever the socket path points.
+        guard UnixSocketServer.isSameUser(fd) else {
+            close(fd)
+            throw SocketError.system("getpeereid", EPERM)
         }
         return fd
     }
@@ -122,6 +133,7 @@ public final class UnixSocketServer: @unchecked Sendable {
             while true {
                 let client = accept(fd, nil, nil)
                 guard client >= 0 else { return }
+                SocketOptions.closeOnExec(client)
                 guard Self.isSameUser(client) else {
                     close(client)
                     continue
@@ -150,17 +162,25 @@ public final class UnixSocketServer: @unchecked Sendable {
     static func openListener(at path: String) throws -> Int32 {
         var address = try SocketAddress.make(path: path)
         let directory = URL(fileURLWithPath: path).deletingLastPathComponent()
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(
+            at: directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700]
+        )
         unlink(path)
         let fd = socket(AF_UNIX, SOCK_STREAM, 0)
         guard fd >= 0 else { throw SocketError.system("socket", errno) }
+        SocketOptions.closeOnExec(fd)
         let bound = SocketAddress.withSockaddr(&address) { bind(fd, $0, $1) }
         guard bound == 0 else {
             let code = errno
             close(fd)
             throw SocketError.system("bind", code)
         }
-        chmod(path, 0o600)
+        guard chmod(path, 0o600) == 0 else {
+            let code = errno
+            close(fd)
+            unlink(path)
+            throw SocketError.system("chmod", code)
+        }
         guard listen(fd, 32) == 0 else {
             let code = errno
             close(fd)
@@ -171,7 +191,8 @@ public final class UnixSocketServer: @unchecked Sendable {
         return fd
     }
 
-    /// The folder is 0700 and the socket 0600; this also refuses a peer of another user (root included).
+    /// A folder Tendbar creates is 0700 and the socket 0600; this also refuses a peer of another user (root included).
+    /// The hook uses it the other way round, to check the server it reached.
     static func isSameUser(_ fd: Int32, expected: uid_t = getuid()) -> Bool {
         var uid: uid_t = 0
         var gid: gid_t = 0

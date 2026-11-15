@@ -7,12 +7,22 @@ public struct PermissionAsk: Sendable, Equatable {
     public var tool: String
     /// The command, file path or URL, as Claude Code passed it.
     public var detail: String?
+    /// True only when `detail` is everything the request would do: no cut, and no other field that changes what runs
+    /// or what gets written (a file's new content, an MCP tool's arguments). Tendbar offers Allow only then; anything
+    /// else is answered in the terminal, which shows the whole request.
+    public var shownInFull: Bool
 
-    public init(id: String, sessionID: String, tool: String, detail: String? = nil) {
+    public init(id: String, sessionID: String, tool: String, detail: String? = nil, shownInFull: Bool = false) {
         self.id = id
         self.sessionID = sessionID
         self.tool = tool
         self.detail = detail
+        self.shownInFull = shownInFull
+    }
+
+    /// Allow approves the whole request, so it is offered only for a request shown whole. Deny is always safe.
+    public func offers(_ decision: PermissionDecision) -> Bool {
+        decision == .deny || shownInFull
     }
 }
 
