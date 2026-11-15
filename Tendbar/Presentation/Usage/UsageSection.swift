@@ -144,7 +144,7 @@ struct CompactLimits: View {
                 if let resets = resets(now: context.date) {
                     Text(resets)
                         .font(.caption)
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
             }
