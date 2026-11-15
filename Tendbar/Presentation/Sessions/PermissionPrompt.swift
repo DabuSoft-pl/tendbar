@@ -46,7 +46,7 @@ struct PermissionPrompt: View {
             .disabled(!armed)
         }
         .task {
-            try? await Task.sleep(for: .milliseconds(500))
+            guard (try? await Task.sleep(for: .milliseconds(500))) != nil else { return }
             armed = true
         }
         .accessibilityElement(children: .contain)
