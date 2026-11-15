@@ -131,7 +131,7 @@ private struct WindowLimit: View {
     }
 }
 
-/// One line per account: the name, then the five-hour and weekly usage as short bars.
+/// One account in short: the name, the five-hour and weekly usage as short bars and, below, when each resets.
 struct CompactLimits: View {
     let account: AccountUsage
     let active: Bool
@@ -139,8 +139,29 @@ struct CompactLimits: View {
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 30)) { context in
-            line(now: context.date)
+            VStack(alignment: .leading, spacing: 2) {
+                line(now: context.date)
+                if let resets = resets(now: context.date) {
+                    Text(resets)
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                }
+            }
+            .accessibilityElement(children: .combine)
         }
+    }
+
+    /// Only windows still running: a window past its reset has no next time until a new reading.
+    private func resets(now: Date) -> String? {
+        var parts: [String] = []
+        if let window = account.fiveHour, now < window.resetsAt {
+            parts.append(String(localized: "5h resets \(Elapsed.clock(window.resetsAt, now: now))"))
+        }
+        if let window = account.sevenDay, now < window.resetsAt {
+            parts.append(String(localized: "7d resets \(Elapsed.clock(window.resetsAt, now: now))"))
+        }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
     private func line(now: Date) -> some View {
@@ -154,7 +175,6 @@ struct CompactLimits: View {
             gauge(String(localized: "5h"), account.fiveHour, length: LimitWindow.fiveHourLength, now: now)
             gauge(String(localized: "7d"), account.sevenDay, length: LimitWindow.sevenDayLength, now: now)
         }
-        .accessibilityElement(children: .combine)
     }
 
     private func gauge(_ title: String, _ window: LimitWindow?, length: TimeInterval, now: Date) -> some View {

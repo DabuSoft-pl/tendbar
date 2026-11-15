@@ -261,6 +261,26 @@
         }
       }
     },
+    "5h resets %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5h odnowa %@"
+          }
+        }
+      }
+    },
+    "7d resets %@": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7d odnowa %@"
+          }
+        }
+      }
+    },
     "A name has 1–32 characters: lowercase letters, digits and hyphens.": {
       "localizations": {
         "pl": {
@@ -647,6 +667,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Błąd poświadczeń chmury"
+          }
+        }
+      }
+    },
+    "Compact": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skrócone"
           }
         }
       }
@@ -1467,16 +1497,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Raz dziennie Tendbar czyta listę wydań na GitHubie. Nic o Tobie ani o Twoich sesjach nie jest wysyłane. Wersje beta dają nowości wcześniej i mogą mieć niedoróbki"
-          }
-        }
-      }
-    },
-    "One line per account": {
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jedna linia na konto"
           }
         }
       }

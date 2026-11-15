@@ -411,7 +411,7 @@ private struct AppearanceSettings: View {
                 Toggle("Today's turns and waits", isOn: $preferences.panelToday)
                 Picker("Usage limits", selection: $preferences.usageStyle) {
                     Text("Full").tag(UsageStyle.full)
-                    Text("One line per account").tag(UsageStyle.compact)
+                    Text("Compact").tag(UsageStyle.compact)
                     Text("Hidden").tag(UsageStyle.hidden)
                 }
             }
