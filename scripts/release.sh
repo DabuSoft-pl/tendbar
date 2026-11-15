@@ -142,8 +142,14 @@ make_delta() {
     diskutil image attach --nobrowse --readOnly --mountPoint "$dir/mount" "$dir"/*.dmg > /dev/null || return 1
     ditto "$dir/mount/Tendbar.app" "$dir/Tendbar.app"
     diskutil eject "$dir/mount" > /dev/null || return 1
+    # A downloaded release is only diffed when it is still our signed build, so a replaced asset fails here loudly.
+    codesign --verify --deep --strict "$dir/Tendbar.app" || return 1
+    if [[ -n "${TEAM_ID:-}" ]]; then
+        codesign -dv "$dir/Tendbar.app" 2>&1 | grep -qx "TeamIdentifier=$TEAM_ID" || return 1
+    fi
     local old_build
     old_build=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$dir/Tendbar.app/Contents/Info.plist") || return 1
+    [[ "$old_build" =~ ^[0-9]+$ ]] || return 1
     [[ "$old_build" != "$BUILD" ]] || return 0
     local delta="$OUT/Tendbar$BUILD-$old_build.delta" signature
     "$SPARKLE_BIN/BinaryDelta" create "$dir/Tendbar.app" "$APP" "$delta" || return 1

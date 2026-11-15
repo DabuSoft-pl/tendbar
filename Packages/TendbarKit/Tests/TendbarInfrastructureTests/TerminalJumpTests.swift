@@ -112,6 +112,19 @@ import TendbarDomain
         ))
     }
 
+    @Test func kittyNeverTalksToANetworkAddress() {
+        let plan = TerminalJump.plan(for: TerminalContext(kittyWindowID: "3", kittySocket: "tcp:localhost:12345"), tools: Self.tools)
+
+        #expect(plan == .activate(bundleID: TerminalJump.kitty))
+    }
+
+    @Test func safeValuesAreAsciiAndNeverLookLikeAnOption() {
+        #expect(TerminalJump.safe("/dev/ttys001") == "/dev/ttys001")
+        #expect(TerminalJump.safe("-S/tmp/evil") == nil)
+        #expect(TerminalJump.safe("/dev/ttyś001") == nil)
+        #expect(TerminalJump.safe("w0t0p0:１２３") == nil)
+    }
+
     @Test func kittyWithoutRemoteControlOnlyActivates() {
         #expect(TerminalJump.plan(for: TerminalContext(kittyWindowID: "3"), tools: Self.tools) == .activate(bundleID: TerminalJump.kitty))
     }

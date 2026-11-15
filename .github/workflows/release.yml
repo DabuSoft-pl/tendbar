@@ -13,6 +13,9 @@ name: Release
 #   SPARKLE_ED_KEY             the Sparkle private key (`generate_keys --account tendbar -x key.txt`, then its contents)
 # Variables:
 #   TEAM_ID                    the Apple Developer team id
+#
+# Releases are made locally (scripts/release.sh) and this workflow is disabled; the signing keys are not on GitHub.
+# If it is ever turned on, keep the secrets in the protected "release" environment, not in the repository.
 on:
   push:
     tags: ["v*"]
@@ -29,18 +32,39 @@ jobs:
     # The same Xcode as local builds and the test workflow.
     runs-on: xcode-27
     timeout-minutes: 60
+    # Secrets live in this environment, so required reviewers can gate every run.
+    environment: release
     permissions:
       contents: write
     env:
       DEVELOPER_DIR: /Applications/Xcode_27.2.app/Contents/Developer
+      XCODEGEN_VERSION: 2.46.0
+      XCODEGEN_SHA256: 4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806
       TEAM_ID: ${{ vars.TEAM_ID }}
       NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
       NOTARY_ISSUER: ${{ secrets.NOTARY_ISSUER }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          # The write token is only needed by gh, through GH_TOKEN; it does not stay in .git/config.
+          persist-credentials: false
+
+      - name: Tag on main
+        # Only reviewed code gets signed: the tagged commit must already be on main.
+        run: git merge-base --is-ancestor "$GITHUB_SHA" origin/main
 
       - name: Tests
         run: make test
+
+      - name: XcodeGen
+        # A pinned release checked against a hash written here, not whatever Homebrew serves today.
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/xcodegen.zip" \
+            "https://github.com/yonaskolb/XcodeGen/releases/download/$XCODEGEN_VERSION/xcodegen.zip"
+          echo "$XCODEGEN_SHA256  $RUNNER_TEMP/xcodegen.zip" | shasum -a 256 --check
+          unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
 
       - name: Signing keychain
         env:
@@ -68,9 +92,7 @@ jobs:
       - name: Build, sign and notarize
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          brew install xcodegen
-          make release
+        run: make release
 
       - name: Draft release
         env:

@@ -148,7 +148,8 @@ public enum TerminalJump {
                 bundleID: bundleID
             )
         }
-        if let window = id(context.kittyWindowID), let socket = safe(context.kittySocket),
+        // Only a local socket: `--to tcp:…` would send the command over the network.
+        if let window = id(context.kittyWindowID), let socket = safe(context.kittySocket), socket.hasPrefix("unix:"),
            let executable = tools.locate("kitty") {
             return .command(
                 TerminalCommand(executable, ["@", "--to", socket, "focus-window", "--match", "id:\(window)"]),
@@ -177,9 +178,11 @@ public enum TerminalJump {
         return value
     }
 
+    /// ASCII letters, digits and `-_:/.` only, up to 128 characters and not starting with `-`, so a value can sit
+    /// in an AppleScript string or after a command-line option without ever being read as anything else.
     static func safe(_ value: String?) -> String? {
-        guard let value, !value.isEmpty, value.count <= 128 else { return nil }
-        let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_:/."))
+        guard let value, !value.isEmpty, value.count <= 128, !value.hasPrefix("-") else { return nil }
+        let allowed = Set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_:/.".unicodeScalars)
         return value.unicodeScalars.allSatisfy(allowed.contains) ? value : nil
     }
 
