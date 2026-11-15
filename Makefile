@@ -25,9 +25,12 @@ install: generate
 	ditto $(RELEASE_APP) $(INSTALL_DIR)/Tendbar.app
 	open $(INSTALL_DIR)/Tendbar.app
 
-# Developer ID signed, notarized DMG in build/release; see scripts/release.sh for the variables it needs.
+# Developer ID signed, notarized DMG with the Sparkle feed and deltas in build/release (scripts/release.sh lists every
+# variable). The team and the notarytool profile default to Dabusoft's own; override them on the command line.
+TEAM_ID ?= ZFG7SZ938C
+NOTARY_PROFILE ?= dabusoft
 release:
-	scripts/release.sh
+	TEAM_ID="$(TEAM_ID)" NOTARY_PROFILE="$(NOTARY_PROFILE)" scripts/release.sh
 
 screenshots: build
 	$(APP)/Contents/MacOS/Tendbar -AppleLanguages "(en)" -screenshots docs/images

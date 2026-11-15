@@ -68,7 +68,7 @@ make test       # Domain, Application and Infrastructure tests
 make build      # xcodegen + xcodebuild (Debug, ad-hoc signed) into build/
 make run        # build and open the app
 make install    # Release build into /Applications (then "Connect" in the app)
-make release    # Developer ID signed, notarized DMG in build/release (scripts/release.sh lists what it needs)
+make release    # notarized DMG, appcast.xml and Sparkle deltas in build/release (team ZFG7SZ938C, notarytool profile dabusoft)
 ```
 
 Plan: https://claude.ai/artifact/5KoBQbPYDmyNbsJrpXraj8
