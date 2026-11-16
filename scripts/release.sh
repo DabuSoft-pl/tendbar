@@ -14,8 +14,9 @@
 #   SPARKLE_KEY_FILE  a file with the private key (`generate_keys --account tendbar -x <file>` exports it)
 # Optional:
 #   KEYCHAIN        the keychain holding the certificate (CI uses a temporary one)
-#   SKIP_NOTARIZE=1 sign only, for checking the signature without waiting for Apple
-#   SIGN_IDENTITY   another identity; "-" signs ad hoc, for trying the script without a certificate
+#   SKIP_NOTARIZE=1 sign only, for checking the signature without waiting for Apple (a test build: no Sparkle
+#                   signature, no appcast)
+#   SIGN_IDENTITY   another identity; "-" signs ad hoc, for trying the script without a certificate (a test build)
 #   DELTA_COUNT     how many earlier releases get a Sparkle delta update (default 2, 0 for none); needs `gh`
 #   BETA=<n>        builds beta n of MARKETING_VERSION for the pre-release v<version>-beta.<n>: its appcast keeps the
 #                   items of the latest release and adds this one on the `beta` channel, which only copies with
@@ -117,6 +118,19 @@ if [[ "${SKIP_NOTARIZE:-}" != 1 ]]; then
     spctl --assess --type execute --verbose=2 "$APP"
     spctl --assess --type open --context context:primary-signature --verbose=2 "$DMG"
 fi
+
+# Only a notarized Developer ID build of this team gets the Sparkle signature: copies install whatever carries it,
+# even with another code signature. A test build (SIGN_IDENTITY=- or SKIP_NOTARIZE=1) ends here, with no appcast.
+if [[ "$IDENTITY" == - || "${SKIP_NOTARIZE:-}" == 1 ]]; then
+    echo "Test build: $DMG is not signed for Sparkle and gets no appcast. Do not publish it."
+    exit 0
+fi
+for signed in "$APP" "$DMG"; do
+    if ! codesign -dv "$signed" 2>&1 | grep -qx "TeamIdentifier=$TEAM_ID"; then
+        echo "$signed is not signed by team $TEAM_ID" >&2
+        exit 1
+    fi
+done
 
 # The Sparkle feed for this release. It goes up with the DMG, and the app reads the copy on the latest published
 # release, so CURRENT_PROJECT_VERSION has to grow with every release.
