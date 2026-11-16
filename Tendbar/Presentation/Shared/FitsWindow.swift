@@ -21,15 +21,20 @@ private struct UnifiedTitleBar: ViewModifier {
     func body(content: Content) -> some View {
         content
             .background(WindowReader(window: $window))
-            .onChange(of: window) {
-                guard let window else { return }
-                window.titleVisibility = .hidden
-                window.titlebarAppearsTransparent = true
-                window.titlebarSeparatorStyle = .none
-                window.styleMask.insert(.fullSizeContentView)
-                window.standardWindowButton(.miniaturizeButton)?.isHidden = true
-                window.standardWindowButton(.zoomButton)?.isHidden = true
-            }
+            .onChange(of: window) { apply() }
+            // SwiftUI reuses the Settings window and makes its title bar opaque again when it reopens, which drew a
+            // bar and a line over the scrolling content. So the style goes on again each time the content appears.
+            .onAppear { DispatchQueue.main.async { apply() } }
+    }
+
+    private func apply() {
+        guard let window else { return }
+        window.titleVisibility = .hidden
+        window.titlebarAppearsTransparent = true
+        window.titlebarSeparatorStyle = .none
+        window.styleMask.insert(.fullSizeContentView)
+        window.standardWindowButton(.miniaturizeButton)?.isHidden = true
+        window.standardWindowButton(.zoomButton)?.isHidden = true
     }
 }
 
