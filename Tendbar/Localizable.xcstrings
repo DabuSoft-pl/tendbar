@@ -641,6 +641,16 @@
         }
       }
     },
+    "Claude Notifications…": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Powiadomienia Claude…"
+          }
+        }
+      }
+    },
     "Claude worked": {
       "localizations": {
         "pl": {
@@ -1211,16 +1221,6 @@
         }
       }
     },
-    "Leave Claude app sessions to its notifications": {
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sesje z aplikacji Claude zostaw jej powiadomieniom"
-          }
-        }
-      }
-    },
     "Light": {
       "localizations": {
         "pl": {
@@ -1471,6 +1471,16 @@
         }
       }
     },
+    "Notify about Claude app sessions too": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Powiadamiaj też o sesjach z aplikacji Claude"
+          }
+        }
+      }
+    },
     "Notify when": {
       "localizations": {
         "pl": {
@@ -1527,6 +1537,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Organizacja niedozwolona"
+          }
+        }
+      }
+    },
+    "Otherwise each event gives two banners: one from Claude and one from Tendbar": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inaczej każde zdarzenie da dwa banery: od Claude i od Tendbara"
           }
         }
       }
@@ -2137,6 +2157,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wypróbuj"
+          }
+        }
+      }
+    },
+    "Turn off Claude's own notifications": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wyłącz własne powiadomienia Claude"
           }
         }
       }

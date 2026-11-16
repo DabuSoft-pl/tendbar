@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 import TendbarApplication
+import TendbarDomain
 
 enum SettingsPage: String, CaseIterable, Identifiable {
     case claudeCode, notifications, appearance, general
@@ -236,13 +237,29 @@ private struct NotificationSettings: View {
                     .disabled(!preferences.notifyDone)
                     .padding(.leading, 16)
                 Toggle("A turn fails", isOn: $preferences.notifyFailed)
-                Toggle(isOn: $preferences.leaveDesktopBanners) {
+                Toggle(isOn: Binding(get: { !preferences.leaveDesktopBanners }, set: { preferences.leaveDesktopBanners = !$0 })) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Leave Claude app sessions to its notifications")
-                        Text("The Claude desktop app notifies and asks for permission itself. The screen edge still glows")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        Text("Notify about Claude app sessions too")
+                        if preferences.leaveDesktopBanners {
+                            Text("The Claude desktop app notifies and asks for permission itself. The screen edge still glows")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     }
+                }
+                if !preferences.leaveDesktopBanners {
+                    // macOS lets no app turn off another app's notifications, so Tendbar opens the right pane instead.
+                    LabeledContent {
+                        Button("Claude Notifications…") { actions.openNotificationSettings(bundleID: TerminalContext.claudeDesktopBundleID) }
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Turn off Claude's own notifications")
+                            Text("Otherwise each event gives two banners: one from Claude and one from Tendbar")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.leading, 16)
                 }
             } header: {
                 Text("Notify when")

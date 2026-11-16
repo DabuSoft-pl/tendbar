@@ -80,7 +80,11 @@ final class SystemController {
     }
 
     func openNotificationSettings() {
-        let id = Bundle.main.bundleIdentifier ?? "pl.dabusoft.tendbar"
+        openNotificationSettings(bundleID: Bundle.main.bundleIdentifier ?? "pl.dabusoft.tendbar")
+    }
+
+    /// The Notifications pane of System Settings, on the given app when macOS can open it there.
+    func openNotificationSettings(bundleID id: String) {
         for string in [
             "x-apple.systempreferences:com.apple.Notifications-Settings.extension?id=\(id)",
             "x-apple.systempreferences:com.apple.Notifications-Settings.extension",

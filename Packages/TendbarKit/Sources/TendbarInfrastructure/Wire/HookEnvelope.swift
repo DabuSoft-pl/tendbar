@@ -255,7 +255,7 @@ public enum PermissionAnswer {
     /// The hook output that allows or denies the prompt.
     public static func hookOutput(_ decision: PermissionDecision) -> Data {
         var verdict: [String: Any] = ["behavior": decision.rawValue]
-        if decision == .deny { verdict["message"] = "Denied from a Tendbar notification." }
+        if decision == .deny { verdict["message"] = "Denied by the user." }
         let output: [String: Any] = [
             "hookSpecificOutput": ["hookEventName": "PermissionRequest", "decision": verdict],
         ]
