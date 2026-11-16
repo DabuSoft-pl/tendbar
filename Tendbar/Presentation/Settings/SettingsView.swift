@@ -353,6 +353,13 @@ private struct NotificationSettings: View {
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             actions.refresh()
         }
+        // Allowing from the macOS prompt does not activate Tendbar, so check again until the permission arrives.
+        .task(id: granted) {
+            while !granted, !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(2))
+                await actions.refreshNotifications()
+            }
+        }
     }
 
     private var granted: Bool {

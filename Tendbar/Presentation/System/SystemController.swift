@@ -31,14 +31,21 @@ final class SystemController {
 
     func refresh() {
         model.loginItem = checkLaunchAtLogin.execute()
-        Task { model.notificationPermission = await checkPermission.execute() }
+        Task { await refreshNotifications() }
+    }
+
+    /// Reads the permission again. Once macOS reports it granted, an error left from asking is stale and goes.
+    func refreshNotifications() async {
+        let permission = await checkPermission.execute()
+        model.notificationPermission = permission
+        if permission == .authorized { model.notificationError = nil }
     }
 
     func requestNotifications() {
         Task {
             let (permission, error) = await requestPermission.execute()
             model.notificationPermission = permission
-            model.notificationError = error
+            model.notificationError = permission == .authorized ? nil : error
         }
     }
 
