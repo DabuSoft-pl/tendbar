@@ -107,7 +107,11 @@ final class NotchController {
         let inside = area.contains(mouse)
         if !inside { hover.closedByClick = false }
         let openedByAsk = followAsks(inside: inside)
-        let expanded = (inside || openedByAsk) && !hover.closedByClick
+        var expanded = (inside || openedByAsk) && !hover.closedByClick
+        #if DEBUG
+        // `-demo-pill` keeps the pill open for screenshots.
+        if CommandLine.arguments.contains("-demo-pill") { expanded = true }
+        #endif
         if expanded != hover.expanded { hover.expanded = expanded }
     }
 

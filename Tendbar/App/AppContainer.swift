@@ -214,6 +214,10 @@ final class AppContainer {
         self.shortcut = shortcut
     }
 
+    #if DEBUG
+    func showDemoNotch() { showNotch() }
+    #endif
+
     private func showNotch() {
         let notch = NotchController(
             sessions: sessions, sessionActions: sessionActions, usage: usage, claudeCode: claudeCode, preferences: preferences

@@ -8,6 +8,23 @@ struct TendbarApp: App {
     init() {
         #if DEBUG
         Screenshots.runIfRequested()
+        // `-demo`: the sample sessions and limits in the real menu bar and notch, for store screenshots.
+        if CommandLine.arguments.contains("-demo") {
+            let demo = PreviewData.container()
+            demo.preferences.hideFromCapture = false
+            if CommandLine.arguments.contains("-demo-light") {
+                DispatchQueue.main.async { NSApp.appearance = NSAppearance(named: .aqua) }
+            }
+            demo.showDemoNotch()
+            // `-demo-panel` shows the panel under the bird by itself: a menu bar extra closes as soon as it opens
+            // in an app that is not active, so the same content goes into a panel of its own.
+            if CommandLine.arguments.contains("-demo-panel") {
+                demo.preferences.notchView = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) { DemoPanel.show(demo) }
+            }
+            _container = State(initialValue: demo)
+            return
+        }
         #endif
         _container = State(initialValue: AppContainer.live())
     }
@@ -124,3 +141,36 @@ private struct StatusImage: View {
         return image
     }
 }
+
+#if DEBUG
+@MainActor
+private enum DemoPanel {
+    static var panel: NSPanel?
+
+    static func show(_ container: AppContainer) {
+        let item = NSApp.windows.filter { String(describing: type(of: $0)).contains("StatusBarWindow") }.max { $0.frame.minX < $1.frame.minX }
+        guard let item else { return }
+        let content = NSHostingView(rootView: MenuContent(container: container).fixedSize(horizontal: false, vertical: true))
+        content.layoutSubtreeIfNeeded()
+        let size = content.fittingSize
+        let effect = NSVisualEffectView(frame: NSRect(origin: .zero, size: size))
+        effect.material = .menu
+        effect.state = .active
+        effect.wantsLayer = true
+        effect.layer?.cornerRadius = 12
+        effect.layer?.masksToBounds = true
+        content.frame = effect.bounds
+        content.autoresizingMask = [.width, .height]
+        effect.addSubview(content)
+        let frame = NSRect(x: item.frame.midX - size.width / 2, y: item.frame.minY - size.height - 6, width: size.width, height: size.height)
+        let panel = NSPanel(contentRect: frame, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
+        panel.isOpaque = false
+        panel.backgroundColor = .clear
+        panel.hasShadow = true
+        panel.level = .popUpMenu
+        panel.contentView = effect
+        panel.orderFrontRegardless()
+        self.panel = panel
+    }
+}
+#endif
