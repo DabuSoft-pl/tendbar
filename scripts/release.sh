@@ -126,7 +126,9 @@ if [[ "$IDENTITY" == - || "${SKIP_NOTARIZE:-}" == 1 ]]; then
     exit 0
 fi
 for signed in "$APP" "$DMG"; do
-    if ! codesign -dv "$signed" 2>&1 | grep -qx "TeamIdentifier=$TEAM_ID"; then
+    # Read the whole output first: grep -q stops early, codesign gets SIGPIPE and pipefail fails the check.
+    details=$(codesign -dv "$signed" 2>&1)
+    if ! grep -qx "TeamIdentifier=$TEAM_ID" <<<"$details"; then
         echo "$signed is not signed by team $TEAM_ID" >&2
         exit 1
     fi
