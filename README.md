@@ -17,6 +17,10 @@
 </p>
 
 <p align="center">
+  <a href="https://alternativeto.net/software/tendbar/about/?utm_source=badge&utm_medium=referral"><img src="https://alternativeto.net/static/badges/badge-compact-color.svg" width="148" height="48" alt="Tendbar on AlternativeTo"></a>
+</p>
+
+<p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/images/panel-dark.png">
     <img src="docs/images/panel-light.png" width="400" alt="The Tendbar panel: five sessions with their state and last reply, and the usage limits of two accounts">
