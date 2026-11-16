@@ -53,6 +53,8 @@ public struct AlertSettings: Sendable, Equatable {
     public var mutedFolders: Set<String> = []
     /// The Claude desktop app notifies about its own sessions, so Tendbar leaves their banners to it.
     public var leavesClaudeDesktopBanners = true
+    /// No banner or sound for a session whose tab is in front; the screen edge still glows.
+    public var glowOnlyInFront = true
     /// A Focus with Tendbar's filter is on: banners still go to Notification Center, which follows the Focus, but
     /// Tendbar plays no sound of its own and the screen edge stays dark.
     public var quietForFocus = false

@@ -237,6 +237,14 @@ private struct NotificationSettings: View {
                     .disabled(!preferences.notifyDone)
                     .padding(.leading, 16)
                 Toggle("A turn fails", isOn: $preferences.notifyFailed)
+                Toggle(isOn: $preferences.glowOnlyInFront) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Only a glow when the session is in front")
+                        Text("No banner or sound while you look at the session's tab. A reminder still comes")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
                 Toggle(isOn: Binding(get: { !preferences.leaveDesktopBanners }, set: { preferences.leaveDesktopBanners = !$0 })) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Notify about Claude app sessions too")

@@ -14,6 +14,12 @@ public enum JumpOutcome: Sendable, Equatable {
 @MainActor
 public protocol TerminalNavigating: AnyObject {
     func jump(to session: Session) -> JumpOutcome
+    /// Whether the session's tab is in front and the user is at the Mac, so a glow is enough.
+    func isInFront(_ session: Session) -> Bool
+}
+
+public extension TerminalNavigating {
+    func isInFront(_ session: Session) -> Bool { false }
 }
 
 public enum LoginItemState: Sendable, Equatable {

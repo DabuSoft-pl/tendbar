@@ -1031,6 +1031,26 @@
         }
       }
     },
+    "Only a glow when the session is in front": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tylko poświata, gdy sesja jest na wierzchu"
+          }
+        }
+      }
+    },
+    "No banner or sound while you look at the session's tab. A reminder still comes": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bez banera i dźwięku, gdy patrzysz na kartę tej sesji. Przypomnienie i tak przyjdzie"
+          }
+        }
+      }
+    },
     "Forget this account": {
       "localizations": {
         "pl": {

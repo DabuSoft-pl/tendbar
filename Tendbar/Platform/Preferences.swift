@@ -35,6 +35,7 @@ final class Preferences: AlertSettingsProviding {
         static let permissionActions = "notify.permissionActions"
         static let nextSessionShortcut = "shortcut.nextSession"
         static let desktopBanners = "notify.desktop.leaveToApp"
+        static let glowOnlyInFront = "notify.inFront.glowOnly"
     }
 
     @ObservationIgnored private let defaults: UserDefaults
@@ -47,6 +48,8 @@ final class Preferences: AlertSettingsProviding {
     var notifyFailed: Bool { didSet { defaults.set(notifyFailed, forKey: Key.failed) } }
     /// Sessions in the Claude desktop app get its own banners, not Tendbar's.
     var leaveDesktopBanners: Bool { didSet { defaults.set(leaveDesktopBanners, forKey: Key.desktopBanners) } }
+    /// A session whose tab is in front only makes the screen edge glow.
+    var glowOnlyInFront: Bool { didSet { defaults.set(glowOnlyInFront, forKey: Key.glowOnlyInFront) } }
     var playSound: Bool { didSet { defaults.set(playSound, forKey: Key.sound) } }
     var soundStyle: SoundStyle { didSet { defaults.set(soundStyle.rawValue, forKey: Key.soundStyle) } }
     /// Minutes a session may wait for you before a reminder; 0 turns reminders off.
@@ -105,12 +108,13 @@ final class Preferences: AlertSettingsProviding {
         defaults.register(defaults: [
             Key.needsYou: true, Key.done: true, Key.failed: true, Key.sound: true, Key.glow: true, Key.glowDone: true, Key.notch: true, Key.limits: true,
             Key.pillLines: true, Key.panelPreviews: true, Key.hideFromCapture: true,
-            Key.remindAfter: 5, Key.quietAfter: 15, Key.limitResets: true, Key.today: true, Key.desktopBanners: true,
+            Key.remindAfter: 5, Key.quietAfter: 15, Key.limitResets: true, Key.today: true, Key.desktopBanners: true, Key.glowOnlyInFront: true,
         ])
         notifyNeedsYou = defaults.bool(forKey: Key.needsYou)
         notifyDone = defaults.bool(forKey: Key.done)
         notifyFailed = defaults.bool(forKey: Key.failed)
         leaveDesktopBanners = defaults.bool(forKey: Key.desktopBanners)
+        glowOnlyInFront = defaults.bool(forKey: Key.glowOnlyInFront)
         playSound = defaults.bool(forKey: Key.sound)
         soundStyle = defaults.string(forKey: Key.soundStyle).flatMap(SoundStyle.init) ?? .bird
         remindAfterMinutes = defaults.integer(forKey: Key.remindAfter)
@@ -164,6 +168,7 @@ final class Preferences: AlertSettingsProviding {
         settings.showsReplyPreview = showReplyPreview
         settings.mutedFolders = Set(mutedFolders)
         settings.leavesClaudeDesktopBanners = leaveDesktopBanners
+        settings.glowOnlyInFront = glowOnlyInFront
         settings.quietForFocus = defaults.bool(forKey: FocusFilter.quietKey)
         return settings
     }

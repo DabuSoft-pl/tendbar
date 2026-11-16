@@ -98,6 +98,9 @@ final class StubSettings: AlertSettingsProviding {
 final class StubNavigator: TerminalNavigating {
     var outcome: JumpOutcome = .jumped
     private(set) var jumps: [TerminalContext] = []
+    var inFront = false
+
+    func isInFront(_ session: Session) -> Bool { inFront }
 
     func jump(to session: Session) -> JumpOutcome {
         jumps.append(session.terminal)

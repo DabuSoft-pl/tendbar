@@ -14,6 +14,7 @@ public final class HandleHookEvent {
     private let activityOutput: ActivityOutput
     private let calendar: Calendar
     private let desk: PermissionDesk?
+    private let navigator: TerminalNavigating?
 
     public init(
         repository: SessionRepository,
@@ -25,9 +26,11 @@ public final class HandleHookEvent {
         activity: ActivityRepository,
         activityOutput: ActivityOutput,
         calendar: Calendar = .current,
-        desk: PermissionDesk? = nil
+        desk: PermissionDesk? = nil,
+        navigator: TerminalNavigating? = nil
     ) {
         self.desk = desk
+        self.navigator = navigator
         self.repository = repository
         self.output = output
         self.alerts = alerts
@@ -82,7 +85,8 @@ public final class HandleHookEvent {
     private func notify(_ kind: AlertKind, sessionID: String, permission: (ask: PermissionAsk, reply: PermissionReply)?) -> Bool {
         let settings = settings.alertSettings
         guard settings.notifies(kind), var session = repository.load().sessions[sessionID], !settings.mutes(session) else { return false }
-        if settings.leavesBanners(of: session) {
+        let inFront = settings.glowOnlyInFront && navigator?.isInFront(session) == true
+        if settings.leavesBanners(of: session) || inFront {
             if settings.flashes(kind) { flasher.flash(FlashTone(kind)) }
             return false
         }

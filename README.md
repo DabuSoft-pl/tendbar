@@ -42,6 +42,7 @@ nowhere else.
   from any app to the session waiting longest, then to unread replies.
 - **Notifications that matter.** A banner when a session needs you, finishes or fails, each one switchable, with
   Tendbar's own short bird calls (or the system sound). Optionally the screen edge glows in the state's color.
+  While you look at a session's tab, it only glows (Settings → Notifications).
   Right-click a session to mute its folder. Sessions in the Claude desktop app keep the app's own notifications
   and permission prompts, with Tendbar adding only the glow and reminders (switchable).
 - **Quiet during a Focus.** Add Tendbar's filter to a Focus (System Settings → Focus → App Filters) and its sounds

@@ -67,7 +67,7 @@ final class AppContainer {
         startUsage = StartUsage(repository: a.usage, output: usage, checkWarnings: checkWarnings)
         handleHookEvent = HandleHookEvent(
             repository: a.sessions, output: sessions, alerts: a.alerts, flasher: a.flasher, settings: preferences, transcripts: a.transcripts,
-            activity: a.activity, activityOutput: activity, desk: permissionDesk
+            activity: a.activity, activityOutput: activity, desk: permissionDesk, navigator: a.navigator
         )
         checkAttention = CheckAttention(
             repository: a.sessions, output: sessions, alerts: a.alerts, flasher: a.flasher, settings: preferences, clock: a.clock

@@ -12,7 +12,7 @@ import TendbarDomain
     let activity = InMemoryActivity()
     let now = Date(timeIntervalSince1970: 1_800_000_000)
 
-    private func useCase(preview: String? = nil, title: String? = nil, desk: PermissionDesk? = nil) -> HandleHookEvent {
+    private func useCase(preview: String? = nil, title: String? = nil, desk: PermissionDesk? = nil, navigator: StubNavigator? = nil) -> HandleHookEvent {
         HandleHookEvent(
             repository: sessions,
             output: sessions,
@@ -22,7 +22,8 @@ import TendbarDomain
             transcripts: StubTranscripts(preview: preview, title: title),
             activity: activity,
             activityOutput: activity,
-            desk: desk
+            desk: desk,
+            navigator: navigator
         )
     }
 
@@ -168,6 +169,33 @@ import TendbarDomain
         let handle = useCase()
 
         await handle.execute(desktop(.stop))
+
+        #expect(alerts.presented.map(\.0) == [.done])
+    }
+
+    @Test func aSessionInFrontOnlyGlows() async {
+        settings.alertSettings.answersPermissions = true
+        let navigator = StubNavigator()
+        navigator.inFront = true
+        let reply = RecordingReply()
+        let handle = useCase(desk: PermissionDesk(alerts: alerts), navigator: navigator)
+
+        await handle.execute(event(.permissionRequest), permission: (PermissionAsk(id: "a1", sessionID: "s1", tool: "Bash", detail: "date"), reply))
+        await handle.execute(event(.stop, at: 1))
+
+        #expect(alerts.presented.isEmpty)
+        #expect(alerts.permissions.isEmpty)
+        #expect(reply.answers == [nil])
+        #expect(flasher.tones == [.attention, .success])
+    }
+
+    @Test func aSessionInFrontStillGetsBannersWhenTurnedOff() async {
+        settings.alertSettings.glowOnlyInFront = false
+        let navigator = StubNavigator()
+        navigator.inFront = true
+        let handle = useCase(navigator: navigator)
+
+        await handle.execute(event(.stop))
 
         #expect(alerts.presented.map(\.0) == [.done])
     }

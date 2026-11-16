@@ -20,6 +20,26 @@ final class AppleScriptTerminalNavigator: TerminalNavigating {
         perform(TerminalJump.plan(for: session.terminal, folder: session.cwd, tools: tools))
     }
 
+    func isInFront(_ session: Session) -> Bool {
+        // Away from the Mac (or locked), a glow alone would go unseen.
+        let idle = CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: CGEventType(rawValue: ~0)!)
+        guard idle < 120, let front = NSWorkspace.shared.frontmostApplication?.bundleIdentifier else { return false }
+        switch TerminalFront.check(for: session.terminal, tools: tools) {
+        case .unknown:
+            return false
+        case let .app(bundleID):
+            return front == bundleID
+        case let .script(source, bundleID):
+            guard front == bundleID else { return false }
+            var error: NSDictionary?
+            return NSAppleScript(source: source)?.executeAndReturnError(&error).stringValue == TerminalFront.yes
+        case let .command(command, bundleID, isFront):
+            guard front == bundleID else { return false }
+            let result = runner.run(command)
+            return result.succeeded && isFront(result.output)
+        }
+    }
+
     private func perform(_ plan: JumpPlan) -> JumpOutcome {
         switch plan {
         case .unavailable:

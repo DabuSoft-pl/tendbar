@@ -120,9 +120,7 @@ public enum TerminalJump {
             return .tmux(TmuxTarget(executable: executable, socket: socket, pane: pane, host: host))
         }
 
-        let host = safe(context.hostBundleID)
-        let mapped = context.program.flatMap { bundleIDs[$0] } ?? (context.kittyWindowID != nil ? kitty : nil)
-        guard let bundleID = host ?? mapped else { return .unavailable }
+        guard let bundleID = bundleID(of: context) else { return .unavailable }
         let tty = safe(context.tty)
 
         switch bundleID {
@@ -160,6 +158,12 @@ public enum TerminalJump {
             return .openFolder(folder, bundleID: bundleID)
         }
         return .activate(bundleID: bundleID)
+    }
+
+    /// The app the session runs in.
+    static func bundleID(of context: TerminalContext) -> String? {
+        safe(context.hostBundleID)
+            ?? context.program.flatMap { bundleIDs[$0] } ?? (context.kittyWindowID != nil ? kitty : nil)
     }
 
     /// The Claude desktop app takes `local_` and up to 64 letters, digits and hyphens.
