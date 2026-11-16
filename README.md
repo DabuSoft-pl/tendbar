@@ -6,7 +6,7 @@
 
 <p align="center">
   Your Claude Code sessions, one glance away in the menu bar.<br>
-  Know when a session is done, waiting for you or failed, jump back to its terminal, and watch your usage limits.
+  See which session is done, waiting for you or failed, jump back to its terminal, and watch your usage limits.
 </p>
 
 <p align="center">
@@ -23,73 +23,26 @@
   </picture>
 </p>
 
-Run Claude Code in a few terminals and you end up checking tabs to see which one is done and which one is stuck on a
-permission prompt. Tendbar tends those sessions for you, so your attention goes where Claude is waiting for it, and
-nowhere else.
-
-- **Nothing leaves your Mac.** No account, no telemetry; the only network use is checking GitHub for updates.
-- **Your login stays yours.** Tendbar never reads OAuth tokens or the Keychain and never calls Anthropic's servers;
-  limits come from what Claude Code itself hands its status line.
-- **Every account.** Separate `CLAUDE_CONFIG_DIR` profiles side by side, each with its own limits.
-
 ## Features
 
-- **Every session in one list.** The name Claude Code gave the conversation (the folder until it has one), state
-  and the start of Claude's last reply. A ring while Claude works, amber when it waits for you, vermilion after an
-  error, sage green until you read a finished reply. Close a terminal tab and its session ends there too.
-- **Back to the right terminal.** Click a session, or pick it with the arrow keys and press Return, to jump to its
-  tab or pane (see [Terminals](#terminals)). Or turn on a shortcut in Settings → General (⌃⌥J, for one) that goes
-  from any app to the session waiting longest, then to unread replies.
-- **Notifications that matter.** A banner when a session needs you, finishes or fails, each one switchable, with
-  Tendbar's own short bird calls (or the system sound). Optionally the screen edge glows in the state's color.
-  While you look at a session's tab, it only glows (Settings → Notifications).
-  Right-click a session to mute its folder. Sessions in the Claude desktop app keep the app's own notifications
-  and permission prompts, with Tendbar adding only the glow and reminders (switchable).
-- **Quiet during a Focus.** Add Tendbar's filter to a Focus (System Settings → Focus → App Filters) and its sounds
-  and glow stay off while that Focus is on. The banners follow the Focus as usual.
-- **Follow-ups.** One reminder when a session has waited for you longer than you set (5 minutes by default), and a
-  warning when a working session goes quiet for 15 minutes, since it may hang on a command or a dropped connection.
-- **Answer without the terminal.** Opt in, and a permission prompt shows the whole command or file with Allow and
-  Deny in the panel, in the notch pill and on the banner. A request that doesn't fit (over 2,000 characters, a file's
-  new content, an MCP tool's arguments) gets Deny only, so Allow never approves something you didn't see. The
-  terminal prompt keeps working, whichever you answer first decides, and your deny rules still apply.
-- **A pill by the notch.** The lead state, a count and two thin lines for the five-hour and weekly limits. Hover it,
-  or the notch while the pill is hidden, for the sessions and every account's limits; a click on a session closes it
-  until the pointer leaves. On Macs without a notch it sits in the middle of the menu bar.
-- **Usage limits per account.** Five-hour and weekly usage with a warning at 80% and 90%, for every account you use,
-  including separate `CLAUDE_CONFIG_DIR` profiles. A tick on each bar marks the even pace, and when you run ahead of
-  it Tendbar tells you when the limit would run out. Resets show as a clock time, and a limit that warned you
-  announces when it is available again.
-- **Your day in one line.** The panel counts today's turns, Claude's working time and how long it waited for you.
-  Click it for the last seven days: a bar per day and the week's totals.
-- **Shown your way.** Settings → Appearance picks what sits next to the bird in the menu bar, when the pill shows up,
-  and how dense the panel is: with or without reply previews, full or one-line limits. Right-click the bird for
-  Settings, the update check and Quit.
-- **English and Polish.** Follows the macOS language, or pick one in Settings → General.
+- **All sessions in one list** with their state and the start of Claude's last reply.
+- **Jump back** to a session's terminal tab or pane with a click, the arrow keys, or a global shortcut.
+- **Notifications** when a session needs you, finishes or fails, with optional screen-edge glow and bird calls.
+  Quiet during a Focus.
+- **Follow-ups:** a reminder when a session waits too long, a warning when a working one goes silent.
+- **Allow or Deny** permission prompts from the panel, the notch pill or the banner (opt in). A request Tendbar
+  can't show in full (over 2,000 characters, a file's new content, MCP tool arguments) gets Deny only.
+- **A pill by the notch** with the lead state and both limits; hover it for the details.
+- **Usage limits** (five-hour and weekly, Pro and Max plans) for every `CLAUDE_CONFIG_DIR` profile, with warnings
+  at 80% and 90%.
+- **Daily stats:** turns, working time and waiting time, plus the last seven days.
+- English and Polish.
 
 <p align="center">
   <img src="docs/images/notch-expanded.png" width="520" alt="The notch pill expanded on hover: four sessions and the limits of two accounts">
 </p>
 
-## Terminals
-
-| Terminal | Clicking a session |
-|---|---|
-| Terminal, iTerm2 | Switches to the session's tab |
-| WezTerm | Activates the session's pane |
-| kitty | Focuses the session's window (needs `allow_remote_control` and `listen_on` in `kitty.conf`) |
-| tmux | Selects the pane, then the tab running tmux in Terminal or iTerm2 |
-| VS Code, Cursor and other forks | Opens the window of the session's folder |
-| Claude desktop app (Code tab, local sessions) | Opens the session in the app |
-| Ghostty, Warp, others | Brings the app forward |
-
 ## Install
-
-Download `Tendbar-<version>.dmg` from the [latest release](https://github.com/DabuSoft-pl/tendbar/releases/latest)
-(macOS 26+) and drag Tendbar to Applications. It is signed with a Developer ID and notarized by Apple, and keeps
-itself up to date through Sparkle.
-
-Or with [Homebrew](https://brew.sh):
 
 ```bash
 brew tap dabusoft-pl/tap
@@ -97,115 +50,73 @@ brew trust dabusoft-pl/tap
 brew install --cask tendbar
 ```
 
-Then open Settings (the gear in the panel, or ⌘,) → Claude Code and press **Connect**. Keep the app in
-`/Applications`, since the hooks point at the helper inside it. Settings → General → **Open at login** keeps it
-running after a restart.
+Or download the DMG from the [latest release](https://github.com/DabuSoft-pl/tendbar/releases/latest) (macOS 26+,
+signed and notarized, updates itself through Sparkle).
 
-To build it yourself (Xcode 27+, [XcodeGen](https://github.com/yonaskolb/XcodeGen)):
+Then open Settings (⌘,) → Claude Code → **Connect**. Keep the app in `/Applications`: the hooks point at the helper
+inside it.
 
-```bash
-brew install xcodegen
-git clone https://github.com/DabuSoft-pl/tendbar.git
-cd tendbar
-make install   # Release build into /Applications/Tendbar.app
-```
+## Terminals
 
-Such a build is signed ad hoc, so it runs on the Mac that built it.
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/settings-dark.png">
-    <img src="docs/images/settings-light.png" width="700" alt="Tendbar settings: the Claude Code connection and the profiles with their hooks">
-  </picture>
-</p>
+| Terminal | Clicking a session |
+|---|---|
+| Terminal, iTerm2 | Switches to the tab |
+| WezTerm | Activates the pane |
+| kitty | Focuses the window (needs `allow_remote_control` and `listen_on`) |
+| tmux | Selects the pane, then the tab in Terminal or iTerm2 |
+| VS Code, Cursor and forks | Opens the folder's window |
+| Claude desktop app | Opens the session |
+| Ghostty, Warp, others | Brings the app forward |
 
 ## Privacy
 
-- **Nothing leaves your Mac.** Tendbar has no analytics and never calls Anthropic. Its only network use is the
-  update check ([Sparkle](https://sparkle-project.org)): once a day it reads the list of releases on GitHub, sending
-  no system profile. Turn it off in Settings → General → Updates.
-- **No secrets.** It never reads tokens or the Keychain and never switches or rotates accounts.
-- **Only what it needs.** The hook helper drops prompts, tool inputs and outputs, file contents and Claude's replies
-  before anything reaches the app. The reply preview is read from the local transcript file. The one exception is a
-  permission prompt: its tool and command, file path or URL (up to 2,000 characters) reach the app for Allow and
-  Deny, stay in memory only and never go to a file or the event log.
-- **Not on shared screens.** The pill and the glow stay out of screen sharing and recordings (Settings → General).
-- **Your settings, your call.** `~/.claude/settings.json` changes only when you press Connect or Disconnect, never at
-  launch. Each change is backed up first (the last five are kept), and Disconnect removes only Tendbar's entries.
-  When a profile's hooks stop matching this copy of Tendbar (another copy, a deleted build, missing events), the
-  menu bar item shows a warning triangle and the panel says which `settings.json` needs Connect.
+- **Nothing leaves your Mac.** No analytics, no calls to Anthropic. The only network use is the daily update check
+  on GitHub, which you can turn off.
+- **No secrets.** Never reads OAuth tokens or the Keychain, never switches accounts. Limits come from what Claude
+  Code passes to its status line.
+- **Minimal data.** The hook helper drops prompts, tool inputs and outputs and Claude's replies before anything
+  reaches the app. The reply preview (first 200 characters) is read from the local transcript. Permission prompt
+  details stay in memory only.
+- **Your settings, your call.** `settings.json` changes only on Connect or Disconnect, never at launch, with a
+  backup first.
+  Disconnect removes only Tendbar's entries.
 
-Everything Tendbar keeps lives in `~/Library/Application Support/Tendbar` (folder 0700, files 0600):
-
-| File | Contents |
-|---|---|
-| `sessions.json` | Session id, folder, the conversation's title from its transcript, terminal ids, the Claude Code process id, state, the permission message and the first 200 characters of the last reply |
-| `usage.json` | Limit readings per account, keyed by config directory and e-mail address |
-| `activity.json` | Per day for the last month: the number of turns and waits, their total time, and the longest wait and turn with their folder name |
-| `events.jsonl` | Only when Settings → General → Event log is on (off by default; turning it off deletes it). Hook events for troubleshooting: session id, event, folder, transcript path, message, notification type, the error of a failed turn, and limits when they change. Rotated at 5 MB |
+Data lives in `~/Library/Application Support/Tendbar` (folder 0700, files 0600).
 
 ## How it works
 
-Connecting adds Tendbar's hooks to Claude Code. On each hook event Claude Code runs `tendbar-hook`, a small helper
-inside the app bundle. It keeps only the fields Tendbar uses, adds the terminal context (`TERM_PROGRAM`, the host
-app, iTerm/Terminal session ids, WezTerm, kitty and tmux pane ids and sockets, the TTY, `CLAUDE_CONFIG_DIR`, the
-Claude Code process id and its start time, the Claude desktop app's session id), sends the event over a Unix socket
-(`~/Library/Application Support/Tendbar/tendbar.sock`, mode 0600) and exits at once. It prints nothing and always
-exits 0, so Claude Code is never slowed down or blocked, even when Tendbar is not running.
+Connecting adds Tendbar's hooks to Claude Code. Each hook runs `tendbar-hook`, a helper inside the app that strips
+the event down, adds terminal context and sends it over a Unix socket. It prints nothing and exits at once, so
+Claude Code is never slowed down, even when Tendbar is not running. The one exception is a permission prompt with
+Allow/Deny turned on: the helper then waits for your answer while the terminal prompt keeps working.
 
-A permission prompt is the one place the helper waits. It asks the app whether to wait for Allow or Deny from
-Tendbar: with the setting off the app answers at once and the helper exits; with it on, the helper waits (up to 590
-seconds, under a 600 second hook timeout) while Claude Code shows its usual prompt. Answering in the terminal goes
-ahead as normal, and the helper is released with no output as soon as the session moves on. Only Allow or Deny in
-Tendbar (panel, pill or banner) makes it print Claude Code's `PermissionRequest` decision.
-
-A tab closed or a process killed sends no `SessionEnd`, so every 30 seconds the app checks that each session's
-Claude Code process still runs, and ends the session when it is gone.
-
-Limits come from the `rate_limits` Claude Code passes to status lines (five-hour and weekly windows on Pro and Max
-plans, after the first reply of a session). Connecting wraps your `statusLine`: `tendbar-hook --statusline` sends the
-limits to the app, then runs your previous status line command with the same input and prints its output unchanged.
-Disconnecting puts the previous command back. The Claude desktop app runs no status line, so its sessions show up in
-Tendbar but do not update limits; a terminal session does.
-
-Readings are filed under the account signed in at the time, so switching accounts starts a new entry, and the
-previous account keeps its last reading until its window resets.
+Limits come from the `rate_limits` Claude Code passes to status lines: Tendbar wraps your `statusLine`, runs your
+original command unchanged, and restores it on Disconnect.
 
 ## Develop
 
+Needs Xcode 27+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen).
+
 ```bash
-make test         # Domain, Application and Infrastructure tests
-make run          # generate the Xcode project, build and open a Debug build
-make install      # Release build into /Applications
-make screenshots  # render the README images from sample data
+make test      # tests
+make run       # Debug build
+make install   # Release build into /Applications
 ```
 
-The code follows Clean Architecture: a domain package, use cases and adapters, described in [`CLAUDE.md`](CLAUDE.md).
-UI strings are English, with the Polish translation in `Tendbar/Localizable.xcstrings`. The app icon is drawn by
-`tools/make-icon.swift` and the bird calls are synthesized by `tools/make-sounds.swift`, so the app ships no recorded
-or licensed audio.
+The architecture is described in [`CLAUDE.md`](CLAUDE.md).
 
 ## Similar projects
 
-Claude Code on the Mac has a lively set of companions, and one of them may suit you better:
-
-- [Vibe Notch](https://github.com/farouqaldori/vibe-notch) puts sessions in a notch island with approve and deny
-  controls.
-- [Nudge](https://github.com/ZachDeLong/nudge) and [Checkpoint](https://github.com/DouweBos/Checkpoint) focus on
-  answering permission prompts from the menu bar.
-- [Clabar](https://github.com/Magir/clabar), [claude-code-usage](https://github.com/pedroprates/claude-code-usage)
-  and [CodexBar](https://github.com/steipete/CodexBar) show usage limits, CodexBar for several providers.
-- [Claude Code Menu](https://github.com/PiXeL16/claudecode-macmenu) adds usage analytics and notifications.
-
-Tendbar's take is attention rather than usage: which session waits for you, for how long, and the shortest way back
-to its terminal, with limits read from Claude Code itself and nothing about you sent anywhere.
+[Vibe Notch](https://github.com/farouqaldori/vibe-notch), [Nudge](https://github.com/ZachDeLong/nudge),
+[Checkpoint](https://github.com/DouweBos/Checkpoint), [Clabar](https://github.com/Magir/clabar),
+[CodexBar](https://github.com/steipete/CodexBar), [Claude Code Menu](https://github.com/PiXeL16/claudecode-macmenu).
+Tendbar focuses on attention rather than usage: which session waits for you, and the fastest way back to it.
 
 ## Contributing
 
-Bugs and ideas are welcome in [issues](https://github.com/DabuSoft-pl/tendbar/issues); Settings → General → Diagnostics
-copies what a bug report needs without anything private. See [CONTRIBUTING.md](CONTRIBUTING.md), and report security
-problems privately as described in [SECURITY.md](SECURITY.md).
+Bugs and ideas go to [issues](https://github.com/DabuSoft-pl/tendbar/issues) (Settings → General → Diagnostics
+copies what a report needs). See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md).
 
 ## License
 
-[MIT](LICENSE). Tendbar is an independent project, not affiliated with or endorsed by Anthropic.
+[MIT](LICENSE). Not affiliated with or endorsed by Anthropic.
