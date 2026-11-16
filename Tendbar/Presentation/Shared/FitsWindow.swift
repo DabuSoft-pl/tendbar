@@ -22,9 +22,11 @@ private struct UnifiedTitleBar: ViewModifier {
         content
             .background(WindowReader(window: $window))
             .onChange(of: window) { apply() }
-            // SwiftUI reuses the Settings window and makes its title bar opaque again when it reopens, which drew a
-            // bar and a line over the scrolling content. So the style goes on again each time the content appears.
-            .onAppear { DispatchQueue.main.async { apply() } }
+            // SwiftUI sets the window's title bar style again whenever the app deactivates, the appearance changes or
+            // the window reopens, which made the bar opaque and drew a line over the scrolling content. Saying it
+            // through SwiftUI keeps it hidden through all of those.
+            .toolbar(removing: .title)
+            .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
     }
 
     private func apply() {
