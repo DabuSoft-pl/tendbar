@@ -25,9 +25,27 @@ struct UsageSection: View {
                         }
                     }
                 }
+                if model.now.timeIntervalSince(first.updatedAt) > Self.staleAfter {
+                    SourceHint()
+                }
             }
             .font(.callout)
+        } else {
+            SourceHint().font(.callout)
         }
+    }
+
+    /// A reading this old usually means only the Claude app was in use, which passes no limits on.
+    static let staleAfter: TimeInterval = 60 * 60
+}
+
+/// Where limits come from: the Claude app runs no status line, so its sessions never update them.
+private struct SourceHint: View {
+    var body: some View {
+        Text("Limits update from Claude Code in a terminal. The Claude app doesn't pass them on.")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 

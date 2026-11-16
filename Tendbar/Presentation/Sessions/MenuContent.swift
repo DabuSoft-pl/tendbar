@@ -92,7 +92,7 @@ struct MenuContent: View {
             if container.preferences.panelToday {
                 ActivitySection(model: container.activity)
             }
-            if !container.usage.isEmpty, container.preferences.usageStyle != .hidden {
+            if container.preferences.usageStyle != .hidden {
                 Divider()
                 UsageSection(model: container.usage, actions: container.usageActions, compact: container.preferences.usageStyle == .compact)
             }

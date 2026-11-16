@@ -1021,6 +1021,16 @@
         }
       }
     },
+    "Limits update from Claude Code in a terminal. The Claude app doesn't pass them on.": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limity przychodzą z Claude Code w terminalu. Aplikacja Claude ich nie przekazuje."
+          }
+        }
+      }
+    },
     "Forget this account": {
       "localizations": {
         "pl": {

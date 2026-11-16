@@ -164,7 +164,8 @@ Claude Code process still runs, and ends the session when it is gone.
 Limits come from the `rate_limits` Claude Code passes to status lines (five-hour and weekly windows on Pro and Max
 plans, after the first reply of a session). Connecting wraps your `statusLine`: `tendbar-hook --statusline` sends the
 limits to the app, then runs your previous status line command with the same input and prints its output unchanged.
-Disconnecting puts the previous command back.
+Disconnecting puts the previous command back. The Claude desktop app runs no status line, so its sessions show up in
+Tendbar but do not update limits; a terminal session does.
 
 Readings are filed under the account signed in at the time, so switching accounts starts a new entry, and the
 previous account keeps its last reading until its window resets.
