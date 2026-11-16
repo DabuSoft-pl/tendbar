@@ -34,7 +34,7 @@
   can't show in full (over 2,000 characters, a file's new content, MCP tool arguments) gets Deny only.
 - **A pill by the notch** with the lead state and both limits; hover it for the details.
 - **Usage limits** (five-hour and weekly, Pro and Max plans) for every `CLAUDE_CONFIG_DIR` profile, with warnings
-  at 80% and 90%.
+  at 80% and 90%. The Claude desktop app runs no status line, so its sessions don't update limits.
 - **Daily stats:** turns, working time and waiting time, plus the last seven days.
 - English and Polish.
 
