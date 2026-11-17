@@ -100,6 +100,9 @@ public struct Session: Sendable, Identifiable, Equatable {
     public var stoppedAt: Date?
     /// A subagent once started after the main thread stopped (PA3's background agent), so done waits longer.
     public var usesBackgroundAgents: Bool
+    /// A subagent stopped since the last prompt: the background agent already answered, so the turn's Stop needs
+    /// only the short grace. Not persisted; a restart mid-turn falls back to the long grace.
+    public var agentStoppedThisTurn = false
     public var unread: Bool
     public var message: String?
     public var preview: String?

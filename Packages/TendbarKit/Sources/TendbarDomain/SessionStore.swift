@@ -76,6 +76,7 @@ public struct SessionStore: Sendable, Equatable {
             session.turnWaited = 0
             session.stopDeferred = false
             session.stoppedAt = nil
+            session.agentStoppedThisTurn = false
             session.unread = false
             session.message = nil
         case .postToolUse:
@@ -104,6 +105,7 @@ public struct SessionStore: Sendable, Equatable {
             if let agent = event.agentID { session.runningAgents.insert(agent) }
         case .subagentStop:
             if let agent = event.agentID { session.runningAgents.remove(agent) }
+            session.agentStoppedThisTurn = true
             if session.stopDeferred, session.runningAgents.isEmpty,
                session.state == .working || session.state == .needsYou {
                 session.stopDeferred = false
@@ -158,13 +160,13 @@ public struct SessionStore: Sendable, Equatable {
     }
 
     /// Finishes the turns whose main thread stopped at least `stopGrace` (`backgroundGrace` for sessions with
-    /// background agents) ago with no subagent started since.
+    /// background agents, unless one already stopped this turn) ago with no subagent started since.
     /// Returns each finished session as it was before and after; the turn ended at `before.stoppedAt`.
     public mutating func finishPendingStops(now: Date) -> [(before: Session, after: Session)] {
         var finished: [(before: Session, after: Session)] = []
         for (id, before) in sessions {
             guard before.stopDeferred, before.runningAgents.isEmpty, let stoppedAt = before.stoppedAt,
-                  now.timeIntervalSince(stoppedAt) >= (before.usesBackgroundAgents ? Self.backgroundGrace : Self.stopGrace),
+                  now.timeIntervalSince(stoppedAt) >= (before.usesBackgroundAgents && !before.agentStoppedThisTurn ? Self.backgroundGrace : Self.stopGrace),
                   before.state != .ended else { continue }
             var after = before
             after.stopDeferred = false

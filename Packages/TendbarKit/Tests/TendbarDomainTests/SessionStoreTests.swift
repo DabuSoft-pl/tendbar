@@ -216,6 +216,18 @@ import Testing
         #expect(store.finishPendingStops(now: start.addingTimeInterval(41)).count == 1)
     }
 
+    @Test func theStopAfterTheBackgroundAgentAnsweredWaitsOnlyTheShortGrace() {
+        var store = SessionStore()
+        // PA3 delivers the agent's answer as a new prompt; the agent stops, then the main thread.
+        for hook in [event("UserPromptSubmit"), event("Stop", at: 1), agent("SubagentStart", "a1", at: 2),
+                     event("UserPromptSubmit", at: 10), agent("SubagentStop", "a1", at: 10), event("Stop", at: 11)] {
+            store.apply(hook)
+        }
+        #expect(store.sessions["s1"]?.usesBackgroundAgents == true)
+        #expect(store.finishPendingStops(now: start.addingTimeInterval(13)).isEmpty)
+        #expect(store.finishPendingStops(now: start.addingTimeInterval(14)).count == 1)
+    }
+
     @Test func aSessionEndClearsSubagentsLeftRunning() {
         var store = SessionStore()
 
