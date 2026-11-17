@@ -18,6 +18,8 @@
 
 <p align="center">
   <a href="https://alternativeto.net/software/tendbar/about/?utm_source=badge&utm_medium=referral"><img src="https://alternativeto.net/static/badges/badge-compact-color.svg" width="148" height="48" alt="Tendbar on AlternativeTo"></a>
+  <br>
+  Listed on <a href="https://macmenubar.com/">MacMenuBar</a>
 </p>
 
 <p align="center">
