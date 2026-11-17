@@ -198,6 +198,32 @@ import TendbarDomain
         #expect(try installer.status() == .outdated)
     }
 
+    @Test func repairsAStatusLineAnotherToolReplaced() throws {
+        let installer = HookInstaller(settingsURL: settings, hookPath: hookPath)
+        try installer.connect(now: now)
+        var object = try read()
+        object["statusLine"] = ["type": "command", "command": "bash ~/.claude/pa3/statusline.sh"]
+        try JSONSerialization.data(withJSONObject: object).write(to: settings)
+        #expect(try installer.status() == .outdated)
+
+        #expect(try installer.repairStatusLine(now: now.addingTimeInterval(1)) != nil)
+
+        #expect(try installer.status() == .connected)
+        let command = (try read()["statusLine"] as? [String: Any])?["command"] as? String
+        #expect(command.flatMap(HookInstaller.wrappedCommand(in:)) == "bash ~/.claude/pa3/statusline.sh")
+        #expect(try installer.repairStatusLine(now: now.addingTimeInterval(2)) == nil)
+    }
+
+    @Test func leavesAStatusLineAloneWithoutOurHooks() throws {
+        let json = #"{"statusLine":{"type":"command","command":"bash other.sh"}}"#
+        try write(json)
+
+        #expect(try HookInstaller(settingsURL: settings, hookPath: hookPath).repairStatusLine(now: now) == nil)
+
+        #expect(String(decoding: try Data(contentsOf: settings), as: UTF8.self) == json)
+        #expect(try backups().isEmpty)
+    }
+
     @Test func hooksOfAnotherCopyThatIsGoneStopEveryEvent() throws {
         let gone = "/Users/me/build/release/Tendbar.app/Contents/MacOS/tendbar-hook"
         try HookInstaller(settingsURL: settings, hookPath: gone).connect(now: now)

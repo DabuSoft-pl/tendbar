@@ -57,9 +57,7 @@ public struct HookInstaller: Sendable {
         let wrapped = statusLine.map(Self.isOurs(command:)) == true
         if commands.isEmpty && !wrapped { return .disconnected }
         let expected = Self.command(for: hookPath)
-        let timeouts = Self.ourTimeouts(in: settings)
-        let complete = Self.events.allSatisfy { commands[$0] == [expected] && timeouts[$0] == [Self.timeout(for: $0)] }
-            && commands.count == Self.events.count
+        let complete = hooksCurrent(in: settings)
         let statusLineCurrent = statusLine?.hasPrefix(expected + " " + Self.statusLineFlag) == true
         if complete && statusLineCurrent { return .connected }
         let paths = Set(commands.values.joined().compactMap(Self.helperPath(in:))
@@ -67,6 +65,30 @@ public struct HookInstaller: Sendable {
         let others = paths.subtracting([hookPath])
         if others.contains(where: { !fileExists($0) }) { return .helperGone }
         return others.isEmpty ? .outdated : .otherCopy
+    }
+
+    /// Every event has exactly our current hook with its timeout.
+    private func hooksCurrent(in settings: [String: Any]) -> Bool {
+        let commands = Self.ourCommands(in: settings)
+        let expected = Self.command(for: hookPath)
+        let timeouts = Self.ourTimeouts(in: settings)
+        return Self.events.allSatisfy { commands[$0] == [expected] && timeouts[$0] == [Self.timeout(for: $0)] }
+            && commands.count == Self.events.count
+    }
+
+    /// Re-wraps a statusLine another tool replaced or removed (installers rewrite it whole), keeping theirs as
+    /// `--next`. Only when all our hooks are present and current: a disconnected profile, or a statusLine that is
+    /// already ours (another copy, an old path), stays as it is. Returns the backup when it wrote.
+    @discardableResult
+    public func repairStatusLine(now: Date = Date()) throws -> URL? {
+        let settings = try load()
+        guard hooksCurrent(in: settings),
+              Self.statusLineCommand(in: settings).map(Self.isOurs(command:)) != true
+        else { return nil }
+        let repaired = try Self.wrappingStatusLine(in: settings, hookPath: hookPath)
+        let backup = try backupIfPresent(now: now)
+        try write(repaired)
+        return backup
     }
 
     /// The helper a hook command runs: the single-quoted path that `command(for:)` writes, or the first word.

@@ -10,8 +10,11 @@ public final class ClaudeHookConnector: HookConnecting {
         self.hookPath = hookPath
     }
 
+    /// Also re-wraps a statusLine another tool replaced: this runs at launch, on panel open and every 30 s.
     public func status(configDirectory: String?) throws -> HookConnection {
-        switch try installer(configDirectory).status() {
+        let installer = installer(configDirectory)
+        _ = try? installer.repairStatusLine()
+        return switch try installer.status() {
         case .connected: .connected
         case .outdated: .outdated
         case .otherCopy: .otherCopy
