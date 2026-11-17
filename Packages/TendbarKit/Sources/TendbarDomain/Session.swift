@@ -103,6 +103,9 @@ public struct Session: Sendable, Identifiable, Equatable {
     /// A subagent stopped since the last prompt: the background agent already answered, so the turn's Stop needs
     /// only the short grace. Not persisted; a restart mid-turn falls back to the long grace.
     public var agentStoppedThisTurn = false
+    /// The background agent resumed this turn without a prompt (PA3 after a picker or a hand-back), so its
+    /// SubagentStop may be the turn's only end. Not persisted.
+    public var resumedByAgent = false
     public var unread: Bool
     public var message: String?
     public var preview: String?

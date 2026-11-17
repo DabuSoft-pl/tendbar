@@ -228,6 +228,38 @@ import Testing
         #expect(store.finishPendingStops(now: start.addingTimeInterval(14)).count == 1)
     }
 
+    @Test func theBackgroundAgentResumingWithoutAPromptIsWorking() {
+        var store = SessionStore()
+        store.applyAll(event("UserPromptSubmit"), event("Stop", at: 1), agent("SubagentStart", "a1", at: 2),
+              event("UserPromptSubmit", at: 10), agent("SubagentStop", "a1", at: 10), event("Stop", at: 11))
+        #expect(store.finishPendingStops(now: start.addingTimeInterval(14)).count == 1)
+
+        // A picker answer resumes the agent: no prompt, only its SubagentStart.
+        store.applyAll(event("PermissionRequest", at: 20), agent("SubagentStart", "a1", at: 30))
+        #expect(store.sessions["s1"]?.state == .working)
+        #expect(store.sessions["s1"]?.unread == false)
+        #expect(store.sessions["s1"]?.turnWaited == 0)
+        #expect(store.finishPendingStops(now: start.addingTimeInterval(200)).isEmpty)
+
+        store.applyAll(event("UserPromptSubmit", at: 300), agent("SubagentStop", "a1", at: 300), event("Stop", at: 301))
+        #expect(store.finishPendingStops(now: start.addingTimeInterval(303)).isEmpty)
+        #expect(store.finishPendingStops(now: start.addingTimeInterval(304)).count == 1)
+        #expect(store.sessions["s1"]?.state == .done)
+    }
+
+    @Test func aResumedAgentEndingWithoutAStopFinishesAfterTheShortGrace() {
+        var store = SessionStore()
+        store.applyAll(event("UserPromptSubmit"), event("Stop", at: 1), agent("SubagentStart", "a1", at: 2),
+              event("UserPromptSubmit", at: 10), agent("SubagentStop", "a1", at: 10), event("Stop", at: 11))
+        #expect(store.finishPendingStops(now: start.addingTimeInterval(14)).count == 1)
+
+        store.applyAll(agent("SubagentStart", "a1", at: 20), agent("SubagentStop", "a1", at: 50))
+        #expect(store.sessions["s1"]?.state == .working)
+        #expect(store.finishPendingStops(now: start.addingTimeInterval(52)).isEmpty)
+        #expect(store.finishPendingStops(now: start.addingTimeInterval(53)).count == 1)
+        #expect(store.sessions["s1"]?.state == .done)
+    }
+
     @Test func aSessionEndClearsSubagentsLeftRunning() {
         var store = SessionStore()
 
@@ -250,6 +282,10 @@ import Testing
 extension SessionStore {
     /// Applies the event and, for a Stop, lets the grace pass with no subagent starting, as the app's timer does.
     @discardableResult
+    mutating func applyAll(_ events: HookEvent...) {
+        for event in events { apply(event) }
+    }
+
     mutating func applySettled(_ event: HookEvent) -> Session {
         let session = apply(event)
         guard event.kind == .stop else { return session }

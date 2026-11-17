@@ -77,6 +77,7 @@ public struct SessionStore: Sendable, Equatable {
             session.stopDeferred = false
             session.stoppedAt = nil
             session.agentStoppedThisTurn = false
+            session.resumedByAgent = false
             session.unread = false
             session.message = nil
         case .postToolUse:
@@ -102,6 +103,18 @@ public struct SessionStore: Sendable, Equatable {
         case .subagentStart:
             // Foreground subagents start inside the working turn; one starting after the Stop is a background one.
             if session.stopDeferred || session.state == .done { session.usesBackgroundAgents = true }
+            // PA3 resumes its background agent without a prompt (a picker answer, a hand-back): a new turn.
+            if session.usesBackgroundAgents, !session.stopDeferred,
+               session.state == .done || session.state == .needsYou || session.state == .idle {
+                session.state = .working
+                session.turnStartedAt = event.sentAt
+                session.turnWaited = 0
+                session.waitingSince = nil // the wait belonged to the turn before
+                session.agentStoppedThisTurn = false
+                session.resumedByAgent = true
+                session.unread = false
+                session.message = nil
+            }
             if let agent = event.agentID { session.runningAgents.insert(agent) }
         case .subagentStop:
             if let agent = event.agentID { session.runningAgents.remove(agent) }
@@ -113,6 +126,11 @@ public struct SessionStore: Sendable, Equatable {
                 session.state = .done
                 session.unread = true
                 session.message = nil
+            } else if session.resumedByAgent, !session.stopDeferred, session.runningAgents.isEmpty,
+                      session.state == .working {
+                // A resumed turn may get no Stop; finish it after the short grace unless one follows.
+                session.stopDeferred = true
+                session.stoppedAt = event.sentAt
             }
         case .stopFailure:
             session.stopDeferred = false
