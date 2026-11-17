@@ -11,6 +11,8 @@ public struct HookEvent: Sendable, Equatable {
         case stop
         case stopFailure
         case sessionEnd
+        case subagentStart
+        case subagentStop
         case other(String)
 
         public init(name: String) {
@@ -23,6 +25,8 @@ public struct HookEvent: Sendable, Equatable {
             case "Stop": self = .stop
             case "StopFailure": self = .stopFailure
             case "SessionEnd": self = .sessionEnd
+            case "SubagentStart": self = .subagentStart
+            case "SubagentStop": self = .subagentStop
             default: self = .other(name)
             }
         }
@@ -64,6 +68,12 @@ public struct HookEvent: Sendable, Equatable {
         self.agentID = agentID
         self.terminal = terminal
         self.sentAt = sentAt
+    }
+
+    /// Headless `claude` runs that plugins start in the system temp dir, not sessions the user opened.
+    public var isInTempDirectory: Bool {
+        guard let cwd else { return false }
+        return ["/private/var/folders/", "/var/folders/", "/tmp/", "/private/tmp/"].contains { cwd.hasPrefix($0) }
     }
 
     public var asksForAttention: Bool {

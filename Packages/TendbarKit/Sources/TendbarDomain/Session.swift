@@ -92,6 +92,10 @@ public struct Session: Sendable, Identifiable, Equatable {
     public var flaggedQuiet: Bool
     /// The subagent whose permission prompt the session waits on; nil for the main thread.
     public var waitingAgent: String?
+    /// Subagents started and not yet stopped, so a main-thread Stop can wait for background ones.
+    public var runningAgents: Set<String>
+    /// The main thread stopped while subagents still ran; the last SubagentStop finishes the turn.
+    public var stopDeferred: Bool
     public var unread: Bool
     public var message: String?
     public var preview: String?
@@ -112,6 +116,8 @@ public struct Session: Sendable, Identifiable, Equatable {
         remindedWait: Bool = false,
         flaggedQuiet: Bool = false,
         waitingAgent: String? = nil,
+        runningAgents: Set<String> = [],
+        stopDeferred: Bool = false,
         unread: Bool = false,
         message: String? = nil,
         preview: String? = nil,
@@ -130,6 +136,8 @@ public struct Session: Sendable, Identifiable, Equatable {
         self.remindedWait = remindedWait
         self.flaggedQuiet = flaggedQuiet
         self.waitingAgent = waitingAgent
+        self.runningAgents = runningAgents
+        self.stopDeferred = stopDeferred
         self.unread = unread
         self.message = message
         self.preview = preview

@@ -47,6 +47,7 @@ public final class HandleHookEvent {
     public func execute(_ event: HookEvent, permission: (ask: PermissionAsk, reply: PermissionReply)? = nil) async {
         var held = false
         defer { if let permission, !held { permission.reply.send(nil) } }
+        guard !event.isInTempDirectory else { return }
         var store = repository.load()
         let before = store.sessions[event.sessionID]
         let previous = before?.state
@@ -77,7 +78,7 @@ public final class HandleHookEvent {
     private static func readsTranscript(after kind: HookEvent.Kind) -> Bool {
         switch kind {
         case .sessionStart, .userPromptSubmit, .permissionRequest, .notification, .stop, .stopFailure: true
-        case .postToolUse, .sessionEnd, .other: false
+        case .postToolUse, .sessionEnd, .subagentStart, .subagentStop, .other: false
         }
     }
 

@@ -30,6 +30,8 @@ struct SessionRecord: Codable {
     var remindedWait: Bool?
     var flaggedQuiet: Bool?
     var waitingAgent: String?
+    var runningAgents: [String]?
+    var stopDeferred: Bool?
     var unread: Bool
     var message: String?
     var preview: String?
@@ -49,6 +51,8 @@ struct SessionRecord: Codable {
         remindedWait = session.remindedWait
         flaggedQuiet = session.flaggedQuiet
         waitingAgent = session.waitingAgent
+        runningAgents = session.runningAgents.isEmpty ? nil : session.runningAgents.sorted()
+        stopDeferred = session.stopDeferred ? true : nil
         unread = session.unread
         message = session.message
         preview = session.preview
@@ -70,6 +74,8 @@ struct SessionRecord: Codable {
             remindedWait: remindedWait ?? false,
             flaggedQuiet: flaggedQuiet ?? false,
             waitingAgent: waitingAgent,
+            runningAgents: Set(runningAgents ?? []),
+            stopDeferred: stopDeferred ?? false,
             unread: unread,
             message: message,
             preview: preview,

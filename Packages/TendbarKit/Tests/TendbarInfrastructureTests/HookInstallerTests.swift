@@ -39,6 +39,7 @@ import TendbarDomain
 
         #expect(backup == nil)
         #expect(try installer.status() == .connected)
+        #expect(HookInstaller.events.contains("SubagentStart") && HookInstaller.events.contains("SubagentStop"))
         for event in HookInstaller.events {
             #expect(commands(event, in: try read()) == ["'\(hookPath)'"])
         }

@@ -159,4 +159,51 @@ import Testing
         store.markSeen("done")
         #expect(store.nextForYou == nil)
     }
+
+    private func agent(_ name: String, _ id: String, at offset: TimeInterval) -> HookEvent {
+        var hook = event(name, at: offset)
+        hook.agentID = id
+        return hook
+    }
+
+    @Test func aStopWaitsForBackgroundSubagents() {
+        var store = SessionStore()
+
+        apply(&store, event("UserPromptSubmit"), agent("SubagentStart", "a1", at: 1), event("Stop", at: 5))
+        #expect(store.sessions["s1"]?.state == .working)
+
+        apply(&store, agent("PostToolUse", "a1", at: 20), agent("SubagentStop", "a1", at: 60))
+        #expect(store.sessions["s1"]?.state == .done)
+        #expect(store.sessions["s1"]?.unread == true)
+        #expect(store.sessions["s1"]?.runningAgents.isEmpty == true)
+    }
+
+    @Test func aForegroundSubagentChangesNothing() {
+        var store = SessionStore()
+
+        apply(&store, event("UserPromptSubmit"), agent("SubagentStart", "a1", at: 1), agent("SubagentStop", "a1", at: 4))
+        #expect(store.sessions["s1"]?.state == .working)
+
+        apply(&store, event("Stop", at: 5))
+        #expect(store.sessions["s1"]?.state == .done)
+        #expect(store.sessions["s1"]?.stopDeferred == false)
+    }
+
+    @Test func aSessionEndClearsSubagentsLeftRunning() {
+        var store = SessionStore()
+
+        apply(&store, event("UserPromptSubmit"), agent("SubagentStart", "a1", at: 1), event("Stop", at: 5), event("SessionEnd", at: 9))
+        #expect(store.sessions["s1"]?.state == .ended)
+        #expect(store.sessions["s1"]?.runningAgents.isEmpty == true)
+        #expect(store.sessions["s1"]?.stopDeferred == false)
+    }
+
+    @Test func aTempDirectorySessionIsNotTheUsers() {
+        var hook = event("SessionStart")
+        #expect(!hook.isInTempDirectory)
+        hook.cwd = "/private/var/folders/xy/T/te-123"
+        #expect(hook.isInTempDirectory)
+        hook.cwd = "/tmp/te-1"
+        #expect(hook.isInTempDirectory)
+    }
 }

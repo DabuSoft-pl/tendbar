@@ -72,6 +72,7 @@ public struct SessionStore: Sendable, Equatable {
             session.state = .working
             session.turnStartedAt = event.sentAt
             session.turnWaited = 0
+            session.stopDeferred = false
             session.unread = false
             session.message = nil
         case .postToolUse:
@@ -90,16 +91,35 @@ public struct SessionStore: Sendable, Equatable {
             session.unread = true
             session.message = event.message ?? session.message
         case .stop:
+            // Background subagents outlive the main turn; foreground ones have stopped by now.
+            guard session.runningAgents.isEmpty else {
+                session.stopDeferred = true
+                break
+            }
             session.state = .done
             session.unread = true
             session.message = nil
+        case .subagentStart:
+            if let agent = event.agentID { session.runningAgents.insert(agent) }
+        case .subagentStop:
+            if let agent = event.agentID { session.runningAgents.remove(agent) }
+            if session.stopDeferred, session.runningAgents.isEmpty,
+               session.state == .working || session.state == .needsYou {
+                session.stopDeferred = false
+                session.state = .done
+                session.unread = true
+                session.message = nil
+            }
         case .stopFailure:
+            session.stopDeferred = false
             session.state = .failed
             session.unread = true
             session.message = event.message
         case .sessionEnd:
             session.state = .ended
             session.unread = false
+            session.runningAgents = []
+            session.stopDeferred = false
         case .other:
             break
         }
@@ -125,6 +145,8 @@ public struct SessionStore: Sendable, Equatable {
         session.unread = false
         session.waitingSince = nil
         session.waitingAgent = nil
+        session.runningAgents = []
+        session.stopDeferred = false
         session.flaggedQuiet = false
         session.updatedAt = max(session.updatedAt, date)
         sessions[id] = session

@@ -31,6 +31,34 @@ import TendbarDomain
         HookEvent(sessionID: "s1", kind: kind, cwd: "/Users/me/app", transcriptPath: "/tmp/s1.jsonl", message: message, sentAt: now.addingTimeInterval(offset))
     }
 
+    @Test func aBackgroundSubagentHoldsTheDoneAlertUntilItStops() async {
+        let handle = useCase()
+        var start = event(.subagentStart, at: 1)
+        start.agentID = "a1"
+        var stop = event(.subagentStop, at: 30)
+        stop.agentID = "a1"
+
+        await handle.execute(event(.userPromptSubmit))
+        await handle.execute(start)
+        await handle.execute(event(.stop, at: 5))
+        #expect(alerts.presented.isEmpty)
+        #expect(sessions.store.sessions["s1"]?.state == .working)
+
+        await handle.execute(stop)
+        #expect(alerts.presented.map(\.0) == [.done])
+        #expect(sessions.store.sessions["s1"]?.state == .done)
+    }
+
+    @Test func aRunInTheTempDirectoryIsIgnored() async {
+        let handle = useCase()
+        var hook = event(.userPromptSubmit)
+        hook.cwd = "/private/var/folders/ab/T/te-xyz"
+
+        await handle.execute(hook)
+
+        #expect(sessions.store.sessions.isEmpty)
+    }
+
     @Test func aFinishedTurnShowsTheReplyAndFlashesGreen() async {
         settings.alertSettings.showsReplyPreview = true
         let handle = useCase(preview: "Gotowe: testy przechodzą")

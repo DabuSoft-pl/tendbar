@@ -47,6 +47,10 @@ Domain  <-  Application  <-  Infrastructure
 
 Flow of one event: `tendbar-hook` → socket → `HookEventListener` → `InboundMessage.hook(HookEvent)` →
 `HandleHookEvent` → `SessionRepository` + `SessionsOutput` (`SessionsViewModel`) + `AlertPresenting`/`ScreenFlashing`.
+Hooks: SessionStart, UserPromptSubmit, Notification, PermissionRequest, PostToolUse, Stop, StopFailure, SessionEnd,
+SubagentStart, SubagentStop (`agent_id`, `agent_type`). A Stop while subagents run (`Session.runningAgents`) stays
+working (`stopDeferred`); the last SubagentStop makes it done. SessionEnd/end-gone clear them. Events whose `cwd` is in
+the system temp dir (`/var/folders/`, `/tmp/`, `/private/...`) are dropped in `HandleHookEvent` (plugin headless runs).
 Tests: `TendbarDomainTests` (rules), `TendbarApplicationTests` (use cases on fakes), `TendbarInfrastructureTests`.
 
 ## Rules

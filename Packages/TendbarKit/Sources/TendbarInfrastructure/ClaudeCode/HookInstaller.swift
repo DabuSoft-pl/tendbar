@@ -18,7 +18,7 @@ public struct HookInstaller: Sendable {
     public static let marker = "tendbar-hook"
     public static let events = [
         "SessionStart", "UserPromptSubmit", "Notification", "PermissionRequest",
-        "PostToolUse", "Stop", "StopFailure", "SessionEnd",
+        "PostToolUse", "Stop", "StopFailure", "SessionEnd", "SubagentStart", "SubagentStop",
     ]
     public static let timeoutSeconds = 3
     /// A PermissionRequest hook may wait for Allow or Deny on a banner. The terminal prompt works meanwhile.
