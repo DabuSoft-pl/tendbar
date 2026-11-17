@@ -98,6 +98,8 @@ public struct Session: Sendable, Identifiable, Equatable {
     public var stopDeferred: Bool
     /// When the main thread stopped with no subagent known yet; done waits out `SessionStore.stopGrace` from here.
     public var stoppedAt: Date?
+    /// A subagent once started after the main thread stopped (PA3's background agent), so done waits longer.
+    public var usesBackgroundAgents: Bool
     public var unread: Bool
     public var message: String?
     public var preview: String?
@@ -121,6 +123,7 @@ public struct Session: Sendable, Identifiable, Equatable {
         runningAgents: Set<String> = [],
         stopDeferred: Bool = false,
         stoppedAt: Date? = nil,
+        usesBackgroundAgents: Bool = false,
         unread: Bool = false,
         message: String? = nil,
         preview: String? = nil,
@@ -142,6 +145,7 @@ public struct Session: Sendable, Identifiable, Equatable {
         self.runningAgents = runningAgents
         self.stopDeferred = stopDeferred
         self.stoppedAt = stoppedAt
+        self.usesBackgroundAgents = usesBackgroundAgents
         self.unread = unread
         self.message = message
         self.preview = preview

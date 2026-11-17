@@ -199,6 +199,21 @@ import Testing
         apply(&store, event("Stop", at: 5))
         #expect(store.sessions["s1"]?.state == .done)
         #expect(store.sessions["s1"]?.stopDeferred == false)
+        #expect(store.sessions["s1"]?.usesBackgroundAgents == false)
+    }
+
+    @Test func aSubagentStartingAfterStopMakesDoneWaitLonger() {
+        var store = SessionStore()
+        store.apply(event("UserPromptSubmit"))
+        store.apply(event("Stop", at: 1))
+        store.apply(agent("SubagentStart", "a1", at: 2))
+        store.apply(agent("SubagentStop", "a1", at: 9))
+        #expect(store.sessions["s1"]?.usesBackgroundAgents == true)
+
+        store.apply(event("UserPromptSubmit", at: 20))
+        store.apply(event("Stop", at: 21))
+        #expect(store.finishPendingStops(now: start.addingTimeInterval(40)).isEmpty)
+        #expect(store.finishPendingStops(now: start.addingTimeInterval(41)).count == 1)
     }
 
     @Test func aSessionEndClearsSubagentsLeftRunning() {
@@ -226,7 +241,7 @@ extension SessionStore {
     mutating func applySettled(_ event: HookEvent) -> Session {
         let session = apply(event)
         guard event.kind == .stop else { return session }
-        _ = finishPendingStops(now: event.sentAt.addingTimeInterval(Self.stopGrace))
+        _ = finishPendingStops(now: event.sentAt.addingTimeInterval(Self.backgroundGrace))
         return sessions[event.sessionID] ?? session
     }
 }

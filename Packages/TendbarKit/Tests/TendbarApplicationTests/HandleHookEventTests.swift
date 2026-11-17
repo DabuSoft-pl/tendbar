@@ -12,7 +12,9 @@ import TendbarDomain
     let activity = InMemoryActivity()
     let now = Date(timeIntervalSince1970: 1_800_000_000)
 
-    private func useCase(preview: String? = nil, title: String? = nil, desk: PermissionDesk? = nil, navigator: StubNavigator? = nil) -> HandleHookEvent {
+    private func useCase(
+        preview: String? = nil, title: String? = nil, desk: PermissionDesk? = nil, navigator: StubNavigator? = nil, clockAt: TimeInterval = 1000
+    ) -> HandleHookEvent {
         HandleHookEvent(
             repository: sessions,
             output: sessions,
@@ -24,7 +26,7 @@ import TendbarDomain
             activityOutput: activity,
             desk: desk,
             navigator: navigator,
-            clock: FixedClock(date: now.addingTimeInterval(1000))
+            clock: FixedClock(date: now.addingTimeInterval(clockAt))
         )
     }
 
@@ -70,6 +72,40 @@ import TendbarDomain
         handle.finishPendingStops()
         #expect(alerts.presented.map(\.0) == [.done])
         #expect(sessions.store.sessions["s1"]?.state == .done)
+    }
+
+    @Test func aSessionWithBackgroundAgentsWaitsLongerForThem() async {
+        let handle = useCase()
+        func agent(_ kind: HookEvent.Kind, at offset: TimeInterval) -> HookEvent {
+            var event = event(kind, at: offset)
+            event.agentID = "a1"
+            return event
+        }
+        await handle.execute(event(.userPromptSubmit))
+        await handle.execute(event(.stop, at: 1))
+        await handle.execute(agent(.subagentStart, at: 2))
+        await handle.execute(agent(.subagentStop, at: 30))
+        #expect(alerts.presented.map(\.0) == [.done])
+
+        await handle.execute(event(.userPromptSubmit, at: 40))
+        await handle.execute(event(.stop, at: 41))
+        useCase(clockAt: 51).finishPendingStops()
+        await handle.execute(agent(.subagentStart, at: 51))
+        handle.finishPendingStops()
+        #expect(alerts.presented.map(\.0) == [.done])
+        #expect(sessions.store.sessions["s1"]?.state == .working)
+
+        await handle.execute(agent(.subagentStop, at: 60))
+        #expect(alerts.presented.map(\.0) == [.done, .done])
+    }
+
+    @Test func aSessionWithoutBackgroundAgentsIsDoneAfterThreeSeconds() async {
+        await useCase().execute(event(.userPromptSubmit))
+        await useCase().execute(event(.stop, at: 1))
+        useCase(clockAt: 3).finishPendingStops()
+        #expect(alerts.presented.isEmpty)
+        useCase(clockAt: 4).finishPendingStops()
+        #expect(alerts.presented.map(\.0) == [.done])
     }
 
     @Test func aNewPromptInTheGraceCancelsTheDone() async {

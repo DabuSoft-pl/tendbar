@@ -6,6 +6,7 @@ public struct SessionStore: Sendable, Equatable {
     public static let inactiveRetention: TimeInterval = 7 * 24 * 60 * 60
     public static let limit = 100
     public static let stopGrace: TimeInterval = 3 // seconds; Stop and SubagentStart race
+    public static let backgroundGrace: TimeInterval = 20 // seconds; PA3 resumes its agent up to ~15 s after the main Stop
 
     public private(set) var sessions: [String: Session]
 
@@ -98,6 +99,8 @@ public struct SessionStore: Sendable, Equatable {
             session.stopDeferred = true
             session.stoppedAt = session.runningAgents.isEmpty ? event.sentAt : nil
         case .subagentStart:
+            // Foreground subagents start inside the working turn; one starting after the Stop is a background one.
+            if session.stopDeferred || session.state == .done { session.usesBackgroundAgents = true }
             if let agent = event.agentID { session.runningAgents.insert(agent) }
         case .subagentStop:
             if let agent = event.agentID { session.runningAgents.remove(agent) }
@@ -154,13 +157,14 @@ public struct SessionStore: Sendable, Equatable {
         sessions[id] = session
     }
 
-    /// Finishes the turns whose main thread stopped at least `stopGrace` ago with no subagent started since.
+    /// Finishes the turns whose main thread stopped at least `stopGrace` (`backgroundGrace` for sessions with
+    /// background agents) ago with no subagent started since.
     /// Returns each finished session as it was before and after; the turn ended at `before.stoppedAt`.
     public mutating func finishPendingStops(now: Date) -> [(before: Session, after: Session)] {
         var finished: [(before: Session, after: Session)] = []
         for (id, before) in sessions {
             guard before.stopDeferred, before.runningAgents.isEmpty, let stoppedAt = before.stoppedAt,
-                  now.timeIntervalSince(stoppedAt) >= Self.stopGrace,
+                  now.timeIntervalSince(stoppedAt) >= (before.usesBackgroundAgents ? Self.backgroundGrace : Self.stopGrace),
                   before.state != .ended else { continue }
             var after = before
             after.stopDeferred = false

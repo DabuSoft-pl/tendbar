@@ -201,6 +201,8 @@ final class AppContainer {
                 Task { [weak self] in
                     try? await Task.sleep(for: .seconds(SessionStore.stopGrace))
                     self?.handleHookEvent.finishPendingStops()
+                    try? await Task.sleep(for: .seconds(SessionStore.backgroundGrace - SessionStore.stopGrace))
+                    self?.handleHookEvent.finishPendingStops()
                 }
             }
         case let .usage(reading):

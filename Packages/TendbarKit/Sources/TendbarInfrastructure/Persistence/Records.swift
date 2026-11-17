@@ -33,6 +33,7 @@ struct SessionRecord: Codable {
     var runningAgents: [String]?
     var stopDeferred: Bool?
     var stoppedAt: Date?
+    var usesBackgroundAgents: Bool?
     var unread: Bool
     var message: String?
     var preview: String?
@@ -55,6 +56,7 @@ struct SessionRecord: Codable {
         runningAgents = session.runningAgents.isEmpty ? nil : session.runningAgents.sorted()
         stopDeferred = session.stopDeferred ? true : nil
         stoppedAt = session.stoppedAt
+        usesBackgroundAgents = session.usesBackgroundAgents ? true : nil
         unread = session.unread
         message = session.message
         preview = session.preview
@@ -79,6 +81,7 @@ struct SessionRecord: Codable {
             runningAgents: Set(runningAgents ?? []),
             stopDeferred: stopDeferred ?? false,
             stoppedAt: stoppedAt,
+            usesBackgroundAgents: usesBackgroundAgents ?? false,
             unread: unread,
             message: message,
             preview: preview,
