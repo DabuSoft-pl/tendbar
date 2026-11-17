@@ -139,13 +139,14 @@ public struct UsageStore: Sendable, Equatable {
             return match
         }
         if let resets = reading.fiveHour?.resetsAt,
-           let match = candidates.first(where: { $0.fiveHour?.resetsAt == resets }) {
+           let match = candidates.first(where: { $0.fiveHour?.resetsAt == resets && ($0.sevenDay == nil || reading.sevenDay == nil) }) {
             return match
         }
         return nil
     }
 
-    /// Files a reading under the account signed in when it was taken. A missing window means it was reset.
+    /// Files a reading under the account signed in when it was taken. A missing window means it was reset, once the
+    /// stored window's reset time has passed.
     @discardableResult
     public mutating func record(_ reading: UsageReading, email: String?) -> Bool {
         let directory = Self.accountKey(configDirectory: reading.configDirectory)
@@ -159,12 +160,41 @@ public struct UsageStore: Sendable, Equatable {
         ))
     }
 
+    /// Every open session re-sends its own last-known limits, so idle sessions send stale ones with a fresh time, and
+    /// sessions still on another account send that account's. A window resetting at another moment while the stored
+    /// one is still running is another account's: the reading is dropped. Within one window usage only rises, so the
+    /// higher figure wins. Returns whether anything other than `updatedAt` changed.
     @discardableResult
     public mutating func merge(_ reading: AccountUsage) -> Bool {
-        if let current = accounts[reading.id], current.updatedAt > reading.updatedAt { return false }
-        guard accounts[reading.id] != reading else { return false }
-        accounts[reading.id] = reading
-        return true
+        guard let current = accounts[reading.id] else {
+            accounts[reading.id] = reading
+            return true
+        }
+        if current.updatedAt > reading.updatedAt { return false }
+        if Self.contradicts(stored: current.fiveHour, read: reading.fiveHour, at: reading.updatedAt)
+            || Self.contradicts(stored: current.sevenDay, read: reading.sevenDay, at: reading.updatedAt) {
+            return false
+        }
+        var merged = reading
+        merged.fiveHour = Self.window(stored: current.fiveHour, read: reading.fiveHour, at: reading.updatedAt)
+        merged.sevenDay = Self.window(stored: current.sevenDay, read: reading.sevenDay, at: reading.updatedAt)
+        var unchanged = current
+        unchanged.updatedAt = merged.updatedAt
+        accounts[reading.id] = merged
+        return unchanged != merged
+    }
+
+    private static func contradicts(stored: LimitWindow?, read: LimitWindow?, at now: Date) -> Bool {
+        guard let stored, let read else { return false }
+        return read.resetsAt != stored.resetsAt && now < stored.resetsAt
+    }
+
+    /// A missing window clears the stored one only once it has reset; a running window is kept from partial readings.
+    private static func window(stored: LimitWindow?, read: LimitWindow?, at now: Date) -> LimitWindow? {
+        guard let stored else { return read }
+        guard let read else { return now >= stored.resetsAt ? nil : stored }
+        guard read.resetsAt == stored.resetsAt else { return read }
+        return read.usedPercentage > stored.usedPercentage ? read : stored
     }
 
     public mutating func remove(_ id: String) {

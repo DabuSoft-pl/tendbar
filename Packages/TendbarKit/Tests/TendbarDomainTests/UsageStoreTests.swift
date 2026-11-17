@@ -71,10 +71,60 @@ import Testing
         var store = UsageStore()
         store.record(reading(five: 90, week: 50), email: nil)
 
-        store.record(reading(week: 51, at: 1), email: nil)
+        store.record(reading(week: 51, at: 3600), email: nil)
 
         #expect(store.accounts[""]?.fiveHour == nil)
         #expect(store.accounts[""]?.sevenDay?.usedPercentage == 51)
+    }
+
+    @Test func aMissingWindowKeepsOneStillRunning() {
+        var store = UsageStore()
+        store.record(reading(five: 90, week: 50), email: nil)
+
+        store.record(reading(week: 50, at: 1), email: nil)
+
+        #expect(store.accounts[""]?.fiveHour?.usedPercentage == 90)
+    }
+
+    @Test func aStaleLowerReadingKeepsTheHigherOne() {
+        var store = UsageStore()
+        store.record(reading(five: 40, week: 20, at: 0), email: nil)
+
+        let recorded = store.record(reading(five: 30, week: 20, at: 5), email: nil)
+
+        #expect(!recorded)
+        #expect(store.accounts[""]?.fiveHour?.usedPercentage == 40)
+        #expect(store.accounts[""]?.updatedAt == now.addingTimeInterval(5))
+    }
+
+    @Test func aNewWindowReplacesTheOneThatReset() {
+        var store = UsageStore()
+        store.record(reading(five: 90), email: nil)
+        let next = LimitWindow(usedPercentage: 3, resetsAt: Date(timeIntervalSince1970: 1_800_021_600))
+
+        let recorded = store.record(UsageReading(configDirectory: nil, fiveHour: next, sevenDay: nil, readAt: now.addingTimeInterval(3700)), email: nil)
+
+        #expect(recorded)
+        #expect(store.accounts[""]?.fiveHour == next)
+    }
+
+    @Test func anotherAccountsReadingDoesNotOverwriteThisOne() throws {
+        func date(_ text: String) throws -> Date { try #require(ISO8601DateFormatter().date(from: text)) }
+        var store = UsageStore()
+        let mine = LimitWindow(usedPercentage: 97, resetsAt: try date("2026-11-17T11:10:00Z"))
+        let myWeek = LimitWindow(usedPercentage: 49, resetsAt: try date("2026-11-23T05:00:00Z"))
+        store.record(UsageReading(configDirectory: nil, fiveHour: mine, sevenDay: myWeek, readAt: try date("2026-11-17T09:19:00Z")), email: "me@example.com")
+
+        let recorded = store.record(UsageReading(
+            configDirectory: nil,
+            fiveHour: LimitWindow(usedPercentage: 10, resetsAt: try date("2026-11-17T10:20:00Z")),
+            sevenDay: LimitWindow(usedPercentage: 89, resetsAt: try date("2026-11-21T13:00:00Z")),
+            readAt: try date("2026-11-17T09:21:00Z")
+        ), email: "me@example.com")
+
+        #expect(!recorded)
+        #expect(store.accounts["|me@example.com"]?.fiveHour == mine)
+        #expect(store.accounts["|me@example.com"]?.sevenDay == myWeek)
     }
 
     @Test func anOlderReadingDoesNotOverwriteANewerOne() {

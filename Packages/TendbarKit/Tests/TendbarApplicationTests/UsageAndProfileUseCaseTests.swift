@@ -38,7 +38,7 @@ import TendbarDomain
             UsageReading(
                 configDirectory: nil,
                 sessionID: session,
-                fiveHour: LimitWindow(usedPercentage: five, resetsAt: now.addingTimeInterval(3600 + seconds)),
+                fiveHour: LimitWindow(usedPercentage: five, resetsAt: now.addingTimeInterval(3600)),
                 sevenDay: LimitWindow(usedPercentage: week, resetsAt: resets),
                 readAt: now.addingTimeInterval(seconds)
             )
