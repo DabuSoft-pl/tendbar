@@ -5,6 +5,7 @@ public struct SessionStore: Sendable, Equatable {
     public static let endedRetention: TimeInterval = 24 * 60 * 60
     public static let inactiveRetention: TimeInterval = 7 * 24 * 60 * 60
     public static let limit = 100
+    public static let stopGrace: TimeInterval = 3 // seconds; Stop and SubagentStart race
 
     public private(set) var sessions: [String: Session]
 
@@ -73,6 +74,7 @@ public struct SessionStore: Sendable, Equatable {
             session.turnStartedAt = event.sentAt
             session.turnWaited = 0
             session.stopDeferred = false
+            session.stoppedAt = nil
             session.unread = false
             session.message = nil
         case .postToolUse:
@@ -91,14 +93,10 @@ public struct SessionStore: Sendable, Equatable {
             session.unread = true
             session.message = event.message ?? session.message
         case .stop:
-            // Background subagents outlive the main turn; foreground ones have stopped by now.
-            guard session.runningAgents.isEmpty else {
-                session.stopDeferred = true
-                break
-            }
-            session.state = .done
-            session.unread = true
-            session.message = nil
+            // Background subagents outlive the main turn; foreground ones have stopped by now. A SubagentStart may
+            // still be on its way, so done waits out the grace (`finishPendingStops`) or the last SubagentStop.
+            session.stopDeferred = true
+            session.stoppedAt = session.runningAgents.isEmpty ? event.sentAt : nil
         case .subagentStart:
             if let agent = event.agentID { session.runningAgents.insert(agent) }
         case .subagentStop:
@@ -106,12 +104,14 @@ public struct SessionStore: Sendable, Equatable {
             if session.stopDeferred, session.runningAgents.isEmpty,
                session.state == .working || session.state == .needsYou {
                 session.stopDeferred = false
+                session.stoppedAt = nil
                 session.state = .done
                 session.unread = true
                 session.message = nil
             }
         case .stopFailure:
             session.stopDeferred = false
+            session.stoppedAt = nil
             session.state = .failed
             session.unread = true
             session.message = event.message
@@ -120,6 +120,7 @@ public struct SessionStore: Sendable, Equatable {
             session.unread = false
             session.runningAgents = []
             session.stopDeferred = false
+            session.stoppedAt = nil
         case .other:
             break
         }
@@ -147,9 +148,35 @@ public struct SessionStore: Sendable, Equatable {
         session.waitingAgent = nil
         session.runningAgents = []
         session.stopDeferred = false
+        session.stoppedAt = nil
         session.flaggedQuiet = false
         session.updatedAt = max(session.updatedAt, date)
         sessions[id] = session
+    }
+
+    /// Finishes the turns whose main thread stopped at least `stopGrace` ago with no subagent started since.
+    /// Returns each finished session as it was before and after; the turn ended at `before.stoppedAt`.
+    public mutating func finishPendingStops(now: Date) -> [(before: Session, after: Session)] {
+        var finished: [(before: Session, after: Session)] = []
+        for (id, before) in sessions {
+            guard before.stopDeferred, before.runningAgents.isEmpty, let stoppedAt = before.stoppedAt,
+                  now.timeIntervalSince(stoppedAt) >= Self.stopGrace,
+                  before.state != .ended else { continue }
+            var after = before
+            after.stopDeferred = false
+            after.stoppedAt = nil
+            after.state = .done
+            after.unread = true
+            after.message = nil
+            if before.state == .needsYou {
+                if let since = before.waitingSince { after.turnWaited += max(stoppedAt.timeIntervalSince(since), 0) }
+                after.waitingSince = nil
+                after.waitingAgent = nil
+            }
+            sessions[id] = after
+            finished.append((before, after))
+        }
+        return finished.sorted { $0.after.id < $1.after.id }
     }
 
     public mutating func markReminded(_ id: String) {

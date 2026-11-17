@@ -15,6 +15,7 @@ public final class HandleHookEvent {
     private let calendar: Calendar
     private let desk: PermissionDesk?
     private let navigator: TerminalNavigating?
+    private let clock: Clock
 
     public init(
         repository: SessionRepository,
@@ -27,8 +28,10 @@ public final class HandleHookEvent {
         activityOutput: ActivityOutput,
         calendar: Calendar = .current,
         desk: PermissionDesk? = nil,
-        navigator: TerminalNavigating? = nil
+        navigator: TerminalNavigating? = nil,
+        clock: Clock = SystemClock()
     ) {
+        self.clock = clock
         self.desk = desk
         self.navigator = navigator
         self.repository = repository
@@ -72,6 +75,21 @@ public final class HandleHookEvent {
             }
         }
         if let alert { held = notify(alert, sessionID: session.id, permission: permission) }
+    }
+
+    /// Called `SessionStore.stopGrace` after a Stop (and on the periodic timer): turns no subagent claimed become done.
+    public func finishPendingStops() {
+        let now = clock.now()
+        var store = repository.load()
+        let finished = store.finishPendingStops(now: now)
+        guard !finished.isEmpty else { return }
+        commit(store)
+        for (before, after) in finished {
+            record(previous: before, current: after, at: before.stoppedAt ?? now)
+            if let alert = AlertPolicy.alert(from: before.state, to: after.state) {
+                _ = notify(alert, sessionID: after.id, permission: nil)
+            }
+        }
     }
 
     /// The title is looked up where a turn starts or ends and before a banner, not after every tool call.

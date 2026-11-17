@@ -17,6 +17,7 @@ private struct StubProcesses: SessionProcessChecking {
         sessions.store.apply(HookEvent(
             sessionID: id, kind: HookEvent.Kind(name: name), terminal: TerminalContext(processID: pid), sentAt: start
         ))
+        _ = sessions.store.finishPendingStops(now: start.addingTimeInterval(SessionStore.stopGrace))
     }
 
     @Test func endsSessionsWhoseProcessIsGone() {

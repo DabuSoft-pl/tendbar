@@ -17,7 +17,7 @@ import Testing
 
     private func store(_ events: HookEvent...) -> SessionStore {
         var store = SessionStore()
-        for event in events { store.apply(event) }
+        for event in events { store.applySettled(event) }
         return store
     }
 

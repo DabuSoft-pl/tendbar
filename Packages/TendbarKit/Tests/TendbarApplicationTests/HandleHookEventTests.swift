@@ -23,12 +23,65 @@ import TendbarDomain
             activity: activity,
             activityOutput: activity,
             desk: desk,
-            navigator: navigator
+            navigator: navigator,
+            clock: FixedClock(date: now.addingTimeInterval(1000))
         )
+    }
+
+    /// A Stop with no SubagentStart in the grace: the app's grace timer finishes it.
+    private func settle(_ handle: HandleHookEvent, _ stop: HookEvent) async {
+        await handle.execute(stop)
+        handle.finishPendingStops()
     }
 
     private func event(_ kind: HookEvent.Kind, at offset: TimeInterval = 0, message: String? = nil) -> HookEvent {
         HookEvent(sessionID: "s1", kind: kind, cwd: "/Users/me/app", transcriptPath: "/tmp/s1.jsonl", message: message, sentAt: now.addingTimeInterval(offset))
+    }
+
+    @Test func aSubagentStartingJustAfterStopHoldsTheDoneAlert() async {
+        let handle = useCase()
+        var start = event(.subagentStart, at: 2)
+        start.agentID = "a1"
+        var stop = event(.subagentStop, at: 30)
+        stop.agentID = "a1"
+
+        await handle.execute(event(.userPromptSubmit))
+        await handle.execute(event(.stop, at: 1))
+        await handle.execute(start)
+        handle.finishPendingStops()
+        #expect(alerts.presented.isEmpty)
+        #expect(sessions.store.sessions["s1"]?.state == .working)
+
+        await handle.execute(stop)
+        handle.finishPendingStops()
+        #expect(alerts.presented.map(\.0) == [.done])
+        #expect(sessions.store.sessions["s1"]?.state == .done)
+    }
+
+    @Test func aStopWithNoSubagentIsDoneAfterTheGrace() async {
+        let handle = useCase()
+
+        await handle.execute(event(.userPromptSubmit))
+        await handle.execute(event(.stop, at: 1))
+        #expect(alerts.presented.isEmpty)
+        #expect(sessions.store.sessions["s1"]?.state == .working)
+
+        handle.finishPendingStops()
+        handle.finishPendingStops()
+        #expect(alerts.presented.map(\.0) == [.done])
+        #expect(sessions.store.sessions["s1"]?.state == .done)
+    }
+
+    @Test func aNewPromptInTheGraceCancelsTheDone() async {
+        let handle = useCase()
+
+        await handle.execute(event(.userPromptSubmit))
+        await handle.execute(event(.stop, at: 1))
+        await handle.execute(event(.userPromptSubmit, at: 2))
+        handle.finishPendingStops()
+
+        #expect(alerts.presented.isEmpty)
+        #expect(sessions.store.sessions["s1"]?.state == .working)
     }
 
     @Test func aBackgroundSubagentHoldsTheDoneAlertUntilItStops() async {
@@ -40,7 +93,7 @@ import TendbarDomain
 
         await handle.execute(event(.userPromptSubmit))
         await handle.execute(start)
-        await handle.execute(event(.stop, at: 5))
+        await settle(handle, event(.stop, at: 5))
         #expect(alerts.presented.isEmpty)
         #expect(sessions.store.sessions["s1"]?.state == .working)
 
@@ -64,7 +117,7 @@ import TendbarDomain
         let handle = useCase(preview: "Gotowe: testy przechodzą")
 
         await handle.execute(event(.userPromptSubmit))
-        await handle.execute(event(.stop, at: 1))
+        await settle(handle, event(.stop, at: 1))
 
         #expect(alerts.presented.map(\.0) == [.done])
         #expect(alerts.presented.first?.1.preview == "Gotowe: testy przechodzą")
@@ -74,20 +127,20 @@ import TendbarDomain
     }
 
     @Test func theBannerIsNamedAfterClaudesTitle() async {
-        await useCase(title: "Diff warstwy UI").execute(event(.stop))
+        await settle(useCase(title: "Diff warstwy UI"), event(.stop))
 
         #expect(sessions.store.sessions["s1"]?.title == "Diff warstwy UI")
         #expect(alerts.presented.first?.1.displayName == "Diff warstwy UI")
     }
 
     @Test func withoutATitleTheFolderNamesTheSession() async {
-        await useCase().execute(event(.stop))
+        await settle(useCase(), event(.stop))
 
         #expect(alerts.presented.first?.1.displayName == "app")
     }
 
     @Test func aDoneBannerLeavesTheReplyOutByDefault() async {
-        await useCase(preview: "tajny plan").execute(event(.stop))
+        await settle(useCase(preview: "tajny plan"), event(.stop))
 
         #expect(alerts.presented.map(\.0) == [.done])
         #expect(alerts.presented.first?.1.preview == nil)
@@ -97,7 +150,7 @@ import TendbarDomain
     @Test func noGreenFlashWhenTheUserTurnedItOff() async {
         settings.alertSettings.flashOnDone = false
 
-        await useCase().execute(event(.stop))
+        await settle(useCase(), event(.stop))
 
         #expect(alerts.presented.map(\.0) == [.done])
         #expect(flasher.tones.isEmpty)
@@ -107,7 +160,7 @@ import TendbarDomain
         settings.alertSettings.mutedFolders = ["/Users/me/app"]
 
         await useCase().execute(event(.permissionRequest))
-        await useCase().execute(event(.stop, at: 1))
+        await settle(useCase(), event(.stop, at: 1))
 
         #expect(alerts.presented.isEmpty)
         #expect(flasher.tones.isEmpty)
@@ -119,7 +172,7 @@ import TendbarDomain
         let handle = useCase()
 
         await handle.execute(event(.userPromptSubmit))
-        await handle.execute(event(.stop, at: 120))
+        await settle(handle, event(.stop, at: 120))
 
         #expect(activity.stats.day(of: now, calendar: .current).turns == 1)
         #expect(activity.shown.count == 1)
@@ -183,7 +236,7 @@ import TendbarDomain
         let ask = PermissionAsk(id: "a1", sessionID: "s1", tool: "Bash", detail: "date")
 
         await handle.execute(desktop(.permissionRequest), permission: (ask, reply))
-        await handle.execute(desktop(.stop, at: 1))
+        await settle(handle, desktop(.stop, at: 1))
 
         #expect(alerts.presented.isEmpty)
         #expect(alerts.permissions.isEmpty)
@@ -196,7 +249,7 @@ import TendbarDomain
         settings.alertSettings.leavesClaudeDesktopBanners = false
         let handle = useCase()
 
-        await handle.execute(desktop(.stop))
+        await settle(handle, desktop(.stop))
 
         #expect(alerts.presented.map(\.0) == [.done])
     }
@@ -209,7 +262,7 @@ import TendbarDomain
         let handle = useCase(desk: PermissionDesk(alerts: alerts), navigator: navigator)
 
         await handle.execute(event(.permissionRequest), permission: (PermissionAsk(id: "a1", sessionID: "s1", tool: "Bash", detail: "date"), reply))
-        await handle.execute(event(.stop, at: 1))
+        await settle(handle, event(.stop, at: 1))
 
         #expect(alerts.presented.isEmpty)
         #expect(alerts.permissions.isEmpty)
@@ -223,7 +276,7 @@ import TendbarDomain
         navigator.inFront = true
         let handle = useCase(navigator: navigator)
 
-        await handle.execute(event(.stop))
+        await settle(handle, event(.stop))
 
         #expect(alerts.presented.map(\.0) == [.done])
     }
@@ -232,7 +285,7 @@ import TendbarDomain
         settings.alertSettings.quietForFocus = true
         let handle = useCase()
 
-        await handle.execute(event(.stop))
+        await settle(handle, event(.stop))
 
         #expect(alerts.presented.map(\.0) == [.done])
         #expect(alerts.sounds == [AlertSound.none])
@@ -325,7 +378,7 @@ import TendbarDomain
 
         await handle.execute(event(.permissionRequest), permission: (PermissionAsk(id: "a1", sessionID: "s1", tool: "Bash"), RecordingReply()))
         await handle.execute(event(.postToolUse, at: 9))
-        await handle.execute(event(.stop, at: 12))
+        await settle(handle, event(.stop, at: 12))
 
         #expect(output.shown.map(\.count) == [1, 0])
     }

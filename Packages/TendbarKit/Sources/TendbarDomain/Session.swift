@@ -96,6 +96,8 @@ public struct Session: Sendable, Identifiable, Equatable {
     public var runningAgents: Set<String>
     /// The main thread stopped while subagents still ran; the last SubagentStop finishes the turn.
     public var stopDeferred: Bool
+    /// When the main thread stopped with no subagent known yet; done waits out `SessionStore.stopGrace` from here.
+    public var stoppedAt: Date?
     public var unread: Bool
     public var message: String?
     public var preview: String?
@@ -118,6 +120,7 @@ public struct Session: Sendable, Identifiable, Equatable {
         waitingAgent: String? = nil,
         runningAgents: Set<String> = [],
         stopDeferred: Bool = false,
+        stoppedAt: Date? = nil,
         unread: Bool = false,
         message: String? = nil,
         preview: String? = nil,
@@ -138,6 +141,7 @@ public struct Session: Sendable, Identifiable, Equatable {
         self.waitingAgent = waitingAgent
         self.runningAgents = runningAgents
         self.stopDeferred = stopDeferred
+        self.stoppedAt = stoppedAt
         self.unread = unread
         self.message = message
         self.preview = preview

@@ -26,7 +26,7 @@ import Testing
     }
 
     private func apply(_ store: inout SessionStore, _ events: HookEvent...) {
-        for event in events { store.apply(event) }
+        for event in events { store.applySettled(event) }
     }
 
     @Test func remembersWhenTheTurnStarted() {
@@ -37,6 +37,18 @@ import Testing
 
         apply(&store, event("Stop", at: 60), event("UserPromptSubmit", at: 90))
         #expect(store.sessions["s1"]?.turnStartedAt == start.addingTimeInterval(90))
+    }
+
+    @Test func aStopIsDoneOnlyOnceTheGracePassed() {
+        var store = SessionStore()
+        store.apply(event("UserPromptSubmit"))
+        store.apply(event("Stop", at: 10))
+
+        #expect(store.finishPendingStops(now: start.addingTimeInterval(12)).isEmpty)
+        #expect(store.sessions["s1"]?.state == .working)
+        #expect(store.finishPendingStops(now: start.addingTimeInterval(13)).count == 1)
+        #expect(store.sessions["s1"]?.state == .done)
+        #expect(store.sessions["s1"]?.stopDeferred == false)
     }
 
     @Test func followsATypicalTurn() {
@@ -205,5 +217,16 @@ import Testing
         #expect(hook.isInTempDirectory)
         hook.cwd = "/tmp/te-1"
         #expect(hook.isInTempDirectory)
+    }
+}
+
+extension SessionStore {
+    /// Applies the event and, for a Stop, lets the grace pass with no subagent starting, as the app's timer does.
+    @discardableResult
+    mutating func applySettled(_ event: HookEvent) -> Session {
+        let session = apply(event)
+        guard event.kind == .stop else { return session }
+        _ = finishPendingStops(now: event.sentAt.addingTimeInterval(Self.stopGrace))
+        return sessions[event.sessionID] ?? session
     }
 }

@@ -116,6 +116,7 @@ final class AppContainer {
             MainActor.assumeIsolated {
                 self?.endGoneSessions.execute()
                 self?.checkAttention.execute()
+                self?.handleHookEvent.finishPendingStops()
                 self?.checkWarnings.checkResets()
                 self?.usage.tick()
                 self?.claudeCodeActions.refreshConnections()
@@ -196,6 +197,12 @@ final class AppContainer {
         switch message {
         case let .hook(event):
             Task { await handleHookEvent.execute(event, permission: permission) }
+            if event.kind == .stop {
+                Task { [weak self] in
+                    try? await Task.sleep(for: .seconds(SessionStore.stopGrace))
+                    self?.handleHookEvent.finishPendingStops()
+                }
+            }
         case let .usage(reading):
             recordUsage.execute(reading)
         }

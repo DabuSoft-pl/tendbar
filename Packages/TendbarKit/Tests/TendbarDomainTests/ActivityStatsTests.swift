@@ -21,7 +21,7 @@ import Testing
         var stats = ActivityStats()
         for event in events {
             let previous = store.sessions[event.sessionID]
-            let current = store.apply(event)
+            let current = store.applySettled(event)
             stats.record(previous: previous, current: current, at: event.sentAt, calendar: calendar)
         }
         return stats
@@ -64,7 +64,7 @@ import Testing
             let base = Double(day) * 24 * 60
             for event in [event("UserPromptSubmit", at: base), event("Stop", at: base + 1)] {
                 let previous = store.sessions["s1"]
-                stats.record(previous: previous, current: store.apply(event), at: event.sentAt, calendar: calendar)
+                stats.record(previous: previous, current: store.applySettled(event), at: event.sentAt, calendar: calendar)
             }
         }
         stats.prune(now: start.addingTimeInterval(39 * 24 * 60 * minute), calendar: calendar)
