@@ -273,6 +273,7 @@ struct NotchView: View {
     }
 
     private let wing: CGFloat = 44
+    private let closedWing: CGFloat = 26
     private let expandedWidth: CGFloat = 380
     private let radius: CGFloat = 14
 
@@ -317,8 +318,6 @@ struct NotchView: View {
             if showsPill || expanded {
                 pill(lead: lead)
                     .onDisappear { hover.pill = nil }
-                    // Closed, the pill hangs under the notch (or the menu bar), so it covers no menu bar icon or menu.
-                    .padding(.top, expanded ? 0 : notchHeight)
             }
             Spacer(minLength: 0)
         }
@@ -369,36 +368,30 @@ struct NotchView: View {
 
     private func pill(lead: SessionState?) -> some View {
         VStack(spacing: 0) {
-            if expanded {
-                HStack(spacing: 0) {
-                    mark(lead: lead).frame(width: wing)
-                    Spacer(minLength: max(notchWidth, 4))
-                    status.frame(width: wing)
-                }
-                .frame(height: notchHeight)
-            } else {
-                VStack(spacing: 4) {
-                    HStack(spacing: 5) {
-                        dot(lead: lead)
-                        status
-                    }
-                    if highestLimit > 0, preferences.pillLimitLines {
-                        VStack(spacing: 2) {
-                            LimitLine(percentage: usage.currentFiveHour ?? 0)
-                            LimitLine(percentage: usage.currentSevenDay ?? 0)
+            // Closed, narrow wings beside the notch hold the state, so the pill covers no window under the menu bar
+            // and only the menu bar items right next to the notch.
+            HStack(spacing: 0) {
+                Group {
+                    if expanded {
+                        mark(lead: lead)
+                    } else {
+                        VStack(spacing: 3) {
+                            dot(lead: lead)
+                            if highestLimit > 0, preferences.pillLimitLines {
+                                VStack(spacing: 2) {
+                                    LimitLine(percentage: usage.currentFiveHour ?? 0)
+                                    LimitLine(percentage: usage.currentSevenDay ?? 0)
+                                }
+                                .frame(width: 16)
+                            }
                         }
-                        .frame(width: 32)
                     }
                 }
-                .padding(.horizontal, 10)
-                .padding(.top, 3)
-                .padding(.bottom, 6)
-                // Gone before the open pill's rows fade in over it, and back only once they have faded out.
-                .transition(.asymmetric(
-                    insertion: .opacity.animation(.easeOut(duration: 0.1).delay(0.2)),
-                    removal: .opacity.animation(.easeOut(duration: 0.08))
-                ))
+                .frame(width: expanded ? wing : closedWing)
+                Spacer(minLength: max(notchWidth, 4))
+                status.frame(width: expanded ? wing : closedWing)
             }
+            .frame(height: notchHeight)
 
             if expanded {
                 VStack(alignment: .leading, spacing: 0) {
