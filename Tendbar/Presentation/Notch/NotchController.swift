@@ -88,12 +88,13 @@ final class NotchController {
             if hover.expanded { hover.expanded = false }
             return
         }
-        // A hidden pill still opens from the notch itself, where nothing else can be clicked. Not from the menu bar
-        // beside it, whose items it would cover, and not at all on Macs without a notch.
+        // The closed pill opens from its wing and from the notch itself, where nothing else can be clicked; not from
+        // the menu bar right of the notch, whose items the open pill would cover.
         let notch = CGRect(
             x: (NotchGeometry.panelWidth - geometry.notchWidth) / 2, y: 0, width: geometry.notchWidth, height: geometry.notchHeight
         )
-        guard let pill = hover.pill ?? (geometry.hasNotch ? notch : nil) else {
+        // The open pill covers the notch too, so the union also holds in the frame before it reports its size.
+        guard let pill = geometry.hasNotch ? hover.pill?.union(notch) : hover.pill else {
             if hover.expanded { hover.expanded = false }
             return
         }
@@ -218,7 +219,7 @@ private final class FirstClickHostingView<Content: View>: NSHostingView<Content>
 @Observable
 final class NotchHover {
     var expanded: Bool
-    /// Where the pill sits in its panel, top left origin; nil while it is hidden.
+    /// Where the pill (closed: its wing) sits in its panel, top left origin; nil before its first layout.
     @ObservationIgnored var pill: CGRect?
     /// A click on a session closes the pill until the pointer leaves it.
     @ObservationIgnored var closedByClick = false
@@ -273,6 +274,7 @@ struct NotchView: View {
     }
 
     private let wing: CGFloat = 44
+    private let closedWing: CGFloat = 26
     private let expandedWidth: CGFloat = 380
     private let radius: CGFloat = 14
 
@@ -305,10 +307,10 @@ struct NotchView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Only open: a closed pill beside the notch would cover the menu bar items next to it.
             if expanded {
                 pill(lead: lead)
-                    .onDisappear { hover.pill = nil }
+            } else {
+                closed(lead: lead)
             }
             Spacer(minLength: 0)
         }
@@ -340,6 +342,35 @@ struct NotchView: View {
                 .font(.system(size: 13, weight: .semibold).monospacedDigit())
                 .foregroundStyle(badge.state.color)
         }
+    }
+
+    /// Closed, only a wing left of the notch shows the bird, so the pill is visibly alive. The right side, where the
+    /// status items stand, stays free; the app menus on the left rarely reach the notch.
+    private func closed(lead: SessionState?) -> some View {
+        HStack(spacing: 0) {
+            Group {
+                if let hookProblem {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(hookProblem == .helperGone ? Palette.vermilion : Palette.amber)
+                } else if let lead {
+                    TendbarMark(filled: true, height: 11)
+                        .foregroundStyle(lead.color)
+                        .modifier(Breathing(active: lead == .working))
+                } else {
+                    TendbarMark(filled: false, height: 11)
+                        .foregroundStyle(highestLimit >= 70 ? limitColor(highestLimit) : .secondary)
+                }
+            }
+            .frame(width: closedWing, height: notchHeight)
+            .background(UnevenRoundedRectangle(bottomLeadingRadius: 9).fill(.black))
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { hover.pill = $0 }
+            // The notch itself, then empty room as wide as the wing, keep the wing left of a centred notch.
+            Color.clear.frame(width: notchWidth + closedWing, height: notchHeight)
+        }
+        .environment(\.colorScheme, .dark)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityText(lead: lead))
     }
 
     private func pill(lead: SessionState?) -> some View {

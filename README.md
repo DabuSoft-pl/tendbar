@@ -38,7 +38,7 @@
 - **Follow-ups:** a reminder when a session waits too long, a warning when a working one goes silent.
 - **Allow or Deny** permission prompts from the panel, the notch pill or the banner (opt in). A request Tendbar
   can't show in full (over 2,000 characters, a file's new content, MCP tool arguments) gets Deny only.
-- **A pill from the notch**: hover the notch for every session and both limits; it also opens by itself for a permission prompt.
+- **A pill by the notch**: a small bird left of the notch shows the lead state; hover it or the notch for every session and both limits. It also opens by itself for a permission prompt.
 - **Usage limits** (five-hour and weekly, Pro and Max plans) for every `CLAUDE_CONFIG_DIR` profile, with warnings
   at 80% and 90%. The Claude desktop app runs no status line, so its sessions don't update limits.
 - **Daily stats:** turns, working time and waiting time, plus the last seven days.
