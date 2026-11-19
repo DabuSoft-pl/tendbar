@@ -273,6 +273,7 @@ struct NotchView: View {
     }
 
     private let wing: CGFloat = 44
+    private let chinHeight: CGFloat = 22
     private let expandedWidth: CGFloat = 380
     private let radius: CGFloat = 14
 
@@ -317,6 +318,8 @@ struct NotchView: View {
             if showsPill || expanded {
                 pill(lead: lead)
                     .onDisappear { hover.pill = nil }
+                    // Without a notch a closed pill hangs under the menu bar instead of covering its middle.
+                    .padding(.top, expanded || notchWidth > 0 ? 0 : notchHeight)
             }
             Spacer(minLength: 0)
         }
@@ -325,36 +328,49 @@ struct NotchView: View {
         .animation(.easeInOut(duration: 0.25), value: lead)
     }
 
+    @ViewBuilder private func mark(lead: SessionState?) -> some View {
+        if let lead {
+            TendbarMark(filled: true, height: 14)
+                .foregroundStyle(lead.color)
+                .modifier(Breathing(active: lead == .working))
+        } else {
+            TendbarMark(filled: false, height: 14).foregroundStyle(highestLimit >= 70 ? limitColor(highestLimit) : .secondary)
+        }
+    }
+
+    /// The hook warning, or the count of sessions in the bird's state.
+    @ViewBuilder private var status: some View {
+        if let hookProblem {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 12))
+                .foregroundStyle(hookProblem == .helperGone ? Palette.vermilion : Palette.amber)
+                .accessibilityLabel(Text("Tendbar's hooks need a click on Connect"))
+                .help(Text("Tendbar's hooks need a click on Connect"))
+        } else if let badge {
+            Text("\(badge.count)")
+                .font(.system(size: 13, weight: .semibold).monospacedDigit())
+                .foregroundStyle(badge.state.color)
+        }
+    }
+
     private func pill(lead: SessionState?) -> some View {
         VStack(spacing: 0) {
-            HStack(spacing: 0) {
-                Group {
-                    if let lead {
-                        TendbarMark(filled: true, height: 14)
-                            .foregroundStyle(lead.color)
-                            .modifier(Breathing(active: lead == .working))
-                    } else {
-                        TendbarMark(filled: false, height: 14).foregroundStyle(highestLimit >= 70 ? limitColor(highestLimit) : .secondary)
-                    }
+            if expanded {
+                HStack(spacing: 0) {
+                    mark(lead: lead).frame(width: wing)
+                    Spacer(minLength: max(notchWidth, 4))
+                    status.frame(width: wing)
                 }
-                .frame(width: wing)
-                Spacer(minLength: max(notchWidth, 4))
-                Group {
-                    if let hookProblem {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.system(size: 12))
-                            .foregroundStyle(hookProblem == .helperGone ? Palette.vermilion : Palette.amber)
-                            .accessibilityLabel(Text("Tendbar's hooks need a click on Connect"))
-                            .help(Text("Tendbar's hooks need a click on Connect"))
-                    } else if let badge {
-                        Text("\(badge.count)")
-                            .font(.system(size: 13, weight: .semibold).monospacedDigit())
-                            .foregroundStyle(badge.state.color)
-                    }
+                .frame(height: notchHeight)
+            } else {
+                // Closed, the pill stays under the notch, not beside it, so it covers no menu bar icon or menu.
+                Color.clear.frame(height: notchWidth > 0 ? notchHeight : 0)
+                HStack(spacing: 6) {
+                    mark(lead: lead)
+                    status
                 }
-                .frame(width: wing)
+                .frame(height: chinHeight)
             }
-            .frame(height: notchHeight)
 
             if !expanded, highestLimit > 0, preferences.pillLimitLines {
                 VStack(spacing: 2) {
@@ -406,7 +422,7 @@ struct NotchView: View {
                 .transition(.opacity)
             }
         }
-        .frame(width: expanded ? expandedWidth : max(notchWidth, 4) + wing * 2)
+        .frame(width: expanded ? expandedWidth : max(notchWidth, wing * 2))
         .background(
             UnevenRoundedRectangle(bottomLeadingRadius: radius, bottomTrailingRadius: radius)
                 .fill(.black)
