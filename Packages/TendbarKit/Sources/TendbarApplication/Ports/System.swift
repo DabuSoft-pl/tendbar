@@ -36,11 +36,13 @@ public protocol LoginItemControlling: AnyObject {
 
 public protocol Clock: Sendable {
     func now() -> Date
+    func sleep(seconds: TimeInterval) async
 }
 
 public struct SystemClock: Clock {
     public init() {}
     public func now() -> Date { Date() }
+    public func sleep(seconds: TimeInterval) async { try? await Task.sleep(for: .seconds(seconds)) }
 }
 
 /// Tells whether the Claude Code process behind a session still runs. Nil when it cannot tell.

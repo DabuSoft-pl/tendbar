@@ -139,4 +139,13 @@ struct StubTranscripts: TranscriptReading {
 struct FixedClock: Clock {
     var date: Date
     func now() -> Date { date }
+    func sleep(seconds: TimeInterval) async {}
+}
+
+/// A clock whose sleeps move time on at once, so waiting use cases run without real waits.
+final class SteppingClock: Clock, @unchecked Sendable {
+    var date: Date
+    init(date: Date) { self.date = date }
+    func now() -> Date { date }
+    func sleep(seconds: TimeInterval) async { date += seconds }
 }

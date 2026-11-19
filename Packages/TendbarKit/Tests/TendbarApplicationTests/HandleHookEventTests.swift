@@ -60,6 +60,23 @@ import TendbarDomain
         #expect(sessions.store.sessions["s1"]?.state == .done)
     }
 
+    @Test func waitingOutAStopFinishesTheTurnAfterTheGrace() async {
+        let clock = SteppingClock(date: now.addingTimeInterval(1))
+        let handle = HandleHookEvent(
+            repository: sessions, output: sessions, alerts: alerts, flasher: flasher, settings: settings,
+            transcripts: StubTranscripts(), activity: activity, activityOutput: activity, clock: clock
+        )
+
+        await handle.execute(event(.userPromptSubmit))
+        await handle.execute(event(.stop, at: 1))
+        #expect(sessions.store.sessions["s1"]?.state == .working)
+
+        await handle.waitOutStop()
+        #expect(clock.date == now.addingTimeInterval(1 + SessionStore.backgroundGrace))
+        #expect(alerts.presented.map(\.0) == [.done])
+        #expect(sessions.store.sessions["s1"]?.state == .done)
+    }
+
     @Test func aStopWithNoSubagentIsDoneAfterTheGrace() async {
         let handle = useCase()
 

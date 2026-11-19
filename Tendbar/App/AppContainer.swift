@@ -197,14 +197,7 @@ final class AppContainer {
         switch message {
         case let .hook(event):
             Task { await handleHookEvent.execute(event, permission: permission) }
-            if event.kind == .stop {
-                Task { [weak self] in
-                    try? await Task.sleep(for: .seconds(SessionStore.stopGrace))
-                    self?.handleHookEvent.finishPendingStops()
-                    try? await Task.sleep(for: .seconds(SessionStore.backgroundGrace - SessionStore.stopGrace))
-                    self?.handleHookEvent.finishPendingStops()
-                }
-            }
+            if event.kind == .stop { Task { await handleHookEvent.waitOutStop() } }
         case let .usage(reading):
             recordUsage.execute(reading)
         }

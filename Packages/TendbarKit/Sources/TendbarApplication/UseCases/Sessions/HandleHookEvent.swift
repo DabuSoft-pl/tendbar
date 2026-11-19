@@ -77,7 +77,16 @@ public final class HandleHookEvent {
         if let alert { held = notify(alert, sessionID: session.id, permission: permission) }
     }
 
-    /// Called `SessionStore.stopGrace` after a Stop (and on the periodic timer): turns no subagent claimed become done.
+    /// Run after a Stop: finishes the turn once `SessionStore.stopGrace` has passed with no subagent, and again after
+    /// `backgroundGrace` for sessions whose background agents resume later.
+    public func waitOutStop() async {
+        await clock.sleep(seconds: SessionStore.stopGrace)
+        finishPendingStops()
+        await clock.sleep(seconds: SessionStore.backgroundGrace - SessionStore.stopGrace)
+        finishPendingStops()
+    }
+
+    /// Called after a Stop (and on the periodic timer): turns no subagent claimed become done.
     public func finishPendingStops() {
         let now = clock.now()
         var store = repository.load()
