@@ -363,10 +363,13 @@ struct NotchView: View {
                 }
             }
             .frame(width: closedWing, height: notchHeight)
+            // The black runs on under the notch to the screen's middle: the measured notch edge sits a few points
+            // off the real one, which left a gap between the wing and the notch.
+            .frame(width: closedWing + notchWidth / 2, alignment: .leading)
             .background(UnevenRoundedRectangle(bottomLeadingRadius: 9).fill(.black))
             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { hover.pill = $0 }
-            // The notch itself, then empty room as wide as the wing, keep the wing left of a centred notch.
-            Color.clear.frame(width: notchWidth + closedWing, height: notchHeight)
+            // Empty room as wide as the left side keeps the middle of this row on the notch's middle.
+            Color.clear.frame(width: notchWidth / 2 + closedWing, height: notchHeight)
         }
         .environment(\.colorScheme, .dark)
         .accessibilityElement(children: .ignore)
