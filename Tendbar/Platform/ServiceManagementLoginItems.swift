@@ -2,7 +2,7 @@ import ServiceManagement
 import TendbarApplication
 
 @MainActor
-final class LaunchAtLoginService: LoginItemControlling {
+final class ServiceManagementLoginItems: LoginItemControlling {
     var state: LoginItemState {
         switch SMAppService.mainApp.status {
         case .enabled: .enabled

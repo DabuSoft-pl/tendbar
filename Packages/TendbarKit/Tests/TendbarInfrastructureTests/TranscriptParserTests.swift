@@ -3,7 +3,7 @@ import Testing
 import TendbarDomain
 @testable import TendbarInfrastructure
 
-@Suite struct TranscriptReaderTests {
+@Suite struct TranscriptParserTests {
     private func transcript(_ lines: [String]) throws -> URL {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("tendbar-\(UUID().uuidString).jsonl")
         try Data(lines.joined(separator: "\n").utf8).write(to: url)
@@ -19,7 +19,7 @@ import TendbarDomain
             #"{"type":"system","subtype":"turn_duration"}"#,
         ])
 
-        #expect(TranscriptReader.lastAssistantText(at: url) == "All 42 tests pass.")
+        #expect(TranscriptParser.lastAssistantText(at: url) == "All 42 tests pass.")
     }
 
     @Test func findsTheLatestTitle() throws {
@@ -30,7 +30,7 @@ import TendbarDomain
             #"{"type":"assistant","message":{"content":"done"}}"#,
         ])
 
-        #expect(TranscriptReader.lastTitle(at: url) == "Diff warstwy UI")
+        #expect(TranscriptParser.lastTitle(at: url) == "Diff warstwy UI")
     }
 
     @Test func aCustomTitleWinsOverAGeneratedOne() throws {
@@ -40,13 +40,13 @@ import TendbarDomain
             #"{"type":"assistant","message":{"content":"done"}}"#,
         ])
 
-        #expect(TranscriptReader.lastTitle(at: url) == "Czy to tylko tu działa?")
+        #expect(TranscriptParser.lastTitle(at: url) == "Czy to tylko tu działa?")
     }
 
     @Test func noTitleYet() throws {
         let url = try transcript([#"{"type":"user","message":{"content":"hi"}}"#])
 
-        #expect(TranscriptReader.lastTitle(at: url) == nil)
+        #expect(TranscriptParser.lastTitle(at: url) == nil)
     }
 
     @Test func skipsToolOnlyMessages() throws {
@@ -55,7 +55,7 @@ import TendbarDomain
             #"{"type":"assistant","message":{"content":[{"type":"tool_use","id":"t1","name":"Read","input":{}}]}}"#,
         ])
 
-        #expect(TranscriptReader.lastAssistantText(at: url) == "First answer")
+        #expect(TranscriptParser.lastAssistantText(at: url) == "First answer")
     }
 
     @Test func readsOnlyTheTailAndSurvivesACutLine() throws {
@@ -66,17 +66,17 @@ import TendbarDomain
             #"{"type":"assistant","message":{"content":"tail text"}}"#,
         ])
 
-        #expect(TranscriptReader.lastAssistantText(at: url, tailBytes: 100) == "tail text")
+        #expect(TranscriptParser.lastAssistantText(at: url, tailBytes: 100) == "tail text")
     }
 
     @Test func missingFileGivesNothing() {
-        #expect(TranscriptReader.lastAssistantText(at: URL(fileURLWithPath: "/nonexistent/t.jsonl")) == nil)
+        #expect(TranscriptParser.lastAssistantText(at: URL(fileURLWithPath: "/nonexistent/t.jsonl")) == nil)
     }
 
     @Test func previewCollapsesWhitespaceAndTruncates() {
-        #expect(TranscriptReader.preview(of: "a\n\n  b\tc") == "a b c")
+        #expect(TranscriptParser.preview(of: "a\n\n  b\tc") == "a b c")
         let long = String(repeating: "word ", count: 100)
-        let preview = TranscriptReader.preview(of: long, limit: 20)
+        let preview = TranscriptParser.preview(of: long, limit: 20)
         #expect(preview.count == 20)
         #expect(preview.hasSuffix("…"))
     }

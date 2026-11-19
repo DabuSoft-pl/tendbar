@@ -7,7 +7,7 @@ import TendbarDomain
 
 /// Notification Center behind the `AlertPresenting` and `NotificationPermissions` ports.
 @MainActor
-final class UserNotificationsAdapter: NSObject, UNUserNotificationCenterDelegate, AlertPresenting, NotificationPermissions {
+final class UserNotificationsAlerts: NSObject, UNUserNotificationCenterDelegate, AlertPresenting, NotificationPermissions {
     private let center = UNUserNotificationCenter.current()
     private let log = Logger(subsystem: "pl.dabusoft.tendbar", category: "notifications")
     /// Called with the session id when the user clicks a banner.

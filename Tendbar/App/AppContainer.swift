@@ -132,7 +132,7 @@ final class AppContainer {
 
     /// The real app: JSON files, the hook socket, Notification Center, AppleScript and the notch.
     static func live() -> AppContainer {
-        let notifications = UserNotificationsAdapter()
+        let notifications = UserNotificationsAlerts()
         let hookPath = Bundle.main.url(forAuxiliaryExecutable: "tendbar-hook")?.path
         let preferences = Preferences()
         let container = AppContainer(
@@ -151,7 +151,7 @@ final class AppContainer {
                 transcripts: FileTranscriptReader(),
                 connector: hookPath.map(ClaudeHookConnector.init(hookPath:)),
                 profileDirectories: ClaudeProfileDirectories(),
-                loginItems: LaunchAtLoginService(),
+                loginItems: ServiceManagementLoginItems(),
                 processes: SessionProcessChecker(),
                 clock: SystemClock()
             ),

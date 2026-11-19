@@ -26,13 +26,13 @@ Domain  <-  Application  <-  Infrastructure
 - `TendbarInfrastructure` — adapters that touch files, sockets and processes: the hook wire format (`HookEnvelope`,
   `HookRedaction`, `InboundMessage` maps it to domain values), `HookEventListener`, JSON repositories with storage
   records (`Records.swift` keeps `sessions.json`/`usage.json` stable), `HookInstaller`, `ClaudeProfiles`,
-  `TranscriptReader`, `TerminalJump` (plans a jump per terminal), `ProcessCommandRunner` (runs `wezterm`, `kitty`, `tmux`
+  `FileTranscriptReader` (the `TranscriptReading` port, parsing in `TranscriptParser`), `TerminalJump` (plans a jump per terminal), `ProcessCommandRunner` (runs `wezterm`, `kitty`, `tmux`
   without a shell, 2 s timeout), `ProcessTTY`.
 - `Tendbar/App` — `TendbarApp` and `AppContainer`, the only code that knows every layer; `PreviewAdapters.swift`
   builds the same container on in-memory adapters for SwiftUI previews.
-- `Tendbar/Platform` — adapters that need macOS UI frameworks: `UserNotificationsAdapter` (plays the bird calls itself
+- `Tendbar/Platform` — adapters that need macOS UI frameworks: `UserNotificationsAlerts` (plays the bird calls itself
   with `NSSound`: Notification Center on macOS 27 swaps a named app sound for a built-in one), `EdgeGlow`,
-  `AppleScriptTerminalNavigator`, `GlobalShortcut` (Carbon hot key, no Accessibility permission), `SoftwareUpdate` (Sparkle), `StatusItemMenu` (right click on the menu bar item), `FocusFilter` (a Focus filter intent that sets `focus.quiet`: no sounds or glow), `ShortcutsActions` (Shortcuts app actions: waiting count, next session, current limit; they reach the container through `AppDependencyManager`), `ShortcutTrigger` (wraps `AlertPresenting` and runs the shortcut picked per event with `/usr/bin/shortcuts run`, no shell, not awaited), `LaunchAtLoginService`, `Preferences` (UserDefaults, also `AlertSettingsProviding`).
+  `AppleScriptTerminalNavigator`, `GlobalShortcut` (Carbon hot key, no Accessibility permission), `SoftwareUpdate` (Sparkle), `StatusItemMenu` (right click on the menu bar item), `FocusFilter` (a Focus filter intent that sets `focus.quiet`: no sounds or glow), `ShortcutsActions` (Shortcuts app actions: waiting count, next session, current limit; they reach the container through `AppDependencyManager`), `ShortcutTrigger` (wraps `AlertPresenting` and runs the shortcut picked per event with `/usr/bin/shortcuts run`, no shell, not awaited), `ServiceManagementLoginItems`, `Preferences` (UserDefaults, also `AlertSettingsProviding`).
 - `Tendbar/Presentation` — per feature a view model (observable state; implements the output port where there is one),
   a controller (user intent → use case) and the views. Views import Domain and Application, never Infrastructure. `Shared/TendbarMark`
   draws the menu bar and pill mark from the icon's shapes (outlined, filled when something needs you).
@@ -52,6 +52,26 @@ SubagentStart, SubagentStop (`agent_id`, `agent_type`). A Stop while subagents r
 working (`stopDeferred`); the last SubagentStop makes it done. SessionEnd/end-gone clear them. Events whose `cwd` is in
 the system temp dir (`/var/folders/`, `/tmp/`, `/private/...`) are dropped in `HandleHookEvent` (plugin headless runs).
 Tests: `TendbarDomainTests` (rules), `TendbarApplicationTests` (use cases on fakes), `TendbarInfrastructureTests`.
+
+## Where new code goes
+
+Name an adapter after its technology and the port it serves (`JSONSessionRepository`, `AppleScriptTerminalNavigator`,
+`UserNotificationsAlerts`), not with `Adapter`/`Service`/`Manager`.
+
+- A new rule about sessions, limits or alerts: a value type or a pure function in Domain, with a test in
+  `TendbarDomainTests`.
+- Something the user or a hook makes happen: a use case in Application (one class, `execute()`, ports passed in
+  `init`), tested on fakes in `TendbarApplicationTests`.
+- The use case needs the outside world (files, sockets, macOS): a protocol in `Application/Ports`, an adapter in
+  Infrastructure (no UI frameworks) or Platform (AppKit, UserNotifications…), wired in `AppContainer.live()`.
+- Extra behaviour on an existing port: a decorator that implements the same protocol and wraps the adapter, like
+  `ShortcutTrigger` around the alerts.
+- Something the user sees: a feature folder in Presentation with a view model (state, implements the output port),
+  a controller (user intent → use case) and the views. A view never calls an adapter.
+- A new setting: a property on `Preferences` (stored in UserDefaults), a control in `SettingsView`, the Polish text in
+  `Localizable.xcstrings`.
+- A new hook event: the wire format in `HookEnvelope`, mapped by `InboundMessage` to a `HookEvent`, handled by
+  `HandleHookEvent`/`SessionStore`; the hook itself in `HookInstaller`.
 
 ## Rules
 

@@ -13,14 +13,14 @@ public struct FileTranscriptReader: TranscriptReading {
     public func lastReplyPreview(at path: String) async -> String? {
         guard let url = Self.transcriptURL(path, home: home) else { return nil }
         return await Task.detached(priority: .utility) {
-            TranscriptReader.lastAssistantText(at: url).map { TranscriptReader.preview(of: $0) }
+            TranscriptParser.lastAssistantText(at: url).map { TranscriptParser.preview(of: $0) }
         }.value
     }
 
     public func title(at path: String) async -> String? {
         guard let url = Self.transcriptURL(path, home: home) else { return nil }
         return await Task.detached(priority: .utility) {
-            TranscriptReader.lastTitle(at: url).map { TranscriptReader.preview(of: $0, limit: 80) }
+            TranscriptParser.lastTitle(at: url).map { TranscriptParser.preview(of: $0, limit: 80) }
         }.value
     }
 

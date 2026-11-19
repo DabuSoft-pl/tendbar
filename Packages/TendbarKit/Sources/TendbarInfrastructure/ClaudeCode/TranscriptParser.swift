@@ -1,6 +1,6 @@
 import Foundation
 
-public enum TranscriptReader {
+public enum TranscriptParser {
     public static let tailBytes = 512 * 1024
 
     public static func lastAssistantText(at url: URL, tailBytes: Int = tailBytes) -> String? {
