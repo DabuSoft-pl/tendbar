@@ -15,7 +15,6 @@ final class UsageViewModel: UsageOutput {
     var accounts: [AccountUsage] { store.currentFirst }
     var currentAccountID: String? { store.current?.id }
     var currentLimit: Double { store.currentLimit(at: now) }
-    /// The current account's five-hour and weekly usage, nil when not read yet.
 
     func isCurrent(_ account: AccountUsage) -> Bool {
         account.id == currentAccountID

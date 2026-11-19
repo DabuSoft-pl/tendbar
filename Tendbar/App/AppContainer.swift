@@ -143,7 +143,7 @@ final class AppContainer {
                 activity: JSONActivityRepository(),
                 firedWarnings: UserDefaultsFiredWarningRepository(),
                 profiles: UserDefaultsProfileRepository(),
-                alerts: notifications,
+                alerts: ShortcutTrigger(alerts: notifications, preferences: preferences),
                 permissions: notifications,
                 flasher: EdgeGlow { [preferences] in preferences.hideFromCapture },
                 navigator: AppleScriptTerminalNavigator(),

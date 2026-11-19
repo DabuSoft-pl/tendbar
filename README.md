@@ -33,6 +33,8 @@
 
 - **All sessions in one list** with their state and the start of Claude's last reply.
 - **Jump back** to a session's terminal tab or pane with a click, the arrow keys, or a global shortcut.
+- **Shortcuts:** actions for how many sessions wait for you, the next session and the current limit, and a shortcut
+  of your choice run when a session waits, finishes or fails, or a limit passes 80%.
 - **Notifications** when a session needs you, finishes or fails, with optional screen-edge glow and bird calls.
   Quiet during a Focus.
 - **Follow-ups:** a reminder when a session waits too long, a warning when a working one goes silent.

@@ -28,6 +28,7 @@ final class Preferences: AlertSettingsProviding {
         static let soundStyle = "notify.sound.style"
         static let remindAfter = "notify.remindAfter"
         static let quietAfter = "notify.quietAfter"
+        static let eventShortcuts = "notify.shortcuts"
         static let limitResets = "notify.limits.resets"
         static let today = "view.panel.today"
         static let permissionActions = "notify.permissionActions"
@@ -62,6 +63,8 @@ final class Preferences: AlertSettingsProviding {
     var glowOnDone: Bool { didSet { defaults.set(glowOnDone, forKey: Key.glowDone) } }
     var showReplyPreview: Bool { didSet { defaults.set(showReplyPreview, forKey: Key.replyPreview) } }
     var notifyLimits: Bool { didSet { defaults.set(notifyLimits, forKey: Key.limits) } }
+    /// The shortcut to run per event, by `AlertKind` raw value or `ShortcutTrigger.limitKey`.
+    var eventShortcuts: [String: String] { didSet { defaults.set(eventShortcuts, forKey: Key.eventShortcuts) } }
     var menuBarStyle: MenuBarStyle { didSet { defaults.set(menuBarStyle.rawValue, forKey: Key.menuBar) } }
     var panelPreviews: Bool { didSet { defaults.set(panelPreviews, forKey: Key.panelPreviews) } }
     var usageStyle: UsageStyle { didSet { defaults.set(usageStyle.rawValue, forKey: Key.usage) } }
@@ -121,6 +124,7 @@ final class Preferences: AlertSettingsProviding {
         edgeGlow = defaults.bool(forKey: Key.glow)
         glowOnDone = defaults.bool(forKey: Key.glowDone)
         notifyLimits = defaults.bool(forKey: Key.limits)
+        eventShortcuts = defaults.dictionary(forKey: Key.eventShortcuts) as? [String: String] ?? [:]
         notchView = defaults.bool(forKey: Key.notch)
         logEvents = defaults.bool(forKey: Key.logEvents)
         showReplyPreview = defaults.bool(forKey: Key.replyPreview)

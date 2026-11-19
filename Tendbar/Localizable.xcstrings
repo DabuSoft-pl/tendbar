@@ -551,6 +551,16 @@
         }
       }
     },
+    "Bring the terminal tab of the next session that needs you to the front. Returns false when none waits.": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przenosi na wierzch kartę terminala z następną sesją, która Cię potrzebuje. Zwraca fałsz, gdy żadna nie czeka."
+          }
+        }
+      }
+    },
     "Cancel": {
       "localizations": {
         "pl": {
@@ -811,6 +821,16 @@
         }
       }
     },
+    "Current Account Limit": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limit bieżącego konta"
+          }
+        }
+      }
+    },
     "Dark": {
       "localizations": {
         "pl": {
@@ -1011,12 +1031,32 @@
         }
       }
     },
+    "How many Claude Code sessions wait for your answer or permission.": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ile sesji Claude Code czeka na Twoją odpowiedź albo zgodę."
+          }
+        }
+      }
+    },
     "Limits update from Claude Code in a terminal. The Claude app doesn't pass them on.": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
             "value": "Limity przychodzą z Claude Code w terminalu. Aplikacja Claude ich nie przekazuje."
+          }
+        }
+      }
+    },
+    "None": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brak"
           }
         }
       }
@@ -1521,6 +1561,16 @@
         }
       }
     },
+    "Open Next Session": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otwórz następną sesję"
+          }
+        }
+      }
+    },
     "Open at login": {
       "localizations": {
         "pl": {
@@ -1721,12 +1771,32 @@
         }
       }
     },
+    "Run a shortcut when": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uruchom skrót, gdy"
+          }
+        }
+      }
+    },
     "Session closed": {
       "localizations": {
         "pl": {
           "stringUnit": {
             "state": "translated",
             "value": "Sesja zamknięta"
+          }
+        }
+      }
+    },
+    "Sessions Waiting for You": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sesje czekające na Ciebie"
           }
         }
       }
@@ -2031,6 +2101,16 @@
         }
       }
     },
+    "The higher of the current account's five-hour and weekly usage, in percent.": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wyższe z dwóch zużyć bieżącego konta, pięciogodzinnego i tygodniowego, w procentach."
+          }
+        }
+      }
+    },
     "The hooks run a Tendbar that is gone, so no sessions arrive": {
       "localizations": {
         "pl": {
@@ -2077,6 +2157,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pigułka i ramka nie trafiają na udostępniany ekran ani do nagrań"
+          }
+        }
+      }
+    },
+    "The shortcut runs along with the notification, so that notification has to be on": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skrót uruchamia się razem z powiadomieniem, więc to powiadomienie musi być włączone"
           }
         }
       }

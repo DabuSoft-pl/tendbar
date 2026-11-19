@@ -219,6 +219,39 @@ private struct ClaudeCodeSettings: View {
     }
 }
 
+/// A shortcut from the Shortcuts app per event, run by `ShortcutTrigger` along with the notification.
+private struct EventShortcutsSection: View {
+    @Bindable var preferences: Preferences
+    @State private var names: [String] = []
+
+    var body: some View {
+        Section {
+            picker("A session waits for you", event: AlertKind.needsYou.rawValue)
+            picker("A session finishes", event: AlertKind.done.rawValue)
+            picker("A turn fails", event: AlertKind.failed.rawValue)
+            picker("An account passes 80% and 90% of a limit", event: ShortcutTrigger.limitKey)
+        } header: {
+            Text("Run a shortcut when")
+        } footer: {
+            Text("The shortcut runs along with the notification, so that notification has to be on")
+        }
+        .task { names = await ShortcutTrigger.names() }
+    }
+
+    private func picker(_ title: LocalizedStringKey, event: String) -> some View {
+        let chosen = preferences.eventShortcuts[event]
+        return Picker(title, selection: Binding(
+            get: { chosen ?? "" },
+            set: { preferences.eventShortcuts[event] = $0.isEmpty ? nil : $0 }
+        )) {
+            Text("None").tag("")
+            ForEach(names, id: \.self) { Text($0).tag($0) }
+            // A shortcut renamed or deleted since keeps its row, so the choice stays visible.
+            if let chosen, !names.contains(chosen) { Text(chosen).tag(chosen) }
+        }
+    }
+}
+
 private struct NotificationSettings: View {
     @Bindable var preferences: Preferences
     let model: SystemViewModel
@@ -327,6 +360,7 @@ private struct NotificationSettings: View {
             } footer: {
                 Text("The edge glows orange when a session waits, green when it finishes, red after an error and at 90% of a limit. Right-click a session in the panel to mute its folder")
             }
+            EventShortcutsSection(preferences: preferences)
             if !preferences.mutedFolders.isEmpty {
                 Section {
                     ForEach(preferences.mutedFolders, id: \.self) { folder in

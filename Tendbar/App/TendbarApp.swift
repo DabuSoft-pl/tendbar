@@ -1,3 +1,4 @@
+import AppIntents
 import AppKit
 import SwiftUI
 
@@ -26,7 +27,10 @@ struct TendbarApp: App {
             return
         }
         #endif
-        _container = State(initialValue: AppContainer.live())
+        let container = AppContainer.live()
+        // The Shortcuts actions in ShortcutsActions.swift get the running container through `@Dependency`.
+        AppDependencyManager.shared.add(dependency: container)
+        _container = State(initialValue: container)
     }
 
     var body: some Scene {
