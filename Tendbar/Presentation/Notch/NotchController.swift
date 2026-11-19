@@ -273,7 +273,6 @@ struct NotchView: View {
     }
 
     private let wing: CGFloat = 44
-    private let chinHeight: CGFloat = 22
     private let expandedWidth: CGFloat = 380
     private let radius: CGFloat = 14
 
@@ -318,8 +317,8 @@ struct NotchView: View {
             if showsPill || expanded {
                 pill(lead: lead)
                     .onDisappear { hover.pill = nil }
-                    // Without a notch a closed pill hangs under the menu bar instead of covering its middle.
-                    .padding(.top, expanded || notchWidth > 0 ? 0 : notchHeight)
+                    // Closed, the pill hangs under the notch (or the menu bar), so it covers no menu bar icon or menu.
+                    .padding(.top, expanded ? 0 : notchHeight)
             }
             Spacer(minLength: 0)
         }
@@ -338,6 +337,17 @@ struct NotchView: View {
         }
     }
 
+    @ViewBuilder private func dot(lead: SessionState?) -> some View {
+        if let lead {
+            Circle().fill(lead.color)
+                .frame(width: 8, height: 8)
+                .modifier(Breathing(active: lead == .working))
+        } else {
+            Circle().strokeBorder(highestLimit >= 70 ? limitColor(highestLimit) : .secondary, lineWidth: 1.5)
+                .frame(width: 8, height: 8)
+        }
+    }
+
     /// The hook warning, or the count of sessions in the bird's state.
     @ViewBuilder private var status: some View {
         if let hookProblem {
@@ -353,6 +363,10 @@ struct NotchView: View {
         }
     }
 
+    private var corner: CGFloat {
+        expanded ? radius : 9
+    }
+
     private func pill(lead: SessionState?) -> some View {
         VStack(spacing: 0) {
             if expanded {
@@ -363,23 +377,27 @@ struct NotchView: View {
                 }
                 .frame(height: notchHeight)
             } else {
-                // Closed, the pill stays under the notch, not beside it, so it covers no menu bar icon or menu.
-                Color.clear.frame(height: notchWidth > 0 ? notchHeight : 0)
-                HStack(spacing: 6) {
-                    mark(lead: lead)
-                    status
+                VStack(spacing: 4) {
+                    HStack(spacing: 5) {
+                        dot(lead: lead)
+                        status
+                    }
+                    if highestLimit > 0, preferences.pillLimitLines {
+                        VStack(spacing: 2) {
+                            LimitLine(percentage: usage.currentFiveHour ?? 0)
+                            LimitLine(percentage: usage.currentSevenDay ?? 0)
+                        }
+                        .frame(width: 32)
+                    }
                 }
-                .frame(height: chinHeight)
-            }
-
-            if !expanded, highestLimit > 0, preferences.pillLimitLines {
-                VStack(spacing: 2) {
-                    LimitLine(percentage: usage.currentFiveHour ?? 0)
-                    LimitLine(percentage: usage.currentSevenDay ?? 0)
-                }
-                .padding(.horizontal, radius)
-                .padding(.top, 2)
+                .padding(.horizontal, 10)
+                .padding(.top, 3)
                 .padding(.bottom, 6)
+                // Gone before the open pill's rows fade in over it, and back only once they have faded out.
+                .transition(.asymmetric(
+                    insertion: .opacity.animation(.easeOut(duration: 0.1).delay(0.2)),
+                    removal: .opacity.animation(.easeOut(duration: 0.08))
+                ))
             }
 
             if expanded {
@@ -422,12 +440,14 @@ struct NotchView: View {
                 .transition(.opacity)
             }
         }
-        .frame(width: expanded ? expandedWidth : max(notchWidth, wing * 2))
+        .frame(width: expanded ? expandedWidth : nil)
         .background(
-            UnevenRoundedRectangle(bottomLeadingRadius: radius, bottomTrailingRadius: radius)
+            UnevenRoundedRectangle(bottomLeadingRadius: corner, bottomTrailingRadius: corner)
                 .fill(.black)
         )
-        .contentShape(UnevenRoundedRectangle(bottomLeadingRadius: radius, bottomTrailingRadius: radius))
+        // Opening and closing, the content shows only inside the growing shape, not around it.
+        .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: corner, bottomTrailingRadius: corner))
+        .contentShape(UnevenRoundedRectangle(bottomLeadingRadius: corner, bottomTrailingRadius: corner))
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { hover.pill = $0 }
         .environment(\.colorScheme, .dark)
         .accessibilityElement(children: .contain)
