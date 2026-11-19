@@ -32,7 +32,7 @@ enum Diagnostics {
             "Sessions: \(sessions.count) (\(states))",
             "Terminals: \(terminals.isEmpty ? "none" : terminals.joined(separator: ", "))",
             "Accounts with limits: \(container.usage.accounts.count)",
-            "Settings: menu bar \(preferences.menuBarStyle.rawValue), pill \(preferences.notchView ? preferences.pillVisibility.rawValue : "off"), "
+            "Settings: menu bar \(preferences.menuBarStyle.rawValue), pill \(preferences.notchView ? "on" : "off"), "
                 + "usage \(preferences.usageStyle.rawValue), glow \(preferences.edgeGlow), hidden from capture \(preferences.hideFromCapture), "
                 + "muted folders \(preferences.mutedFolders.count), event log \(preferences.logEvents), "
                 + "desktop banners left to the app \(preferences.leaveDesktopBanners), shortcut \(preferences.nextSessionShortcut.rawValue)\(container.system.shortcutTaken ? " (taken)" : ""), "

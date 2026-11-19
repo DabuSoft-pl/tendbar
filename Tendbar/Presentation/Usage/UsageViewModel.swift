@@ -16,8 +16,6 @@ final class UsageViewModel: UsageOutput {
     var currentAccountID: String? { store.current?.id }
     var currentLimit: Double { store.currentLimit(at: now) }
     /// The current account's five-hour and weekly usage, nil when not read yet.
-    var currentFiveHour: Double? { store.current?.fiveHour?.percentage(at: now) }
-    var currentSevenDay: Double? { store.current?.sevenDay?.percentage(at: now) }
 
     func isCurrent(_ account: AccountUsage) -> Bool {
         account.id == currentAccountID

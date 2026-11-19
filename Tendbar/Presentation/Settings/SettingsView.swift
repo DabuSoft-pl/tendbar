@@ -425,14 +425,6 @@ private struct AppearanceSettings: View {
             }
             Section {
                 Toggle(NotchController.hasNotch ? "Pill next to the notch" : "Pill in the middle of the menu bar", isOn: $preferences.notchView)
-                Picker("Show it", selection: $preferences.pillVisibility) {
-                    Text("Always").tag(PillVisibility.always)
-                    Text("When a session works or waits").tag(PillVisibility.activity)
-                    Text("Only when a session waits for you").tag(PillVisibility.needsYou)
-                }
-                .disabled(!preferences.notchView)
-                Toggle("Limit lines under the pill", isOn: $preferences.pillLimitLines)
-                    .disabled(!preferences.notchView)
             } header: {
                 Text("Pill")
             } footer: {

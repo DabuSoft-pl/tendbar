@@ -273,7 +273,6 @@ struct NotchView: View {
     }
 
     private let wing: CGFloat = 44
-    private let closedWing: CGFloat = 26
     private let expandedWidth: CGFloat = 380
     private let radius: CGFloat = 14
 
@@ -300,22 +299,14 @@ struct NotchView: View {
         HookAttention.worst(of: claudeCode.needsConnect)
     }
 
-    private var showsPill: Bool {
-        if hookProblem != nil { return true }
-        return switch preferences.pillVisibility {
-        case .always: true
-        case .activity: lead != nil || highestLimit >= 80
-        case .needsYou: lead == .needsYou
-        }
-    }
-
     private var highestLimit: Double {
         usage.currentLimit
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            if showsPill || expanded {
+            // Only open: a closed pill beside the notch would cover the menu bar items next to it.
+            if expanded {
                 pill(lead: lead)
                     .onDisappear { hover.pill = nil }
             }
@@ -336,17 +327,6 @@ struct NotchView: View {
         }
     }
 
-    @ViewBuilder private func dot(lead: SessionState?) -> some View {
-        if let lead {
-            Circle().fill(lead.color)
-                .frame(width: 8, height: 8)
-                .modifier(Breathing(active: lead == .working))
-        } else {
-            Circle().strokeBorder(highestLimit >= 70 ? limitColor(highestLimit) : .secondary, lineWidth: 1.5)
-                .frame(width: 8, height: 8)
-        }
-    }
-
     /// The hook warning, or the count of sessions in the bird's state.
     @ViewBuilder private var status: some View {
         if let hookProblem {
@@ -362,34 +342,12 @@ struct NotchView: View {
         }
     }
 
-    private var corner: CGFloat {
-        expanded ? radius : 9
-    }
-
     private func pill(lead: SessionState?) -> some View {
         VStack(spacing: 0) {
-            // Closed, narrow wings beside the notch hold the state, so the pill covers no window under the menu bar
-            // and only the menu bar items right next to the notch.
             HStack(spacing: 0) {
-                Group {
-                    if expanded {
-                        mark(lead: lead)
-                    } else {
-                        VStack(spacing: 3) {
-                            dot(lead: lead)
-                            if highestLimit > 0, preferences.pillLimitLines {
-                                VStack(spacing: 2) {
-                                    LimitLine(percentage: usage.currentFiveHour ?? 0)
-                                    LimitLine(percentage: usage.currentSevenDay ?? 0)
-                                }
-                                .frame(width: 16)
-                            }
-                        }
-                    }
-                }
-                .frame(width: expanded ? wing : closedWing)
+                mark(lead: lead).frame(width: wing)
                 Spacer(minLength: max(notchWidth, 4))
-                status.frame(width: expanded ? wing : closedWing)
+                status.frame(width: wing)
             }
             .frame(height: notchHeight)
 
@@ -433,14 +391,14 @@ struct NotchView: View {
                 .transition(.opacity)
             }
         }
-        .frame(width: expanded ? expandedWidth : nil)
+        .frame(width: expandedWidth)
         .background(
-            UnevenRoundedRectangle(bottomLeadingRadius: corner, bottomTrailingRadius: corner)
+            UnevenRoundedRectangle(bottomLeadingRadius: radius, bottomTrailingRadius: radius)
                 .fill(.black)
         )
         // Opening and closing, the content shows only inside the growing shape, not around it.
-        .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: corner, bottomTrailingRadius: corner))
-        .contentShape(UnevenRoundedRectangle(bottomLeadingRadius: corner, bottomTrailingRadius: corner))
+        .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: radius, bottomTrailingRadius: radius))
+        .contentShape(UnevenRoundedRectangle(bottomLeadingRadius: radius, bottomTrailingRadius: radius))
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { hover.pill = $0 }
         .environment(\.colorScheme, .dark)
         .accessibilityElement(children: .contain)
@@ -453,23 +411,6 @@ struct NotchView: View {
         if let badge { parts.append(String(localized: "\(badge.count) sessions: \(badge.state.label)")) }
         if highestLimit > 0 { parts.append(String(localized: "current account limit \(Int(highestLimit.rounded()))%")) }
         return parts.joined(separator: ", ")
-    }
-}
-
-private struct LimitLine: View {
-    let percentage: Double
-
-    var body: some View {
-        GeometryReader { proxy in
-            ZStack(alignment: .leading) {
-                Capsule().fill(.white.opacity(0.12))
-                Capsule()
-                    .fill(limitColor(percentage))
-                    .frame(width: proxy.size.width * min(percentage, 100) / 100)
-            }
-        }
-        .frame(height: 2)
-        .accessibilityHidden(true)
     }
 }
 
