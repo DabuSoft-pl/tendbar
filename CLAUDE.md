@@ -28,8 +28,10 @@ Domain  <-  Application  <-  Infrastructure
   records (`Records.swift` keeps `sessions.json`/`usage.json` stable), `HookInstaller`, `ClaudeProfiles`,
   `FileTranscriptReader` (the `TranscriptReading` port, parsing in `TranscriptParser`), `TerminalJump` (plans a jump per terminal), `ProcessCommandRunner` (runs `wezterm`, `kitty`, `tmux`
   without a shell, 2 s timeout), `ProcessTTY`.
-- `Tendbar/App` — `TendbarApp` and `AppContainer`, the only code that knows every layer; `PreviewAdapters.swift`
-  builds the same container on in-memory adapters for SwiftUI previews.
+- `Tendbar/App` — `TendbarApp` and `AppContainer`, the only code that knows every layer (Pure DI, no container
+  library). `App/Assembly` has one assembly per feature (`SessionsAssembly`, `UsageAssembly`, `ClaudeCodeAssembly`,
+  `SystemAssembly`) that builds its use cases and controller from the adapters; `AppContainer` only joins them.
+  `PreviewAdapters.swift` builds the same container on in-memory adapters for SwiftUI previews.
 - `Tendbar/Platform` — adapters that need macOS UI frameworks: `UserNotificationsAlerts` (plays the bird calls itself
   with `NSSound`: Notification Center on macOS 27 swaps a named app sound for a built-in one), `EdgeGlow`,
   `AppleScriptTerminalNavigator`, `GlobalShortcut` (Carbon hot key, no Accessibility permission), `SoftwareUpdate` (Sparkle), `StatusItemMenu` (right click on the menu bar item), `FocusFilter` (a Focus filter intent that sets `focus.quiet`: no sounds or glow), `ShortcutsActions` (Shortcuts app actions: waiting count, next session, current limit; they reach the container through `AppDependencyManager`), `ShortcutTrigger` (wraps `AlertPresenting` and runs the shortcut picked per event with `/usr/bin/shortcuts run`, no shell, not awaited), `ServiceManagementLoginItems`, `Preferences` (UserDefaults, also `AlertSettingsProviding`).
@@ -61,7 +63,8 @@ Name an adapter after its technology and the port it serves (`JSONSessionReposit
 - A new rule about sessions, limits or alerts: a value type or a pure function in Domain, with a test in
   `TendbarDomainTests`.
 - Something the user or a hook makes happen: a use case in Application (one class, `execute()`, ports passed in
-  `init`), tested on fakes in `TendbarApplicationTests`.
+  `init`), tested on fakes in `TendbarApplicationTests`, built in its feature's assembly in `App/Assembly`. Waits go
+  through `Clock.sleep` so tests do not wait.
 - The use case needs the outside world (files, sockets, macOS): a protocol in `Application/Ports`, an adapter in
   Infrastructure (no UI frameworks) or Platform (AppKit, UserNotifications…), wired in `AppContainer.live()`.
 - Extra behaviour on an existing port: a decorator that implements the same protocol and wraps the adapter, like

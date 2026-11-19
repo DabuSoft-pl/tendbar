@@ -4,8 +4,9 @@ import TendbarApplication
 import TendbarDomain
 import TendbarInfrastructure
 
-/// Composition root: the one place that knows every layer. It builds the adapters, hands them to the use cases
-/// through their ports and wires the use cases to the view models and controllers.
+/// Composition root: the one place that knows every layer. Read it in three parts: `Adapters` lists what the app
+/// needs from the outside world, `init` hands them to each feature's assembly (`App/Assembly`), and `live()` picks
+/// the real adapters and starts the socket, the notch, the shortcut and the timer.
 @MainActor
 final class AppContainer {
     /// Everything the use cases need from the outside world, as ports.
@@ -41,14 +42,10 @@ final class AppContainer {
     let claudeCodeActions: ClaudeCodeController
     let systemActions: SystemController
 
-    private let startSessions: StartSessions
-    private let startUsage: StartUsage
-    private let handleHookEvent: HandleHookEvent
-    private let recordUsage: RecordUsageReading
-    private let checkAttention: CheckAttention
-    private let endGoneSessions: EndGoneSessions
-    private let checkWarnings: CheckLimitWarnings
     let permissionDesk: PermissionDesk
+    /// The features the timer and the hook socket keep running after start.
+    private let sessionsFeature: SessionsAssembly
+    private let usageFeature: UsageAssembly
     private var timer: Timer?
     private var listener: HookEventListener?
     private var notch: NotchController?
@@ -59,53 +56,17 @@ final class AppContainer {
         self.updates = updates
         system = SystemViewModel(eventLog: eventLog, dataFolder: dataFolder)
 
-        checkWarnings = CheckLimitWarnings(
-            usage: a.usage, fired: a.firedWarnings, alerts: a.alerts, flasher: a.flasher, settings: preferences, clock: a.clock
-        )
-        permissionDesk = PermissionDesk(alerts: a.alerts, output: sessions)
-        startSessions = StartSessions(repository: a.sessions, output: sessions, clock: a.clock)
-        startUsage = StartUsage(repository: a.usage, output: usage, checkWarnings: checkWarnings)
-        handleHookEvent = HandleHookEvent(
-            repository: a.sessions, output: sessions, alerts: a.alerts, flasher: a.flasher, settings: preferences, transcripts: a.transcripts,
-            activity: a.activity, activityOutput: activity, desk: permissionDesk, navigator: a.navigator
-        )
-        checkAttention = CheckAttention(
-            repository: a.sessions, output: sessions, alerts: a.alerts, flasher: a.flasher, settings: preferences, clock: a.clock
-        )
-        endGoneSessions = EndGoneSessions(
-            repository: a.sessions, output: sessions, processes: a.processes, desk: permissionDesk, clock: a.clock
-        )
-        recordUsage = RecordUsageReading(repository: a.usage, output: usage, emails: a.emails, checkWarnings: checkWarnings)
+        // Each feature builds its own use cases and controller.
+        sessionsFeature = SessionsAssembly(a, model: sessions, activity: activity, preferences: preferences)
+        usageFeature = UsageAssembly(a, model: usage, preferences: preferences)
+        sessionActions = sessionsFeature.controller
+        permissionDesk = sessionsFeature.desk
+        usageActions = usageFeature.controller
+        claudeCodeActions = ClaudeCodeAssembly(a, model: claudeCode).controller
+        systemActions = SystemAssembly(a, model: system, preferences: preferences).controller
 
-        sessionActions = SessionsController(
-            model: sessions,
-            repository: a.sessions,
-            openSession: OpenSession(repository: a.sessions, output: sessions, alerts: a.alerts, navigator: a.navigator),
-            markAllSeen: MarkAllSessionsSeen(repository: a.sessions, output: sessions, alerts: a.alerts),
-            removeEnded: RemoveEndedSessions(repository: a.sessions, output: sessions),
-            desk: permissionDesk
-        )
-        usageActions = UsageController(forgetAccount: ForgetAccount(repository: a.usage, output: usage))
-        claudeCodeActions = ClaudeCodeController(
-            model: claudeCode,
-            checkConnection: CheckHookConnection(connector: a.connector),
-            changeConnection: ChangeHookConnection(connector: a.connector),
-            listProfiles: ListProfiles(repository: a.profiles, emails: a.emails, connector: a.connector),
-            addProfile: AddProfile(repository: a.profiles, directories: a.profileDirectories),
-            removeProfile: RemoveProfile(repository: a.profiles)
-        )
-        systemActions = SystemController(
-            model: system,
-            checkPermission: CheckNotificationPermission(permissions: a.permissions),
-            requestPermission: RequestNotificationPermission(permissions: a.permissions),
-            sendTest: SendTestNotification(permissions: a.permissions, settings: preferences),
-            previewFlash: PreviewScreenFlash(flasher: a.flasher),
-            checkLaunchAtLogin: CheckLaunchAtLogin(loginItems: a.loginItems),
-            setLaunchAtLogin: SetLaunchAtLogin(loginItems: a.loginItems)
-        )
-
-        startSessions.execute()
-        startUsage.execute()
+        sessionsFeature.start.execute()
+        usageFeature.start.execute()
         activity.show(a.activity.load())
         claudeCodeActions.refreshConnections()
     }
@@ -114,10 +75,10 @@ final class AppContainer {
     private func startTimer() {
         let timer = Timer(timeInterval: 30, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated {
-                self?.endGoneSessions.execute()
-                self?.checkAttention.execute()
-                self?.handleHookEvent.finishPendingStops()
-                self?.checkWarnings.checkResets()
+                self?.sessionsFeature.endGone.execute()
+                self?.sessionsFeature.checkAttention.execute()
+                self?.sessionsFeature.handleHookEvent.finishPendingStops()
+                self?.usageFeature.checkWarnings.checkResets()
                 self?.usage.tick()
                 self?.claudeCodeActions.refreshConnections()
             }
@@ -125,9 +86,9 @@ final class AppContainer {
         timer.tolerance = 5
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer
-        endGoneSessions.execute()
-        checkAttention.execute()
-        checkWarnings.checkResets()
+        sessionsFeature.endGone.execute()
+        sessionsFeature.checkAttention.execute()
+        usageFeature.checkWarnings.checkResets()
     }
 
     /// The real app: JSON files, the hook socket, Notification Center, AppleScript and the notch.
@@ -196,10 +157,10 @@ final class AppContainer {
     private func receive(_ message: InboundMessage, permission: (ask: PermissionAsk, reply: PermissionReply)?) {
         switch message {
         case let .hook(event):
-            Task { await handleHookEvent.execute(event, permission: permission) }
-            if event.kind == .stop { Task { await handleHookEvent.waitOutStop() } }
+            Task { await sessionsFeature.handleHookEvent.execute(event, permission: permission) }
+            if event.kind == .stop { Task { await sessionsFeature.handleHookEvent.waitOutStop() } }
         case let .usage(reading):
-            recordUsage.execute(reading)
+            usageFeature.record.execute(reading)
         }
     }
 
