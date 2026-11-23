@@ -50,9 +50,11 @@ import TendbarDomain
         record.execute(reading("new", five: 87, week: 35, resets: resetsB, at: 10))
         record.execute(reading("old", five: 92, week: 22, resets: resetsA, at: 20))
         record.execute(reading("new", five: 88, week: 35, resets: resetsB, at: 30))
+        record.execute(reading("old", five: 93, week: 22, resets: resetsA, at: 40))
 
+        #expect(usage.store.current?.email == "b@example.com")
         let byEmail = Dictionary(uniqueKeysWithValues: usage.store.accounts.values.map { ($0.email, $0) })
-        #expect(byEmail["a@example.com"]?.fiveHour?.usedPercentage == 92)
+        #expect(byEmail["a@example.com"]?.fiveHour?.usedPercentage == 93)
         #expect(byEmail["b@example.com"]?.fiveHour?.usedPercentage == 88)
         #expect(usage.store.accounts.count == 2)
     }

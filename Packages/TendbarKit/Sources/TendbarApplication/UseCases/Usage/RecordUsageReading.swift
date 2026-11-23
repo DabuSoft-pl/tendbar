@@ -22,18 +22,19 @@ public final class RecordUsageReading {
 
     public func execute(_ reading: UsageReading) {
         var store = repository.load()
-        let email = email(for: reading, in: store)
-        guard store.record(reading, email: email) else { return }
+        let signedIn = emails.email(configDirectory: reading.configDirectory)
+        let email = email(for: reading, in: store, signedIn: signedIn)
+        guard store.record(reading, email: email, signedIn: email?.lowercased() == signedIn?.lowercased()) else { return }
         repository.save(store)
         output.show(store)
         checkWarnings.execute()
     }
 
     /// The account with the same reset times, else the one this session used before, else the one signed in now.
-    private func email(for reading: UsageReading, in store: UsageStore) -> String? {
+    private func email(for reading: UsageReading, in store: UsageStore, signedIn: String?) -> String? {
         let email = store.account(matching: reading)?.email
             ?? reading.sessionID.flatMap { sessionEmails[$0] }
-            ?? emails.email(configDirectory: reading.configDirectory)
+            ?? signedIn
         if let session = reading.sessionID, let email {
             if sessionEmails.count >= Self.rememberedSessions, sessionEmails[session] == nil { sessionEmails.removeAll() }
             sessionEmails[session] = email

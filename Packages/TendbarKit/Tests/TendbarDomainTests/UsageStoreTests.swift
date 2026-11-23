@@ -60,6 +60,25 @@ import Testing
         #expect(store.currentLimit(at: now) == 40)
     }
 
+    @Test func anOldSessionDoesNotTakeOverTheSignedInAccount() {
+        var store = UsageStore()
+        store.record(reading(five: 12, week: 40, at: 0), email: "new@example.com")
+        store.record(reading(five: 88, at: 60), email: "old@example.com", signedIn: false)
+
+        #expect(store.current?.email == "new@example.com")
+    }
+
+    @Test func switchingBackToAnUnchangedAccountIsAChange() {
+        var store = UsageStore()
+        store.record(reading(five: 10, at: 0), email: "a@example.com")
+        store.record(reading(five: 20, configDirectory: "/Users/me/.claude-work", at: 60), email: "b@example.com")
+
+        let recorded = store.record(reading(five: 10, at: 120), email: "a@example.com")
+
+        #expect(recorded)
+        #expect(store.current?.email == "a@example.com")
+    }
+
     @Test func treatsTheDefaultDirectoryAsTheDefaultAccount() {
         let home = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".claude").path
         #expect(UsageStore.accountKey(configDirectory: home) == "")

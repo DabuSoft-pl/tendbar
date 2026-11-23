@@ -89,6 +89,9 @@ public struct UsageReading: Sendable, Equatable {
 
 public struct UsageStore: Sendable, Equatable {
     public private(set) var accounts: [String: AccountUsage]
+    /// The account signed in to the profile that sent the latest reading. Not stored: after a restart the account
+    /// read last stands in until the next reading.
+    private var currentID: String?
 
     public init(accounts: [AccountUsage] = []) {
         self.accounts = Dictionary(accounts.map { ($0.id, $0) }, uniquingKeysWith: { $1 })
@@ -101,9 +104,10 @@ public struct UsageStore: Sendable, Equatable {
         }
     }
 
-    /// The account read most recently is the one Claude Code is using now.
+    /// The account signed in now. Sessions started before an account switch keep sending the old account's limits,
+    /// so reading an account last does not make it current.
     public var current: AccountUsage? {
-        accounts.values.max { $0.updatedAt < $1.updatedAt }
+        currentID.flatMap { accounts[$0] } ?? accounts.values.max { $0.updatedAt < $1.updatedAt }
     }
 
     public var currentFirst: [AccountUsage] {
@@ -145,19 +149,23 @@ public struct UsageStore: Sendable, Equatable {
         return nil
     }
 
-    /// Files a reading under the account signed in when it was taken. A missing window means it was reset, once the
-    /// stored window's reset time has passed.
+    /// Files a reading under the account it belongs to; `signedIn` tells whether that account is the one the profile
+    /// is signed in to now, which makes it current. A missing window means it was reset, once the stored window's
+    /// reset time has passed.
     @discardableResult
-    public mutating func record(_ reading: UsageReading, email: String?) -> Bool {
+    public mutating func record(_ reading: UsageReading, email: String?, signedIn: Bool = true) -> Bool {
         let directory = Self.accountKey(configDirectory: reading.configDirectory)
+        let id = Self.key(configDirectory: reading.configDirectory, email: email)
+        let switched = signedIn && currentID != id
+        if signedIn { currentID = id }
         return merge(AccountUsage(
-            id: Self.key(configDirectory: reading.configDirectory, email: email),
+            id: id,
             configDirectory: directory.isEmpty ? nil : directory,
             email: email,
             fiveHour: reading.fiveHour,
             sevenDay: reading.sevenDay,
             updatedAt: reading.readAt
-        ))
+        )) || switched
     }
 
     /// Every open session re-sends its own last-known limits, so idle sessions send stale ones with a fresh time, and
