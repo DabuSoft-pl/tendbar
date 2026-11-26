@@ -41,7 +41,7 @@ struct AccountsSection: View {
                 .buttonStyle(.borderless)
             }
             if let error = model.profileError {
-                Text(error).foregroundStyle(Palette.vermilion)
+                Text(error).foregroundStyle(Palette.vermilionText)
             }
         } header: {
             Text("Claude Code profiles")

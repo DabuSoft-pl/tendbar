@@ -69,7 +69,7 @@ struct MenuContent: View {
             header
             if let error = sessions.listenerError {
                 Text("Could not start the listener: \(error)")
-                    .foregroundStyle(Palette.vermilion)
+                    .foregroundStyle(Palette.vermilionText)
                     .font(.callout)
             }
             ConnectionBanner(model: container.claudeCode, actions: container.claudeCodeActions)
@@ -90,6 +90,7 @@ struct MenuContent: View {
                 sessionList
             }
             if container.preferences.panelToday {
+                Divider()
                 ActivitySection(model: container.activity)
             }
             if container.preferences.usageStyle != .hidden {
@@ -168,27 +169,31 @@ struct MenuContent: View {
         .id(session.id)
     }
 
+    /// What is going on is the title, most urgent first: "1 waiting · 2 working". With nothing going on, the name.
     private var header: some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text("Tendbar").font(.headline)
-            Spacer()
-            Text(summary)
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
+        let parts = summary
+        return HStack(spacing: 0) {
+            if parts.isEmpty {
+                Text("Tendbar")
+            }
+            ForEach(parts.indices, id: \.self) { index in
+                if index > 0 { Text(verbatim: " · ").foregroundStyle(.secondary) }
+                Text(parts[index].text).foregroundStyle(parts[index].color)
+            }
         }
+        .font(.headline)
+        .lineLimit(1)
     }
 
-    /// What is going on, in words, most urgent first: "1 waiting · 2 working".
-    private var summary: String {
+    private var summary: [(text: String, color: Color)] {
         let waiting = sessions.count(of: .needsYou)
         let failed = sessions.count(of: .failed)
         let working = sessions.count(of: .working)
-        var parts: [String] = []
-        if waiting > 0 { parts.append(String(localized: "\(waiting) waiting")) }
-        if failed > 0 { parts.append(String(localized: "\(failed) with an error")) }
-        if working > 0 { parts.append(String(localized: "\(working) working")) }
-        return parts.joined(separator: " · ")
+        var parts: [(text: String, color: Color)] = []
+        if waiting > 0 { parts.append((String(localized: "\(waiting) waiting"), SessionState.needsYou.textColor)) }
+        if failed > 0 { parts.append((String(localized: "\(failed) with an error"), SessionState.failed.textColor)) }
+        if working > 0 { parts.append((String(localized: "\(working) working"), .primary)) }
+        return parts
     }
 
     private var footer: some View {
@@ -303,7 +308,7 @@ struct SessionRow: View {
                         Text(session.displayName).fontWeight(.medium).lineLimit(1)
                             .help(session.cwd ?? session.folderName)
                         // A title runs up to 80 characters, so it is the one that gives way, never the state or time.
-                        Text(session.state.label).foregroundStyle(.secondary).lineLimit(1).fixedSize()
+                        Text(session.state.label).foregroundStyle(session.state.textColor).lineLimit(1).fixedSize()
                         Spacer()
                         if muted {
                             Image(systemName: "bell.slash")
@@ -322,7 +327,7 @@ struct SessionRow: View {
                     if session.state == .working, session.flaggedQuiet {
                         TimelineView(.periodic(from: .now, by: 30)) { context in
                             Text(session.quietText(now: context.date))
-                                .foregroundStyle(Palette.amber)
+                                .foregroundStyle(Palette.amberText)
                                 .lineLimit(1)
                         }
                     } else if showsDetail, session.state != .working {
@@ -351,8 +356,6 @@ struct SessionRow: View {
             }
         }
     }
-
-
 
     private var detail: String {
         if let message = session.message { return message }

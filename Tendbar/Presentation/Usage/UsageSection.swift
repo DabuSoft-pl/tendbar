@@ -117,9 +117,9 @@ private struct WindowLimit: View {
                 Text(title).foregroundStyle(.secondary)
                 Spacer()
                 Text(window == nil ? "–" : "\(Int(percentage.rounded()))%")
-                    .font(.system(size: 17, weight: .medium, design: .rounded))
+                    .font(.system(size: 15, weight: .medium, design: .rounded))
                     .monospacedDigit()
-                    .foregroundStyle(percentage >= 70 ? limitColor(percentage) : .primary)
+                    .foregroundStyle(percentage >= 70 ? limitTextColor(percentage) : .primary)
             }
             // The bar and the figure show what is used; a run-out forecast warns only in the line below.
             LimitBar(percentage: percentage, pace: pace)
@@ -132,7 +132,7 @@ private struct WindowLimit: View {
                     if let runsOut {
                         Text(" · ").foregroundStyle(.tertiary)
                         Text("at this pace out in \(Elapsed.until(runsOut, now: now))")
-                            .foregroundStyle(limitColor(max(percentage, 70)))
+                            .foregroundStyle(limitTextColor(max(percentage, 70)))
                     }
                 }
                 .font(.caption)
@@ -203,7 +203,7 @@ struct CompactLimits: View {
                 .frame(width: barWidth)
             Text(window == nil ? "–" : "\(Int(percentage.rounded()))%")
                 .monospacedDigit()
-                .foregroundStyle(percentage >= 70 ? limitColor(percentage) : .secondary)
+                .foregroundStyle(percentage >= 70 ? limitTextColor(percentage) : .secondary)
                 .frame(width: 34, alignment: .trailing)
         }
     }

@@ -1,4 +1,4 @@
-import Foundation
+import AppKit
 import SwiftUI
 import TendbarDomain
 
@@ -37,6 +37,15 @@ extension SessionState {
         case .failed: Palette.vermilion
         }
     }
+
+    /// The state's word in a row: colored only when it asks for you, in the shades that read as text.
+    var textColor: Color {
+        switch self {
+        case .needsYou: Palette.amberText
+        case .failed: Palette.vermilionText
+        default: .secondary
+        }
+    }
 }
 
 /// Tendbar's own colors, taken from the app icon: an amber bird on a cream perch.
@@ -44,6 +53,16 @@ enum Palette {
     static let amber = Color(red: 1.0, green: 0.60, blue: 0.12)
     static let sage = Color(red: 0.49, green: 0.72, blue: 0.58)
     static let vermilion = Color(red: 0.89, green: 0.34, blue: 0.24)
+    /// For text. The bright amber and vermilion read at about 2:1 and 3.7:1 on a light background, so text there
+    /// takes darker shades (4.5:1 or more); fills, dots and bars keep the bright ones.
+    static let amberText = readable(amber, light: NSColor(red: 0.70, green: 0.37, blue: 0, alpha: 1))
+    static let vermilionText = readable(vermilion, light: NSColor(red: 0.72, green: 0.21, blue: 0.12, alpha: 1))
+
+    private static func readable(_ dark: Color, light: NSColor) -> Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? NSColor(dark) : light
+        })
+    }
 }
 
 extension AlertKind {
@@ -150,6 +169,15 @@ func limitColor(_ percentage: Double) -> Color {
     case ..<70: .primary.opacity(0.55)
     case ..<90: Palette.amber
     default: Palette.vermilion
+    }
+}
+
+/// `limitColor` for text.
+func limitTextColor(_ percentage: Double) -> Color {
+    switch percentage {
+    case ..<70: limitColor(percentage)
+    case ..<90: Palette.amberText
+    default: Palette.vermilionText
     }
 }
 

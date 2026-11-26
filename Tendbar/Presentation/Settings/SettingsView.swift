@@ -197,7 +197,7 @@ private struct ClaudeCodeSettings: View {
                 }
             } footer: {
                 if let error = model.connectionError {
-                    Text(error).foregroundStyle(Palette.vermilion).textSelection(.enabled)
+                    Text(error).foregroundStyle(Palette.vermilionText).textSelection(.enabled)
                 } else {
                     Text("settings.json is backed up before every change")
                 }
@@ -403,7 +403,7 @@ private struct NotificationSettings: View {
                         }
                     }
                     if let error = model.notificationError {
-                        Text(error).foregroundStyle(Palette.vermilion).textSelection(.enabled)
+                        Text(error).foregroundStyle(Palette.vermilionText).textSelection(.enabled)
                     }
                 }
             }
@@ -523,7 +523,7 @@ private struct GeneralSettings: View {
                     Text("Allow Tendbar in System Settings → General → Login Items")
                         .foregroundStyle(.secondary)
                 } else if let error = system.loginItemError {
-                    Text(error).foregroundStyle(Palette.vermilion)
+                    Text(error).foregroundStyle(Palette.vermilionText)
                 } else {
                     Text("Everything stays on this Mac. Only the update check reaches the network")
                 }
