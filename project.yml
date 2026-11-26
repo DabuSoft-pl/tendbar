@@ -10,7 +10,7 @@ settings:
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
     MARKETING_VERSION: "1.3.1"
-    CURRENT_PROJECT_VERSION: "41"
+    CURRENT_PROJECT_VERSION: "42"
     # Set by `BETA=<n> make release`; empty for a release.
     TENDBAR_BETA: ""
     CODE_SIGN_IDENTITY: "-"
