@@ -26,6 +26,7 @@ final class Preferences: AlertSettingsProviding {
         static let muted = "notify.muted"
         static let theme = "view.theme"
         static let soundStyle = "notify.sound.style"
+        static let soundVolume = "notify.sound.volume"
         static let remindAfter = "notify.remindAfter"
         static let quietAfter = "notify.quietAfter"
         static let eventShortcuts = "notify.shortcuts"
@@ -51,6 +52,8 @@ final class Preferences: AlertSettingsProviding {
     var glowOnlyInFront: Bool { didSet { defaults.set(glowOnlyInFront, forKey: Key.glowOnlyInFront) } }
     var playSound: Bool { didSet { defaults.set(playSound, forKey: Key.sound) } }
     var soundStyle: SoundStyle { didSet { defaults.set(soundStyle.rawValue, forKey: Key.soundStyle) } }
+    /// Bird calls only, from 0.1 to 1 of the system volume: Notification Center plays the system sound itself.
+    var soundVolume: Double { didSet { defaults.set(soundVolume, forKey: Key.soundVolume) } }
     /// Minutes a session may wait for you before a reminder; 0 turns reminders off.
     var remindAfterMinutes: Int { didSet { defaults.set(remindAfterMinutes, forKey: Key.remindAfter) } }
     /// Minutes without hook events before a working session counts as stuck; 0 turns it off.
@@ -108,6 +111,7 @@ final class Preferences: AlertSettingsProviding {
             Key.needsYou: true, Key.done: true, Key.failed: true, Key.sound: true, Key.glow: true, Key.glowDone: true, Key.notch: true, Key.limits: true,
             Key.panelPreviews: true, Key.hideFromCapture: true,
             Key.remindAfter: 5, Key.quietAfter: 15, Key.limitResets: true, Key.today: true, Key.desktopBanners: true, Key.glowOnlyInFront: true,
+            Key.soundVolume: 1.0,
         ])
         notifyNeedsYou = defaults.bool(forKey: Key.needsYou)
         notifyDone = defaults.bool(forKey: Key.done)
@@ -116,6 +120,7 @@ final class Preferences: AlertSettingsProviding {
         glowOnlyInFront = defaults.bool(forKey: Key.glowOnlyInFront)
         playSound = defaults.bool(forKey: Key.sound)
         soundStyle = defaults.string(forKey: Key.soundStyle).flatMap(SoundStyle.init) ?? .bird
+        soundVolume = min(max(defaults.double(forKey: Key.soundVolume), 0.1), 1)
         remindAfterMinutes = defaults.integer(forKey: Key.remindAfter)
         quietAfterMinutes = defaults.integer(forKey: Key.quietAfter)
         notifyLimitResets = defaults.bool(forKey: Key.limitResets)

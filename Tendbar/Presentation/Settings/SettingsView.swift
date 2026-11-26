@@ -331,6 +331,16 @@ private struct NotificationSettings: View {
                     Text("System sound").tag(SoundStyle.system)
                 }
                 .disabled(!preferences.playSound)
+                // "Test notification" below plays the bird call at this volume.
+                Slider(value: $preferences.soundVolume, in: 0.1...1) {
+                    Text("Volume")
+                } minimumValueLabel: {
+                    Image(systemName: "speaker.fill").accessibilityHidden(true)
+                } maximumValueLabel: {
+                    Image(systemName: "speaker.wave.3.fill").accessibilityHidden(true)
+                }
+                .disabled(!preferences.playSound || preferences.soundStyle != .bird)
+                .help(preferences.soundStyle == .bird ? "" : "The system sound plays at the system volume")
                 Toggle("Glowing screen edge", isOn: $preferences.edgeGlow)
                 Toggle("Glow when a session finishes too", isOn: $preferences.glowOnDone)
                     .disabled(!preferences.edgeGlow)

@@ -14,6 +14,8 @@ final class UserNotificationsAlerts: NSObject, UNUserNotificationCenterDelegate,
     var onOpen: ((String) -> Void)?
     /// Called with the prompt id, the session id and the choice when the user presses Allow or Deny.
     var onAnswer: ((String, String, PermissionDecision) -> Void)?
+    /// How loud the bird calls play, as a share of the system volume.
+    var birdVolume: @MainActor () -> Float = { 1 }
 
     private static let permissionCategory = "permission"
     /// A request not shown whole: only Deny, since Allow would approve what the banner leaves out.
@@ -135,6 +137,7 @@ final class UserNotificationsAlerts: NSObject, UNUserNotificationCenterDelegate,
             return
         }
         bird.stop()
+        bird.volume = birdVolume()
         bird.play()
     }
 

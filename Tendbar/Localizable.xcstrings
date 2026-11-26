@@ -2610,6 +2610,26 @@
           }
         }
       }
+    },
+    "Volume": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Głośność"
+          }
+        }
+      }
+    },
+    "The system sound plays at the system volume": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dźwięk systemowy gra z głośnością systemu"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

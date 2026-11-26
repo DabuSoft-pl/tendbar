@@ -96,6 +96,7 @@ final class AppContainer {
         let notifications = UserNotificationsAlerts()
         let hookPath = Bundle.main.url(forAuxiliaryExecutable: "tendbar-hook")?.path
         let preferences = Preferences()
+        notifications.birdVolume = { [preferences] in Float(preferences.soundVolume) }
         let container = AppContainer(
             preferences: preferences,
             adapters: Adapters(
